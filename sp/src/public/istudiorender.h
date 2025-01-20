@@ -48,6 +48,11 @@ typedef void (*StudioRender_Printf_t)( PRINTF_FORMAT_STRING const char *fmt, ...
 
 struct StudioRenderConfig_t
 {
+#ifdef STUDIOMDL_PORT_SDK2013
+	StudioRender_Printf_t pConPrintf;
+	StudioRender_Printf_t pConDPrintf;
+#endif
+
 	float fEyeShiftX;	// eye X position
 	float fEyeShiftY;	// eye Y position
 	float fEyeShiftZ;	// eye Z position
@@ -58,6 +63,10 @@ struct StudioRenderConfig_t
 	int drawEntities;
 	int skin;
 	int fullbright;
+
+#ifdef STUDIOMDL_PORT_SDK2013
+	int eyeGloss;		// wet eyes
+#endif
 
 	bool bEyeMove : 1;		// look around
 	bool bSoftwareSkin : 1;
@@ -76,6 +85,30 @@ struct StudioRenderConfig_t
 
 	// Reserved for future use
 	int m_nReserved[4];
+
+#ifdef STUDIOMDL_PORT_SDK2013
+	//not sure if all of they are needed but some of them yes. 
+private:
+	// Bitfield for normals, tangent frame and z buffered wireframe
+	// In earlier interfaces, this was just a bool for drawing normals
+	unsigned char bRenderFlags;
+public:
+	//bool bSoftwareLighting;
+	//bool bShowEnvCubemapOnly;
+	//int maxDecalsPerModel;
+	//bool bWireframeDecals;
+	//float fEyeGlintPixelWidthLODThreshold;
+
+	int rootLOD;	// obsolete, left in for legacy compatibility
+
+	// Setters and getters for normals and tangent frame (now in one bitfield)
+	void SetNormals(bool bN);
+	void SetTangentFrame(bool bTF);
+	void SetZBufferedWireframe(bool bZ);
+	bool GetNormals(void);
+	bool GetTangentFrame(void);
+	bool GetZBufferedWireframe(void);
+#endif
 };
 
 
@@ -203,6 +236,11 @@ struct DrawModelInfo_t
 	Vector			m_vecAmbientCube[6];		// ambient, and lights that aren't in locallight[]
 	int				m_nLocalLightCount;
 	LightDesc_t		m_LocalLightDescs[4];
+
+#ifdef STUDIOMDL_PORT_SDK2013
+	int m_TextureMemoryBytes;
+	int m_ActualTriCount;
+#endif
 };
 
 struct GetTriangles_Vertex_t

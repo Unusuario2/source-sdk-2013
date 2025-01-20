@@ -65,6 +65,7 @@ $Group "everything"
 	"vtfdiff"
 	"vvis_dll"
 	"vvis_launcher"
+	"studiomdl"
 }
 
 $Group "dedicated"
@@ -85,6 +86,7 @@ $Group "maptools"
 	"mathlib"
 	"raytrace"
 	"tier1"
+	"studiomdl"
 	"vscript"
 }
 

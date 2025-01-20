@@ -6,6 +6,8 @@
 //
 //===========================================================================//
 
+#define STUDIOMDL_PORT_SDK2013
+
 #ifndef STUDIO_H
 #define STUDIO_H
 
@@ -80,6 +82,11 @@ Studio models are position independent, so the cache manager can move them.
 #endif
 #define MAXSTUDIOSKINS		32		// total textures
 #define MAXSTUDIOBONES		128		// total bones actually used
+
+#ifdef STUDIOMDL_PORT_SDK2013
+	#define MAXSTUDIOBLENDS		32
+#endif
+
 #define MAXSTUDIOFLEXDESC	1024	// maximum number of low level flexes (actual morph targets)
 #define MAXSTUDIOFLEXCTRL	96		// maximum number of flexcontrollers (input sliders)
 #define MAXSTUDIOPOSEPARAM	24
@@ -888,6 +895,11 @@ struct mstudioflexcontroller_t
 	int					sznameindex;
 	inline char * const pszName( void ) const { return ((char *)this) + sznameindex; }
 	mutable int			localToGlobal;	// remapped at load time to master list
+
+#ifdef STUDIOMDL_PORT_SDK2013
+	mutable int			link;	// remapped at load time to master list
+#endif
+
 	float				min;
 	float				max;
 };
@@ -1201,7 +1213,17 @@ struct mstudioeyeball_t
 	int		texture;
 
 	int		unused1;
+
+#ifdef STUDIOMDL_PORT_SDK2013
+	int iris_material;
+#endif
+
 	float	iris_scale;
+
+#ifdef STUDIOMDL_PORT_SDK2013
+	int		glint_material;	// !!!
+#endif
+
 	int		unused2;
 
 	int		upperflexdesc[3];	// index of raiser, neutral, and lowerer flexdesc that is set by flex controllers
@@ -2316,6 +2338,12 @@ struct studiohdr_t
 	// NOTE: No room to add stuff? Up the .mdl file format version 
 	// [and move all fields in studiohdr2_t into studiohdr_t and kill studiohdr2_t],
 	// or add your stuff to studiohdr2_t. See NumSrcBoneTransforms/SrcBoneTransform for the pattern to use.
+	
+#ifdef STUDIOMDL_PORT_SDK2013
+	int					zeroframecacheindex;
+	byte* pZeroframeCache(int i) const { if (zeroframecacheindex) return (byte*)this + ((int*)(((byte*)this) + zeroframecacheindex))[i]; else return NULL; }
+#endif
+	
 	int					unused2[1];
 
 	studiohdr_t() {}
