@@ -8,6 +8,7 @@
 
 #ifdef STUDIOMDL_PORT_SDK2013
 	#pragma warning( disable : 4211 ) 
+	#pragma warning( disable : 4473 ) 
 #endif
 
 #include <stdlib.h>
@@ -88,7 +89,7 @@ void InitStudioRender( void )
 	}
 
 #ifdef STUDIOMDL_PORT_SDK2013
-	g_pStudioRender->Init(g_MatSysFactory, g_ShaderAPIFactory, g_ShaderAPIFactory, Sys_GetFactoryThis());
+	g_pStudioRender->Init(g_MatSysFactory, g_ShaderAPIFactory, g_ShaderAPIFactory, Sys_GetFactoryThis()); //fix this!
 #else
 	g_pStudioRender->Init(g_MatSysFactory, g_ShaderAPIFactory, g_ShaderAPIFactory, Sys_GetFactoryThis());
 #endif //STUDIOMDL_PORT_SDK2013
@@ -148,7 +149,13 @@ void SpewPerfStats( studiohdr_t *pStudioHdr, const char *pFilename )
 	vertexFileHeader_t				*pNewVvdHdr;
 	vertexFileHeader_t				*pVvdHdr;
 	OptimizedModel::FileHeader_t	*pVtxHdr;
+
+#ifdef STUDIOMDL_PORT_SDK2013
+	DrawModelInfo_t					*drawModelInfo;
+#else
 	DrawModelInfo_t					drawModelInfo;
+#endif
+
 	studiohwdata_t					studioHWData;
 	int								vvdSize;
 	const char						*prefix[] = {".dx80.vtx", ".dx90.vtx", ".sw.vtx", ".xbox.vtx"};
@@ -244,6 +251,8 @@ void SpewPerfStats( studiohdr_t *pStudioHdr, const char *pFilename )
 
 		g_pStudioRender->LoadModel( pStudioHdr, pVtxHdr, &studioHWData );
 		memset( &drawModelInfo, 0, sizeof( DrawModelInfo_t ) );
+
+#ifdef STUDIOMDL_PORT_SDK2013
 		drawModelInfo.m_pStudioHdr = pStudioHdr;
 		drawModelInfo.m_pHardwareData = &studioHWData;	
 		int i;
@@ -251,10 +260,24 @@ void SpewPerfStats( studiohdr_t *pStudioHdr, const char *pFilename )
 		{
 			CUtlBuffer statsOutput( 0, 0, true /* text */ );
 			printf( "LOD: %d\n", i );
+			*drawModelInfo.m_Lod = i;
+			g_pStudioRender->GetPerfStats( *drawModelInfo, &statsOutput );
+			printf( "\tactual tris: %d\n", ( int )*drawModelInfo.m_ActualTriCount );
+			printf( "\ttexture memory bytes: %d\n", ( int )*drawModelInfo.m_TextureMemoryBytes );
+#else
+		drawModelInfo.m_pStudioHdr = pStudioHdr;
+		drawModelInfo.m_pHardwareData = &studioHWData;
+		int i;
+		for (i = studioHWData.m_RootLOD; i < studioHWData.m_NumLODs; i++)
+		{
+			CUtlBuffer statsOutput(0, 0, true /* text */);
+			printf("LOD: %d\n", i);
 			drawModelInfo.m_Lod = i;
-			g_pStudioRender->GetPerfStats( drawModelInfo, &statsOutput );
-			printf( "\tactual tris: %d\n", ( int )drawModelInfo.m_ActualTriCount );
-			printf( "\ttexture memory bytes: %d\n", ( int )drawModelInfo.m_TextureMemoryBytes );
+			g_pStudioRender->GetPerfStats(drawModelInfo, &statsOutput);
+			printf("\tactual tris: %d\n", (int)drawModelInfo.m_ActualTriCount);
+			printf("\ttexture memory bytes: %d\n", (int)drawModelInfo.m_TextureMemoryBytes);
+
+#endif //STUDIOMDL_PORT_SDK2013
 			printf( ( char * )statsOutput.Base() );
 		}
 		g_pStudioRender->UnloadModel( &studioHWData );

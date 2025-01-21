@@ -16,9 +16,12 @@
 #pragma warning( disable : 4237 )
 #pragma warning( disable : 4305 )
 
-#ifdef STUDIOMDL_PORT_SDK2013
+#ifdef STUDIOMDL_PORT_SDK2013 //the compiler is retarded or the code is shit?
 	#pragma warning( disable : 4477 )
 	#pragma warning( disable : 4005 )
+	#pragma warning( disable : 4189 )
+	#pragma warning( disable : 4701 )
+	#pragma warning( disable : 4703 )
 #endif
 
 
@@ -2230,7 +2233,15 @@ void WriteModelFiles(void)
 		for( modelID = 0; modelID < pBodyPart->nummodels; modelID++ )
 		{
 			mstudiomodel_t *pModel = pBodyPart->pModel( modelID );
-			const mstudio_modelvertexdata_t *vertData = pModel->GetVertexData();
+
+#ifdef STUDIOMDL_PORT_SDK2013
+
+			const mstudio_modelvertexdata_t *vertData = pModel->GetVertexData2(); //check if this is the right funtion!
+																				  //so the compiler cannot dedice which funtion to link so we will force it.
+#else
+			const mstudio_modelvertexdata_t* vertData = pModel->GetVertexData();
+#endif
+
 			int vertID;
 			for( vertID = 0; vertID < pModel->numvertices; vertID++ )
 			{
@@ -2306,6 +2317,53 @@ hasData:
 
 	return &vertexdata;
 }
+
+#ifdef STUDIOMDL_PORT_SDK2013
+const mstudio_modelvertexdata_t* mstudiomodel_t::GetVertexData2()
+{
+	static vertexFileHeader_t* pVertexHdr;
+	char						filename[260];
+
+	if (pVertexHdr)
+	{
+		// studiomdl is a single model process, can simply persist data in static
+		goto hasData;
+	}
+
+	// load and persist the vertex file
+	strcpy(filename, gamedir);
+	//	if( *g_pPlatformName )
+	//	{
+	//		strcat( filename, "platform_" );
+	//		strcat( filename, g_pPlatformName );
+	//		strcat( filename, "/" );	
+	//	}
+	strcat(filename, "models/");
+	strcat(filename, outname);
+	Q_StripExtension(filename, filename, sizeof(filename));
+	strcat(filename, ".vvd");
+
+	LoadFile(filename, (void**)&pVertexHdr);
+
+	// check id
+	if (pVertexHdr->id != MODEL_VERTEX_FILE_ID)
+	{
+		MdlError("Error Vertex File: '%s' (id %d should be %d)\n", filename, pVertexHdr->id, MODEL_VERTEX_FILE_ID);
+	}
+
+	// check version
+	if (pVertexHdr->version != MODEL_VERTEX_FILE_VERSION)
+	{
+		MdlError("Error Vertex File: '%s' (version %d should be %d)\n", filename, pVertexHdr->version, MODEL_VERTEX_FILE_VERSION);
+	}
+
+hasData:
+	vertexdata.pVertexData = (byte*)pVertexHdr + pVertexHdr->vertexDataStart;
+	vertexdata.pTangentData = (byte*)pVertexHdr + pVertexHdr->tangentDataStart;
+
+	return &vertexdata;
+}
+#endif
 
 typedef struct
 {

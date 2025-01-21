@@ -1377,6 +1377,11 @@ struct mstudiomodel_t
 	int					vertexindex;		// vertex Vector
 	int					tangentsindex;		// tangents Vector
 
+#ifdef STUDIOMDL_PORT_SDK2013
+	const mstudio_modelvertexdata_t *GetVertexData();
+	const mstudio_modelvertexdata_t *GetVertexData2();
+#endif
+
 	// These functions are defined in application-specific code:
 	const vertexFileHeader_t			*CacheVertexData(			void *pModelData );
 
@@ -1391,7 +1396,12 @@ struct mstudiomodel_t
 	int					eyeballindex;
 	inline  mstudioeyeball_t *pEyeball( int i ) { return (mstudioeyeball_t *)(((byte *)this) + eyeballindex) + i; };
 
+
+#ifdef STUDIOMDL_PORT_SDK2013
+	mstudio_modelvertexdata_t static vertexdata; //idk why this need to be static ngl.
+#else
 	mstudio_modelvertexdata_t vertexdata;
+#endif
 
 	int					unused[8];		// remove as appropriate
 };
@@ -1948,6 +1958,7 @@ inline const mstudio_modelvertexdata_t * mstudiomodel_t::GetVertexData( void *pM
 
 	return &vertexdata;
 }
+
 
 // model thin vertex data accessor (defined here so vertexFileHeader_t can be used)
 inline const thinModelVertices_t * mstudiomodel_t::GetThinVertexData( void *pModelData )

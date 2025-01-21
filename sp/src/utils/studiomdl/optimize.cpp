@@ -1879,7 +1879,11 @@ void COptimizedModel::CreateLODTriangleList( int nLodID, s_source_t* pSrc,
 		return;
 
 #ifdef _DEBUG
-	const mstudio_modelvertexdata_t *vertData = pStudioModel->GetVertexData();3
+	#ifdef STUDIOMDL_PORT_SDK2013
+		const mstudio_modelvertexdata_t* vertData = pStudioModel->GetVertexData2(); //again check 
+	#else
+		const mstudio_modelvertexdata_t *vertData = pStudioModel->GetVertexData(); //again check 
+	#endif
 
 #ifdef STUDIOMDL_PORT_SDK2013
 	//nothing to do here
@@ -2732,7 +2736,11 @@ static void MergeLikeBoneIndicesWithinVerts( studiohdr_t *pHdr )
 			mstudiomodel_t *pModel = pBodyPart->pModel( modelID );
 			for( vertID = 0; vertID < pModel->numvertices; vertID++ )
 			{
-				const mstudio_modelvertexdata_t *vertData = pModel->GetVertexData();
+#ifdef STUDIOMDL_PORT_SDK2013
+				const mstudio_modelvertexdata_t *vertData = pModel->GetVertexData2(); //check if it is right!!
+#else
+				const mstudio_modelvertexdata_t* vertData = pModel->GetVertexData();
+#endif
 				mstudioboneweight_t *pBoneWeight = vertData->BoneWeights( vertID );
 				MergeLikeBoneIndicesWithinVert( pBoneWeight );
 			}

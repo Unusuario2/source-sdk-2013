@@ -9,6 +9,10 @@
 
 #define STUDIOMDL_PORT_SDK2013
 
+#ifdef STUDIOMDL_PORT_SDK2013
+	#pragma warning( disable: 4700 )
+#endif
+
 // NOTE: The term joint here is used to mean a bone, collision model, and a joint.
 // Each "joint" is the collision geometry at a named bone (or set of bones that have been merged)
 // and the joint (with constraints) between that set and its parent.  The root "joint" has
@@ -2286,21 +2290,31 @@ void CollisionModel_ExpandBBox( Vector &mins, Vector &maxs )
 
 	if ( g_JointedModel.m_pCollisionList )
 	{
-		Vector collideMins, collideMaxs;
-
 #ifdef STUDIOMDL_PORT_SDK2013
-		physcollision->CollideGetAABB(collideMins, collideMaxs, g_JointedModel.m_pCollisionList->m_pCollisionData, vec3_origin, vec3_angle);
-#else
+		Vector *collideMins, *collideMaxs;
+
 		physcollision->CollideGetAABB(collideMins, collideMaxs, g_JointedModel.m_pCollisionList->m_pCollisionData, vec3_origin, vec3_angle);
 
-#endif
 		// add the 0.25 inch collision separation as well
 		const float radius = 0.25;
-		collideMins -= Vector(radius,radius,radius);
-		collideMaxs += Vector(radius,radius,radius);
+		*collideMins -= Vector(radius,radius,radius);
+		*collideMaxs += Vector(radius,radius,radius);
 
-		AddPointToBounds( collideMins, mins, maxs );
-		AddPointToBounds( collideMaxs, mins, maxs );
+		AddPointToBounds( *collideMins, mins, maxs );
+		AddPointToBounds( *collideMaxs, mins, maxs );
+#else
+		Vector collideMins, collideMaxs;
+
+		physcollision->CollideGetAABB(collideMins, collideMaxs, g_JointedModel.m_pCollisionList->m_pCollisionData, vec3_origin, vec3_angle);
+
+		// add the 0.25 inch collision separation as well
+		const float radius = 0.25;
+		collideMins -= Vector(radius, radius, radius);
+		collideMaxs += Vector(radius, radius, radius);
+
+		AddPointToBounds(collideMins, mins, maxs);
+		AddPointToBounds(collideMaxs, mins, maxs);
+#endif
 	}
 }
 
