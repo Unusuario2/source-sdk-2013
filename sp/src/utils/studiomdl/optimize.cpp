@@ -29,11 +29,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <float.h>
+
 #ifdef STUDIOMDL_PORT_SDK2013
 	#include <mathlib/mathlib.h>
 #else
 	#include <mathlib.h>
 #endif
+
 #include "cmdlib.h"
 #include "studio.h"
 #include "studiomdl.h"
@@ -45,7 +47,13 @@
 #endif
 #include "optimize.h"
 #include <malloc.h>
+
+#ifdef STUDIOMDL_PORT_SDK2013
+#include "../nvtristriplib/nvtristrip.h"
+#else
 #include <nvtristrip.h>
+#endif
+
 #include "FileBuffer.h"
 #include "UtlVector.h"
 #include "materialsystem/IMaterial.h"
@@ -974,7 +982,6 @@ bool COptimizedModel::IsVertexFlexed( mstudiomesh_t *pStudioMesh, int vertID ) c
 //-----------------------------------------------------------------------------
 // Computes flags for the strip group
 //-----------------------------------------------------------------------------
-
 void COptimizedModel::ComputeStripGroupFlags( StripGroup_t *pStripGroup,
 											  bool isHWSkinned, bool isFlexed )
 {
@@ -1880,7 +1887,9 @@ void COptimizedModel::CreateLODTriangleList( int nLodID, s_source_t* pSrc,
 
 #ifdef _DEBUG
 	#ifdef STUDIOMDL_PORT_SDK2013
-		const mstudio_modelvertexdata_t* vertData = pStudioModel->GetVertexData2(); //again check 
+
+	const mstudiomodel_t* pStudioModelconst = pStudioModel;
+	const mstudio_modelvertexdata_t* vertData = static_cast<const mstudiomodel_t*>(pStudioModelconst)->GetVertexData(); //again check 
 	#else
 		const mstudio_modelvertexdata_t *vertData = pStudioModel->GetVertexData(); //again check 
 	#endif
@@ -2737,7 +2746,7 @@ static void MergeLikeBoneIndicesWithinVerts( studiohdr_t *pHdr )
 			for( vertID = 0; vertID < pModel->numvertices; vertID++ )
 			{
 #ifdef STUDIOMDL_PORT_SDK2013
-				const mstudio_modelvertexdata_t *vertData = pModel->GetVertexData2(); //check if it is right!!
+				const mstudio_modelvertexdata_t *vertData = pModel->GetVertexData(9); //check if it is right!!
 #else
 				const mstudio_modelvertexdata_t* vertData = pModel->GetVertexData();
 #endif

@@ -1366,6 +1366,11 @@ struct mstudiomodel_t
 
 	int					type;
 
+#ifdef STUDIOMDL_PORT_SDK2013
+	const mstudio_modelvertexdata_t* GetVertexData(int x);
+	const mstudio_modelvertexdata_t* GetVertexData()const;
+#endif
+
 	float				boundingradius;
 
 	int					nummeshes;	
@@ -1376,12 +1381,7 @@ struct mstudiomodel_t
 	int					numvertices;		// number of unique vertices/normals/texcoords
 	int					vertexindex;		// vertex Vector
 	int					tangentsindex;		// tangents Vector
-
-#ifdef STUDIOMDL_PORT_SDK2013
-	const mstudio_modelvertexdata_t *GetVertexData();
-	const mstudio_modelvertexdata_t *GetVertexData2();
-#endif
-
+    
 	// These functions are defined in application-specific code:
 	const vertexFileHeader_t			*CacheVertexData(			void *pModelData );
 
@@ -1399,6 +1399,7 @@ struct mstudiomodel_t
 
 #ifdef STUDIOMDL_PORT_SDK2013
 	mstudio_modelvertexdata_t static vertexdata; //idk why this need to be static ngl.
+	//const mstudio_modelvertexdata_t* GetVertexData() const;
 #else
 	mstudio_modelvertexdata_t vertexdata;
 #endif

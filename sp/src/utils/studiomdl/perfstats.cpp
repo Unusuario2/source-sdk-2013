@@ -9,6 +9,8 @@
 #ifdef STUDIOMDL_PORT_SDK2013
 	#pragma warning( disable : 4211 ) 
 	#pragma warning( disable : 4473 ) 
+	#pragma warning( disable : 4701 ) 
+	#pragma warning( disable : 4703 ) 
 #endif
 
 #include <stdlib.h>
@@ -20,6 +22,11 @@
 #include "optimize.h"
 #include "cmdlib.h"
 #include "studiomdl.h"
+
+#ifdef STUDIOMDL_PORT_SDK2013
+	#include "tier1/utlbuffer.h" 
+#endif
+
 
 extern void MdlError( char const *pMsg, ... );
 
@@ -89,7 +96,8 @@ void InitStudioRender( void )
 	}
 
 #ifdef STUDIOMDL_PORT_SDK2013
-	g_pStudioRender->Init(g_MatSysFactory, g_ShaderAPIFactory, g_ShaderAPIFactory, Sys_GetFactoryThis()); //fix this!
+	g_pStudioRender->Init(); //dupe code??
+							 //CHECK THIS!! 
 #else
 	g_pStudioRender->Init(g_MatSysFactory, g_ShaderAPIFactory, g_ShaderAPIFactory, Sys_GetFactoryThis());
 #endif //STUDIOMDL_PORT_SDK2013
@@ -142,7 +150,7 @@ void ShutdownStudioRender( void )
 	g_pStudioRenderModule = NULL;
 }
 
-
+#if 0
 void SpewPerfStats( studiohdr_t *pStudioHdr, const char *pFilename )
 {
 	char							fileName[260];
@@ -261,7 +269,7 @@ void SpewPerfStats( studiohdr_t *pStudioHdr, const char *pFilename )
 			CUtlBuffer statsOutput( 0, 0, true /* text */ );
 			printf( "LOD: %d\n", i );
 			*drawModelInfo.m_Lod = i;
-			g_pStudioRender->GetPerfStats( *drawModelInfo, &statsOutput );
+			g_pStudioRender->GetPerfStats( drawModelInfo, &statsOutput );
 			printf( "\tactual tris: %d\n", ( int )*drawModelInfo.m_ActualTriCount );
 			printf( "\ttexture memory bytes: %d\n", ( int )*drawModelInfo.m_TextureMemoryBytes );
 #else
@@ -287,4 +295,151 @@ void SpewPerfStats( studiohdr_t *pStudioHdr, const char *pFilename )
 	if (pVvdHdr)
 		free(pVvdHdr);
 }
+#endif
 
+void SpewPerfStats(studiohdr_t* pStudioHdr, const char* pFilename)
+{
+	char                            fileName[260];
+	vertexFileHeader_t* pNewVvdHdr;
+	vertexFileHeader_t* pVvdHdr;
+	OptimizedModel::FileHeader_t* pVtxHdr;
+
+#ifdef STUDIOMDL_PORT_SDK2013
+	DrawModelInfo_t                 drawModelInfo; // Cambiado de puntero a instancia
+#else
+	DrawModelInfo_t                 drawModelInfo;
+#endif
+
+	studiohwdata_t                  studioHWData;
+	int                             vvdSize;
+	const char* prefix[] = { ".dx80.vtx", ".dx90.vtx", ".sw.vtx", ".xbox.vtx" };
+
+	if (!pStudioHdr->numbodyparts)
+	{
+		// no stats on these
+		return;
+	}
+
+	// Need to load up StudioRender.dll to spew perf stats.
+	InitStudioRender();
+
+	// persist the vvd data
+	Q_StripExtension(pFilename, fileName, sizeof(fileName));
+	strcat(fileName, ".vvd");
+
+	if (FileExists(fileName))
+	{
+		vvdSize = LoadFile(fileName, (void**)&pVvdHdr);
+	}
+	else
+	{
+		MdlError("Could not open '%s'\n", fileName);
+	}
+
+	// validate header
+	if (pVvdHdr->id != MODEL_VERTEX_FILE_ID)
+	{
+		MdlError("Bad id for '%s' (got %d expected %d)\n", fileName, pVvdHdr->id, MODEL_VERTEX_FILE_ID);
+	}
+	if (pVvdHdr->version != MODEL_VERTEX_FILE_VERSION)
+	{
+		MdlError("Bad version for '%s' (got %d expected %d)\n", fileName, pVvdHdr->version, MODEL_VERTEX_FILE_VERSION);
+	}
+	if (pVvdHdr->checksum != pStudioHdr->checksum)
+	{
+		MdlError("Bad checksum for '%s' (got %d expected %d)\n", fileName, pVvdHdr->checksum, pStudioHdr->checksum);
+	}
+
+	if (pVvdHdr->numFixups)
+	{
+		// need to perform mesh relocation fixups
+		// allocate a new copy
+		pNewVvdHdr = (vertexFileHeader_t*)malloc(vvdSize);
+		if (!pNewVvdHdr)
+		{
+			MdlError("Error allocating %d bytes for Vertex File '%s'\n", vvdSize, fileName);
+		}
+
+		Studio_LoadVertexes(pVvdHdr, pNewVvdHdr, 0, true);
+
+		// discard original
+		free(pVvdHdr);
+
+		pVvdHdr = pNewVvdHdr;
+	}
+
+	// iterate all ???.vtx files
+	for (int j = 0; j < sizeof(prefix) / sizeof(prefix[0]); j++)
+	{
+		// make vtx filename
+		Q_StripExtension(pFilename, fileName, sizeof(fileName));
+		strcat(fileName, prefix[j]);
+
+		printf("\n");
+		printf("Performance Stats: %s\n", fileName);
+		printf("------------------\n");
+
+		// persist the vtx data
+		if (FileExists(fileName))
+		{
+			LoadFile(fileName, (void**)&pVtxHdr);
+		}
+		else
+		{
+			MdlError("Could not open '%s'\n", fileName);
+		}
+
+		// validate header
+		if (pVtxHdr->version != OPTIMIZED_MODEL_FILE_VERSION)
+		{
+			MdlError("Bad version for '%s' (got %d expected %d)\n", fileName, pVtxHdr->version, OPTIMIZED_MODEL_FILE_VERSION);
+		}
+		if (pVtxHdr->checkSum != pStudioHdr->checksum)
+		{
+			MdlError("Bad checksum for '%s' (got %d expected %d)\n", fileName, pVtxHdr->checkSum, pStudioHdr->checksum);
+		}
+
+		// studio render will request these through cache interface
+		pStudioHdr->pVertexBase = (void*)pVvdHdr;
+		pStudioHdr->pIndexBase = (void*)pVtxHdr;
+
+		g_pStudioRender->LoadModel(pStudioHdr, pVtxHdr, &studioHWData);
+		memset(&drawModelInfo, 0, sizeof(DrawModelInfo_t));
+
+#ifdef STUDIOMDL_PORT_SDK2013 //
+		drawModelInfo.m_pStudioHdr = pStudioHdr;
+		drawModelInfo.m_pHardwareData = &studioHWData;
+		int i;
+		for (i = studioHWData.m_RootLOD; i < studioHWData.m_NumLODs; i++)
+		{
+			CUtlBuffer statsOutput(0, 0, CUtlBuffer::BufferFlags_t::TEXT_BUFFER);
+			printf("LOD: %d\n", i);
+			drawModelInfo.m_Lod = i;
+			DrawModelResults_t drawModelResults;
+			g_pStudioRender->GetPerfStats(&drawModelResults, drawModelInfo, &statsOutput);
+			printf("\tactual tris: %d\n", (int)drawModelInfo.m_ActualTriCount);
+			printf("\ttexture memory bytes: %d\n", (int)drawModelInfo.m_TextureMemoryBytes);
+#else
+		drawModelInfo.m_pStudioHdr = pStudioHdr;
+		drawModelInfo.m_pHardwareData = &studioHWData;
+		int i;
+		for (i = studioHWData.m_RootLOD; i < studioHWData.m_NumLODs; i++)
+		{
+			CUtlBuffer statsOutput(0, 0, true /* text */);
+			printf("LOD: %d\n", i);
+			drawModelInfo.m_Lod = i;
+			DrawModelResults_t drawModelResults;
+			g_pStudioRender->GetPerfStats(&drawModelResults, drawModelInfo, &statsOutput);
+			printf("\tactual tris: %d\n", (int)drawModelInfo.m_ActualTriCount);
+			printf("\ttexture memory bytes: %d\n", (int)drawModelInfo.m_TextureMemoryBytes);
+
+#endif //STUDIOMDL_PORT_SDK2013
+			printf((char*)statsOutput.Base());
+		}
+		g_pStudioRender->UnloadModel(&studioHWData);
+		free(pVtxHdr);
+		}
+
+	if (pVvdHdr)
+		free(pVvdHdr);
+	}

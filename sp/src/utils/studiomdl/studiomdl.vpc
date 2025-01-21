@@ -19,10 +19,9 @@ $Configuration
 {
 	$Compiler
 	{
-		$AdditionalIncludeDirectories		"$BASE,..\common,..\..\public,..\..\public\tier1,..\nvtristriplib,..\..\Game_Shared" //51
+		$AdditionalIncludeDirectories		"$BASE,..\common,..\..\public,..\..\public\tier1,..\..\Game_Shared" //51
 		$PreprocessorDefinitions			"$BASE;MACRO_MATHLIB;PROTECTED_THINGS_DISABLE"
 
-		$DisableSpecificWarnings			"2220;$BASE" //sometimes msvc is stupid. 
 		//$PreprocessorDefinitions			"$BASE;MAPBASE_VSCRIPT"	[$MAPBASE_VSCRIPT]
 	}
 
@@ -111,7 +110,7 @@ $Project "Studiomdl"
 		$File  "..\..\public\appframework\IAppSystem.h"
 		$File  "..\..\public\tier0\ICommandLine.h"
 		$File  "..\..\public\ihandleentity.h"
-		//$File  "..\..\Public\ImageLoader.h" // i think we dont need this to compile studiomdl 
+		//$File  "..\..\Public\ImageLoader.h" //We dont need this to compile studiomdl 
 		$File  "..\..\public\materialsystem\imaterial.h"
 		$File  "..\..\public\materialsystem\imaterialsystem.h"
 		$File  "..\..\public\materialsystem\imaterialvar.h"
@@ -151,11 +150,12 @@ $Project "Studiomdl"
 
 	$Folder	"Link Libraries"
 	{
-		$Lib	"..\..\lib\public\tier1.lib"
-		$Lib	"..\..\lib\public\tier2.lib"
-		$Lib	"..\..\lib\public\vstdlib.lib"
-		$Lib	"..\..\lib\public\mathlib.lib"
-		$Lib	"..\..\lib\public\nvtristrip.lib"
+		$Lib	..\..\lib\public\tier1
+		$Lib	..\..\lib\public\tier2
+		$Lib	..\..\lib\public\vstdlib
+		$Lib	..\..\lib\public\mathlib
+		//$Lib	..\..\lib\public\2006\nvtristrip //already included 
+		$Lib	..\..\lib\public\nvtristrip 
 	}
 
 	$File	"studiomdl.vpc"
