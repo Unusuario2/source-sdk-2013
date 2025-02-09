@@ -746,9 +746,8 @@ void CMapFile::MoveBrushesToWorldGeneral( entity_t *mapent )
 	int			newbrushes;
 	int			worldbrushes;
 	mapbrush_t	*temp;
-	int			i;
 
-	for( i = 0; i < nummapdispinfo; i++ )
+	for(int i = 0; i < nummapdispinfo; i++ )
 	{
 		if ( mapdispinfo[ i ].entitynum == ( mapent - entities ) )
 		{
@@ -782,7 +781,7 @@ void CMapFile::MoveBrushesToWorldGeneral( entity_t *mapent )
 
 	// fix up indexes
 	entities[0].numbrushes += newbrushes;
-	for (i=1 ; i<num_entities ; i++)
+	for (int i = 1; i<num_entities ; i++)
 	{
 		if ( entities[ i ].firstbrush < mapent->firstbrush ) // if we use <=, then we'll remap the passed in ent, which we don't want to
 		{
@@ -3624,7 +3623,6 @@ void CMapFile::TestExpandBrushes (void)
 //-----------------------------------------------------------------------------
 mapdispinfo_t *ParseDispInfoChunk( void )
 {
-    int             i, j;
     int             vertCount;
     mapdispinfo_t   *pMapDispInfo;
 
@@ -3656,13 +3654,13 @@ mapdispinfo_t *ParseDispInfoChunk( void )
     pMapDispInfo->power = atoi( token );
 
     // u and v mapping axes
-    for( i = 0; i < 2; i++ )
+    for(int i = 0; i < 2; i++ )
     {
         GetToken( false );
         if( strcmp( token, "[" ) )
             g_MapError.ReportError("\tParseDispInfoChunk: Illegal Chunk! - [" );
 
-        for( j = 0; j < 3; j++ )
+        for(int j = 0; j < 3; j++ )
         {
             GetToken( false );
 
@@ -3707,7 +3705,7 @@ mapdispinfo_t *ParseDispInfoChunk( void )
     pMapDispInfo->vectorDisps[0][2] = atof( token );
 
     vertCount = ( ( ( 1 << pMapDispInfo->power ) + 1 ) * ( ( 1 << pMapDispInfo->power ) + 1 ) );
-    for( i = 1; i < vertCount; i++ )
+    for(int i = 1; i < vertCount; i++ )
     {
         GetToken( false );
         pMapDispInfo->vectorDisps[i][0] = atof( token );
@@ -3723,7 +3721,7 @@ mapdispinfo_t *ParseDispInfoChunk( void )
     GetToken( true );
     pMapDispInfo->dispDists[0] = atof( token );
 
-    for( i = 1; i < vertCount; i++ )
+    for(int i = 1; i < vertCount; i++ )
     {
         GetToken( false );
         pMapDispInfo->dispDists[i] = atof( token );

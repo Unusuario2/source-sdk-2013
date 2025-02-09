@@ -285,7 +285,6 @@ void DispMapToCoreDispInfo( mapdispinfo_t *pMapDisp, CCoreDispInfo *pCoreDispInf
 //-----------------------------------------------------------------------------
 void EmitInitialDispInfos( void )
 {
-	int					i;
 	mapdispinfo_t		*pMapDisp;
 	ddispinfo_t			*pDisp;
 	Vector				v;
@@ -293,7 +292,8 @@ void EmitInitialDispInfos( void )
 	// Calculate the total number of verts.
 	int nTotalVerts = 0;
 	int nTotalTris = 0;
-	for ( i=0; i < nummapdispinfo; i++ )
+
+	for (int i=0; i < nummapdispinfo; i++ )
 	{
 		nTotalVerts += NUM_DISP_POWER_VERTS( mapdispinfo[i].power );
 		nTotalTris += NUM_DISP_POWER_TRIS( mapdispinfo[i].power );
@@ -307,7 +307,7 @@ void EmitInitialDispInfos( void )
 
 	int iCurVert = 0;
 	int iCurTri = 0;
-	for( i = 0; i < nummapdispinfo; i++ )
+	for(int i = 0; i < nummapdispinfo; i++ )
 	{
 		pDisp = &g_dispinfo[i];
 		pMapDisp = &mapdispinfo[i];
@@ -522,7 +522,6 @@ void SnapRemainingVertsToSurface( CCoreDispInfo **ppListBase, ddispinfo_t *pBSPD
 
 void EmitDispLMAlphaAndNeighbors()
 {
-	int i;
 #ifdef MAPBASE
 	Msg("Finding displacement neighbors... ");
 	ColorSpewMessage(SPEW_MESSAGE, &green, "done (0)\n");
@@ -548,7 +547,7 @@ void EmitDispLMAlphaAndNeighbors()
 		g_CoreDispInfos[nIndex] = pDisp;
 	}
 
-	for ( i=0; i < nummapdispinfo; i++ )
+	for (int i = 0; i < nummapdispinfo; i++ )
 	{
 		g_CoreDispInfos[i]->SetDispUtilsHelperInfo( g_CoreDispInfos.Base(), nummapdispinfo );
 	}
@@ -558,7 +557,7 @@ void EmitDispLMAlphaAndNeighbors()
 	int nMemSize = texinfo.Count() * sizeof(int);
 	int *pSwappedTexInfos = (int*)stackalloc( nMemSize );
 	memset( pSwappedTexInfos, 0xFF, nMemSize );
-	for( i = 0; i < numfaces; i++ )
+	for(int i = 0; i < numfaces; i++ )
 	{
         dface_t *pFace = &dfaces[i];
 
@@ -598,7 +597,7 @@ void EmitDispLMAlphaAndNeighbors()
 	Msg("Finding lightmap sample positions...\n");
 #endif 
 	
-	for ( i=0; i < nummapdispinfo; i++ )
+	for (int i = 0; i < nummapdispinfo; i++ )
 	{
 		dface_t *pFace = faces[i];
 		ddispinfo_t *pDisp = &g_dispinfo[pFace->dispinfo];
@@ -613,7 +612,7 @@ void EmitDispLMAlphaAndNeighbors()
 
 	// Build lightmap alphas.
 	int dispCount = 0;	// How many we've processed.
-	for( i = 0; i < nummapdispinfo; i++ )
+	for(int i = 0; i < nummapdispinfo; i++ )
 	{
         dface_t *pFace = faces[i];
 

@@ -1079,9 +1079,8 @@ int Convex2D( Vector2D const *pPoints, int nPoints, int *indices, int nMaxIndice
 	memset( touched, 0, nPoints*sizeof(touched[0]) );
 
 	// Find the (lower) left side.
-	int i;
 	int iBest = 0;
-	for( i=1; i < nPoints; i++ )
+	for(int i = 1; i < nPoints; i++ )
 	{
 		if( pPoints[indexMap[i]].x < pPoints[indexMap[iBest]].x ||
 			(pPoints[indexMap[i]].x == pPoints[indexMap[iBest]].x && pPoints[indexMap[i]].y < pPoints[indexMap[iBest]].y) )
@@ -1106,7 +1105,7 @@ int Convex2D( Vector2D const *pPoints, int nPoints, int *indices, int nMaxIndice
 		int iMinAngle = -1;
 		float flMinAngle = 5000;
 
-		for( i=0; i < nPoints; i++ )
+		for(int i = 0; i < nPoints; i++ )
 		{
 			Vector2D vTo = pPoints[indexMap[i]] - *pStartPoint;
 			float flDistToSqr = vTo.LengthSqr();
@@ -1218,27 +1217,21 @@ void EmitClipPortalGeometry( node_t *pHeadNode, portal_t *pPortal, int iSrcArea,
 {
 	// Build a list of all the points in portals from the same original face.
 	CUtlVector<portal_t*> portals;
-	FindPortalsLeadingToArea_R( 
-		pHeadNode, 
-		iSrcArea, 
-		dp->otherarea, 
-		&pPortal->plane,
-		portals );
+	FindPortalsLeadingToArea_R( pHeadNode, iSrcArea, dp->otherarea, &pPortal->plane,portals );
 
 	CUtlVector<Vector> points;
 	for( int iPortal=0; iPortal < portals.Size(); iPortal++ )
 	{
 		portal_t *pPointPortal = portals[iPortal];
 		winding_t *pWinding = pPointPortal->winding;
-		for( int i=0; i < pWinding->numpoints; i++ )
+		for(int i=0; i < pWinding->numpoints; i++ )
 		{
 			points.AddToTail( pWinding->p[i] );
 		}
 	}
 
 	// Get the 2D convex hull.
-
-	//// First transform them into a plane.
+	// First transform them into a plane.
 	QAngle vAngles;
 	Vector vecs[3];
 
@@ -1249,9 +1242,8 @@ void EmitClipPortalGeometry( node_t *pHeadNode, portal_t *pPortal, int iSrcArea,
 	mTransform.SetBasisVectors( vecs[0], vecs[1], vecs[2] );
 	VMatrix mInvTransform = mTransform.Transpose();
 
-	int i;
 	CUtlVector<Vector2D> points2D;
-	for( i=0; i < points.Size(); i++ )
+	for(int i = 0; i < points.Size(); i++ )
 	{
 		Vector vTest = mTransform * points[i];
 		points2D.AddToTail( Vector2D( vTest.y, vTest.z ) );
@@ -1276,7 +1268,7 @@ void EmitClipPortalGeometry( node_t *pHeadNode, portal_t *pPortal, int iSrcArea,
 		Error("\tMAX_MAP_PORTALVERTS (probably a broken areaportal near %.1f %.1f %.1f ", p->x, p->y, p->z );
 	}
 	
-	for( i=0; i < nIndices; i++ )
+	for(int i = 0; i < nIndices; i++ )
 	{
 		g_ClipPortalVerts[g_nClipPortalVerts] = points[ indices[i] ];
 		++g_nClipPortalVerts;

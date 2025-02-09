@@ -204,8 +204,8 @@ static bool LoadSrcVTFFiles( IVTFTexture *pSrcVTFTextures[6], const char *pSkybo
 							int *pUnionTextureFlags, bool bHDR )
 {
 	const char *facingName[6] = { "rt", "lf", "bk", "ft", "up", "dn" };
-	int i;
-	for( i = 0; i < 6; i++ )
+
+	for(int i = 0; i < 6; i++ )
 	{
 		char srcMaterialName[1024];
 		sprintf( srcMaterialName, "%s%s", pSkyboxMaterialBaseName, facingName[i] );
@@ -489,8 +489,7 @@ void CreateDefaultCubemaps( bool bHDR )
 	AddBufferToPak( pak, dstVTFFileName, outputBuf.Base(), outputBuf.TellPut(), false );
 
 	// spit out all of the ones that are attached to world geometry.
-	int i;
-	for( i = 0; i < s_DefaultCubemapNames.Count(); i++ )
+	for(int i = 0; i < s_DefaultCubemapNames.Count(); i++ )
 	{
 		char vtfName[MAX_PATH];
 		VTFNameToHDRVTFName( s_DefaultCubemapNames[i], vtfName, MAX_PATH, bHDR );
@@ -502,7 +501,7 @@ void CreateDefaultCubemaps( bool bHDR )
 	}
 
 	// Clean up the textures
-	for( i = 0; i < 6; i++ )
+	for(int i = 0; i < 6; i++ )
 	{
 		DestroyVTFTexture( pSrcVTFTextures[i] );
 	}
@@ -782,8 +781,7 @@ static int Cubemap_CreateTexInfo( int originalTexInfo, int origin[3] )
 
 static int SideIDToIndex( int brushSideID )
 {
-	int i;
-	for( i = 0; i < g_MainMap->nummapbrushsides; i++ )
+	for(int i = 0; i < g_MainMap->nummapbrushsides; i++ )
 	{
 		if( g_MainMap->brushsides[i].id == brushSideID )
 		{
@@ -803,12 +801,11 @@ void Cubemap_FixupBrushSidesMaterials( void )
 	Msg( "Fixing up env_cubemap materials on brush sides..." );
 	Assert( s_EnvCubemapToBrushSides.Count() == g_nCubemapSamples );
 
-	int cubemapID;
-	for( cubemapID = 0; cubemapID < g_nCubemapSamples; cubemapID++ )
+	for(int cubemapID = 0; cubemapID < g_nCubemapSamples; cubemapID++ )
 	{
 		IntVector_t &brushSidesVector = s_EnvCubemapToBrushSides[cubemapID];
-		int i;
-		for( i = 0; i < brushSidesVector.Count(); i++ )
+	
+		for(int i = 0; i < brushSidesVector.Count(); i++ )
 		{
 			int brushSideID = brushSidesVector[i];
 			int sideIndex = SideIDToIndex( brushSideID );

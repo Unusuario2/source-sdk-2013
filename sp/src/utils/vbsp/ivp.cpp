@@ -876,6 +876,8 @@ int FindOrCreateWaterTexInfo( texinfo_t *pBaseInfo, float depth )
 }
 
 extern node_t *dfacenodes[MAX_MAP_FACES];
+
+
 static void WriteFogVolumeIDs( dmodel_t *pModel )
 {
 	int i;

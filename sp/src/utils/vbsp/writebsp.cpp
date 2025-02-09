@@ -214,7 +214,7 @@ side_t *pOrigFaceSideList[MAX_MAP_PLANES];
 //-----------------------------------------------------------------------------
 int CreateOrigFace( face_t *f )
 {
-    int         i, j;
+    int         j;
     dface_t     *of;
     side_t      *side;
     int         vIndices[128];
@@ -279,7 +279,7 @@ int CreateOrigFace( face_t *f )
     //
     // save the vertices
     //
-    for( i = 0; i < pWinding->numpoints; i++ )
+    for(int i = 0; i < pWinding->numpoints; i++ )
     {
         //
         // compare vertices
@@ -290,7 +290,7 @@ int CreateOrigFace( face_t *f )
     //
     // save off points -- as edges
     //
-    for( i = 0; i < pWinding->numpoints; i++ )
+    for(int i = 0; i < pWinding->numpoints; i++ )
 	{
         //
         // look for matching edges first
@@ -352,26 +352,20 @@ int CreateOrigFace( face_t *f )
 //-----------------------------------------------------------------------------
 int FindOrigFace( face_t *f )
 {
-    int         i;
     static int  bClear = 0;
-    side_t      *pSide;
 
-    //
     // initially clear the face side lists (per face plane)
-    //
     if( !bClear )
     {
-        for( i = 0; i < MAX_MAP_PLANES; i++ )
+        for(int i = 0; i < MAX_MAP_PLANES; i++ )
         {
             pOrigFaceSideList[i] = NULL;
         }
         bClear = 1;
     }
 
-    //
     // compare the sides
-    //
-    for( pSide = pOrigFaceSideList[f->planenum]; pSide; pSide = pSide->next )
+    for(side_t* pSide = pOrigFaceSideList[f->planenum]; pSide; pSide = pSide->next )
     {
         if( pSide == f->originalface )
             return pSide->origIndex;
@@ -418,7 +412,6 @@ EmitFace
 void EmitFace( face_t *f, qboolean onNode )
 {
 	dface_t	*df;
-	int		i;
 	int		e;
 
 //	void SubdivideFaceBySubdivSize( face_t *f ); // garymcthack
@@ -503,10 +496,8 @@ void EmitFace( face_t *f, qboolean onNode )
 	df->SetNumPrims( f->numPrims );
 	df->SetDynamicShadowsEnabled( f->originalface->m_bDynamicShadowsEnabled );
 
-    //
     // save off points -- as edges
-    //
-	for( i = 0; i < f->numpoints; i++ )
+	for(int i = 0; i < f->numpoints; i++ )
 	{
 		//e = GetEdge (f->pts[i], f->pts[(i+1)%f->numpoints], f);
 		e = GetEdge2 (f->vertexnums[i], f->vertexnums[(i+1)%f->numpoints], f);
@@ -915,7 +906,6 @@ WriteBSP
 */
 void WriteBSP (node_t *headnode, face_t *pLeafFaceList )
 {
-	int		i;
 	int		oldfaces;
     int     oldorigfaces;
 
@@ -940,7 +930,7 @@ void WriteBSP (node_t *headnode, face_t *pLeafFaceList )
 	//
 	// add all displacement faces for the particular model
 	//
-	for( i = 0; i < nummapdispinfo; i++ )
+	for(int i = 0; i < nummapdispinfo; i++ )
 	{
 		int entityIndex = GetDispInfoEntityNum( &mapdispinfo[i] );
 		if( entityIndex == entity_num )
@@ -1169,8 +1159,7 @@ void BeginBSPFile (void)
 // to zero everywhere by default.
 static void ClearDistToClosestWater( void )
 {
-	int i;
-	for( i = 0; i < numleafs; i++ )
+	for(int i = 0; i < numleafs; i++ )
 	{
 		g_LeafMinDistToWater[i] = 0;
 	}

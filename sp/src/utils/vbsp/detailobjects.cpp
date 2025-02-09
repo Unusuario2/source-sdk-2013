@@ -254,8 +254,7 @@ static void ParseDetailGroup( int detailId, KeyValues* pGroupKeyValues )
 static void ParseDetailObjectFile( KeyValues& keyValues )
 {
 	// Iterate over all detail object groups...
-	KeyValues* pIter;
-	for( pIter = keyValues.GetFirstSubKey(); pIter; pIter = pIter->GetNextKey() )
+	for(KeyValues* pIter = keyValues.GetFirstSubKey(); pIter; pIter = pIter->GetNextKey() )
 	{
 		if (!pIter->GetFirstSubKey())
 			continue;

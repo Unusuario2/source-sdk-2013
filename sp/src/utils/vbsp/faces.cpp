@@ -1455,9 +1455,8 @@ typedef winding_t *pwinding_t;
 
 static void PrintWinding( winding_t *w )
 {
-	int i;
 	Msg( "\t---\n" );
-	for( i = 0; i < w->numpoints; i++ )
+	for(int i = 0; i < w->numpoints; i++ )
 	{
 		Msg( "\t%f %f %f\n", w->p[i].x, w->p[i].y, w->p[i].z );
 	}
@@ -1761,8 +1760,7 @@ void SplitSubdividedFaces_Node_r( node_t *node )
 	{
 		return;
 	}
-	face_t *f;
-	for( f = node->faces; f ;f = f->next )
+	for(face_t* f = node->faces; f ;f = f->next )
 	{
 		SubdivideFaceBySubdivSize( f );
 	}
