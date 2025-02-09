@@ -1,4 +1,4 @@
-//========= Copyright Valve Corporation, All rights reserved. ============//
+//============= Copyright Valve Corporation, All rights reserved. =============//
 #ifndef RENDERMECHANISM_H
 #define RENDERMECHANISM_H
 
