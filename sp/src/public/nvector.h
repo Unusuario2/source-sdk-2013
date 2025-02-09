@@ -58,7 +58,7 @@ template<int N>
 inline float NDot( NVector<N> const &a, NVector<N> const &b )
 {
 	float ret = 0;
-	for( int i=0; i < N; i++ )
+	for( int i = 0; i < N; i++ )
 		ret += a.v[i] * b.v[i];
 	return ret;
 }
@@ -107,7 +107,7 @@ float NVectorN::Dot( NVectorN const &b ) const
 {
 	float ret = 0;
 	
-	for( int i=0; i < N; i++ )
+	for( int i = 0; i < N; i++ )
 		ret += v[i]*b.v[i];
 
 	return ret;
@@ -120,7 +120,7 @@ NVectorN NVectorN::Cross( NVectorN const &b ) const
 	NVector<N> ret;
 	NMatrix<N-1> mat;
 	
-	for( int i=0; i < N; i++ )
+	for( int i = 0; i < N; i++ )
 	{
 		for( y=0; y < N; y++ )
 			for( x=0; x < N; x++ )
@@ -151,7 +151,7 @@ template<int N>
 NVectorN NVectorN::operator-() const
 {
 	NVectorN ret;
-	for( int i=0; i < N; i++ )
+	for( int i = 0; i < N; i++ )
 		ret.v[i] = -v[i];
 	return ret;
 }
@@ -162,7 +162,7 @@ NVectorN NVectorN::operator+( NVectorN const &b ) const
 {
 	NVectorN ret;
 	
-	for( int i=0; i < N; i++ )
+	for( int i = 0; i < N; i++ )
 		ret.v[i] = v[i]+b.v[i];
 
 	return ret;
@@ -172,7 +172,7 @@ NVectorN NVectorN::operator+( NVectorN const &b ) const
 template<int N>
 NVectorN const &NVectorN::operator+=( NVectorN const &b )
 {
-	for( int i=0; i < N; i++ )
+	for( int i = 0; i < N; i++ )
 		v[i] += b.v[i];
 	return *this;
 }
@@ -183,7 +183,7 @@ NVectorN NVectorN::operator-( NVectorN const &b ) const
 {
 	NVectorN ret;
 	
-	for( int i=0; i < N; i++ )
+	for( int i = 0; i < N; i++ )
 		ret.v[i] = v[i]-b.v[i];
 
 	return ret;
@@ -193,7 +193,7 @@ template<int N>
 NVectorN NVectorN::operator*( float val ) const
 {
 	NVectorN ret;
-	for( int i=0; i < N; i++ )
+	for( int i = 0; i < N; i++ )
 		ret.v[i] = v[i] * val;
 	return ret;
 }

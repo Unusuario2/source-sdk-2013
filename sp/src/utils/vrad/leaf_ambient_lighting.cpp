@@ -128,7 +128,7 @@ void AddEmitSurfaceLights( const Vector &vStart, Vector lightBoxColor[6] )
 		if ( ratio == 0 )
 			continue;
 
-		for ( int i=0; i < 6; i++ )
+		for ( int i = 0; i < 6; i++ )
 		{
 			float t = DotProduct( g_BoxDirections[i], vDeltaNorm );
 			if ( t > 0 )
@@ -626,7 +626,7 @@ void ComputePerLeafAmbientLighting()
 	// Figure out which lights should go in the per-leaf ambient cubes.
 	int nInAmbientCube = 0;
 	int nSurfaceLights = 0;
-	for ( int i=0; i < *pNumworldlights; i++ )
+	for ( int i = 0; i < *pNumworldlights; i++ )
 	{
 		dworldlight_t *wl = &dworldlights[i];
 		

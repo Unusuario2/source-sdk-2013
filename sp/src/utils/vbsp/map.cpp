@@ -1892,7 +1892,7 @@ entity_t* EntityByName( char const *pTestName )
 	if( !pTestName )
 		return 0;
 
-	for( int i=0; i < g_MainMap->num_entities; i++ )
+	for( int i = 0; i < g_MainMap->num_entities; i++ )
 	{
 		entity_t *e = &g_MainMap->entities[i];
 
@@ -1912,7 +1912,7 @@ void CMapFile::ForceFuncAreaPortalWindowContents()
 	char *targets[] = {"target", "BackgroundBModel"};
 	int nTargets = sizeof(targets) / sizeof(targets[0]);
 
-	for( int i=0; i < num_entities; i++ )
+	for( int i = 0; i < num_entities; i++ )
 	{
 		entity_t *e = &entities[i];
 

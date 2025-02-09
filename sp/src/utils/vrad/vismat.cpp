@@ -316,7 +316,7 @@ void BuildVisRow (int patchnum, byte *pvs, int head, transfer_t *transfers, CTra
 	memset( face_tested, 0, numfaces ) ;
 	memset( disp_tested, 0, numfaces );
 
-	for (j=0; j<dvis->numclusters; j++)
+	for (j = 0; j<dvis->numclusters; j++)
 	{
 		if ( ! ( pvs[(j)>>3] & (1<<((j)&7)) ) )
 		{

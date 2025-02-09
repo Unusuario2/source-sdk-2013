@@ -808,7 +808,7 @@ void FinalLightFace( int iThread, int facenum )
 			{
 				// clip from the bottom first
 				// garymct: minlight is a per entity minimum light value?
-				for( i=0; i<3; i++ )
+				for( i = 0; i<3; i++ )
 				{
 					lb[bumpSample].m_vecLighting[i] = max( lb[bumpSample].m_vecLighting[i], minlight );
 				}

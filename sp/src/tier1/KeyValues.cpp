@@ -711,8 +711,8 @@ void KeyValues::WriteConvertedString( IBaseFileSystem *filesystem, FileHandle_t 
 	// the worst possible case is that the whole string is quotes
 	int len = Q_strlen(pszString);
 	char *convertedString = (char *) _alloca ((len + 1)  * sizeof(char) * 2);
-	int j=0;
-	for (int i=0; i <= len; i++)
+	int j = 0;
+	for (int i = 0; i <= len; i++)
 	{
 		if (pszString[i] == '\"')
 		{

@@ -1028,10 +1028,10 @@ int FindUniquePoints( const Vector2D *pPoints, int nPoints, int *indexMap, int n
 
 	// This could be slightly more efficient.
 	int nUniquePoints = 0;
-	for ( int i=0; i < nPoints; i++ )
+	for ( int i = 0; i < nPoints; i++ )
 	{
 		int j;
-		for ( j=0; j < nUniquePoints; j++ )
+		for ( j = 0; j < nUniquePoints; j++ )
 		{
 			if ( pPoints[i].DistToSqr( pPoints[indexMap[j]] ) < flToleranceSqr )
 				break;
@@ -1211,7 +1211,7 @@ void EmitClipPortalGeometry( node_t *pHeadNode, portal_t *pPortal, int iSrcArea,
 	{
 		portal_t *pPointPortal = portals[iPortal];
 		winding_t *pWinding = pPointPortal->winding;
-		for(int i=0; i < pWinding->numpoints; i++ )
+		for(int i = 0; i < pWinding->numpoints; i++ )
 		{
 			points.AddToTail( pWinding->p[i] );
 		}
@@ -1664,7 +1664,7 @@ void MarkVisibleSides (tree_t *tree, mapbrush_t **ppBrushes, int nCount )
 	qprintf ("--- MarkVisibleSides ---\n");
 
 	// clear all the visible flags
-	for (int i=0; i < nCount; ++i )
+	for (int i = 0; i < nCount; ++i )
 	{
 		mapbrush_t *mb = ppBrushes[i];
 		int numsides = mb->numsides;

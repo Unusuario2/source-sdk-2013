@@ -139,7 +139,7 @@ void CScratchPadGraph::UpdateTicksAndStuff( float flTime, float flValue )
 			);
 
 		// Extend the lines attached to the time labels.
-		for ( int i=0; i < m_nTimeLabelsDrawn; i++ )
+		for ( int i = 0; i < m_nTimeLabelsDrawn; i++ )
 		{
 			float flTimeLocl = m_flTimeOrigin + m_nTimeLabelsDrawn * m_flTimeLabelEveryNSeconds;
 
@@ -228,7 +228,7 @@ void ScratchPad_DrawLitCone(
 	// Draw each quad.
 	Vector vPrevBottom = vBaseCenter + vRight;
 	
-	for ( int i=0; i < nSegments; i++ )
+	for ( int i = 0; i < nSegments; i++ )
 	{
 		float flAngle = (float)(i+1) * M_PI * 2.0 / nSegments;
 		Vector vOffset = vRight * cos( flAngle ) + vUp * sin( flAngle );
@@ -295,7 +295,7 @@ void ScratchPad_DrawLitCylinder(
 	Vector vPrevTop = v1 + vRight;
 	Vector vPrevBottom = v2 + vRight;
 	
-	for ( int i=0; i < nSegments; i++ )
+	for ( int i = 0; i < nSegments; i++ )
 	{
 		float flAngle = (float)(i+1) * M_PI * 2.0 / nSegments;
 		Vector vOffset = vRight * cos( flAngle ) + vUp * sin( flAngle );
@@ -423,7 +423,7 @@ void ScratchPad_DrawSphere(
 			
 			if ( iSlice != (nSubDivs - 1) )
 			{
-				for ( int i=0; i < nSubDivs; i++ )
+				for ( int i = 0; i < nSubDivs; i++ )
 					pPad->DrawLine( CSPVert( prevPoints[i], vColor ), CSPVert( prevPoints[(i+1)%nSubDivs], vColor ) );
 			}
 		}
@@ -447,7 +447,7 @@ void ScratchPad_DrawAABB(
 	vPrevTop.x = vPrevBottom.x = vecs[vertOrder[3][0]]->x;
 	vPrevTop.y = vPrevBottom.y = vecs[vertOrder[3][1]]->y;
 	
-	for ( int i=0; i < 4; i++ )
+	for ( int i = 0; i < 4; i++ )
 	{
 		vTop.x = vBottom.x = vecs[vertOrder[i][0]]->x;
 		vTop.y = vBottom.y = vecs[vertOrder[i][1]]->y;

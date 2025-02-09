@@ -139,7 +139,7 @@ void SerializeFace( MessageBuffer * pmb, int facenum )
 	//
 	// Write the light information
 	// 
-	for (i=0; i<MAXLIGHTMAPS; ++i) {
+	for (i = 0; i<MAXLIGHTMAPS; ++i) {
 		for (n=0; n<NUM_BUMP_VECTS+1; ++n) {
 			if (fl->light[i][n])
 			{
@@ -178,7 +178,7 @@ void UnSerializeFace( MessageBuffer * pmb, int facenum, int iSource )
 	//
 	// Read the light information
 	// 
-	for (i=0; i<MAXLIGHTMAPS; ++i) {
+	for (i = 0; i<MAXLIGHTMAPS; ++i) {
 		for (n=0; n<NUM_BUMP_VECTS+1; ++n) {
 			if (fl->light[i][n])
 			{
@@ -257,7 +257,7 @@ void RunMPIBuildFacelights()
 		// is idling in the above loop. Wouldn't want to slow down the
 		// handing out of work - maybe another thread?
 		//
-		for ( int i=0; i < numfaces; ++i )
+		for ( int i = 0; i < numfaces; ++i )
 		{
 			BuildPatchLights(i);
 		}
@@ -382,7 +382,7 @@ void RunMPIBuildVisLeafs()
 	if ( !g_bMPIMaster || VMPI_GetActiveWorkUnitDistributor() == k_eWorkUnitDistributor_SDK )
 	{
 		// Allocate space for the transfers for each thread.
-		for ( int i=0; i < numthreads; i++ )
+		for ( int i = 0; i < numthreads; i++ )
 		{
 			g_VMPIVisLeafsData[i].m_pBuildVisLeafsTransfers = BuildVisLeafs_Start();
 		}
@@ -401,7 +401,7 @@ void RunMPIBuildVisLeafs()
 		MPI_ReceiveVisLeafsResults );
 
 	// Free the transfers from each thread.
-	for ( int i=0; i < numthreads; i++ )
+	for ( int i = 0; i < numthreads; i++ )
 	{
 		if ( g_VMPIVisLeafsData[i].m_pBuildVisLeafsTransfers )
 			BuildVisLeafs_End( g_VMPIVisLeafsData[i].m_pBuildVisLeafsTransfers );

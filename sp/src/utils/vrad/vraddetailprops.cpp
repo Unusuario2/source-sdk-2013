@@ -971,7 +971,7 @@ void VMPI_ProcessDetailPropWU( int iThread, int iWorkUnit, MessageBuffer *pBuf )
 	pBuf->write( &prop.m_LightStyleCount, sizeof( prop.m_LightStyleCount ) );
 	pBuf->write( &prop.m_LightStyles, sizeof( prop.m_LightStyles ) );
 	
-	for ( int i=0; i < prop.m_LightStyleCount; i++ )
+	for ( int i = 0; i < prop.m_LightStyleCount; i++ )
 	{
 		DetailPropLightstylesLump_t *l = &pDetailPropLump->Element( i + prop.m_LightStyles );
 		pBuf->write( &l->m_Lighting, sizeof( l->m_Lighting ) );
@@ -992,7 +992,7 @@ void VMPI_ReceiveDetailPropWU( int iWorkUnit, MessageBuffer *pBuf, int iWorker )
 	
 	pDetailPropLump->EnsureCount( prop.m_LightStyles + prop.m_LightStyleCount );
 	
-	for ( int i=0; i < prop.m_LightStyleCount; i++ )
+	for ( int i = 0; i < prop.m_LightStyleCount; i++ )
 	{
 		DetailPropLightstylesLump_t *l = &pDetailPropLump->Element( i + prop.m_LightStyles );
 		pBuf->read( &l->m_Lighting, sizeof( l->m_Lighting ) );

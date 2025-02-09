@@ -1212,7 +1212,7 @@ void EnsurePresenceOfWaterLODControlEntity( void )
 		// Don't bother if there isn't any water in the map.
 		return;
 	}
-	for( int i=0; i < num_entities; i++ )
+	for( int i = 0; i < num_entities; i++ )
 	{
 		entity_t *e = &entities[i];
 

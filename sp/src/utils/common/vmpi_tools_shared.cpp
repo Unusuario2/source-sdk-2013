@@ -318,7 +318,7 @@ void VMPI_ExceptionFilter( unsigned long uCode, void *pvExceptionInfo )
 	};
 
 	int nErrors = sizeof( errors ) / sizeof( errors[0] );
-	int i=0;
+	int i = 0;
 	char *pchReason = NULL;
 	char chUnknownBuffer[32];
 	for ( i; ( i < nErrors ) && !pchReason; i++ )

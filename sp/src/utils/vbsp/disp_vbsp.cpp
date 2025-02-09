@@ -178,7 +178,7 @@ void DispMapToCoreDispInfo( mapdispinfo_t *pMapDisp, CCoreDispInfo *pCoreDispInf
 		Assert( pFace->numedges == 4 );
 
 		Vector pt[4];
-		for( int i=0; i < 4; i++ )
+		for( int i = 0; i < 4; i++ )
 			pt[i] = pWinding->p[i];
 
 		int zeroOffset[2] = {0,0};
@@ -293,7 +293,7 @@ void EmitInitialDispInfos( void )
 	int nTotalVerts = 0;
 	int nTotalTris = 0;
 
-	for (int i=0; i < nummapdispinfo; i++ )
+	for (int i = 0; i < nummapdispinfo; i++ )
 	{
 		nTotalVerts += NUM_DISP_POWER_VERTS( mapdispinfo[i].power );
 		nTotalTris += NUM_DISP_POWER_TRIS( mapdispinfo[i].power );
@@ -371,7 +371,7 @@ void EmitInitialDispInfos( void )
 
 void ExportCoreDispNeighborData( const CCoreDispInfo *pIn, ddispinfo_t *pOut )
 {
-	for ( int i=0; i < 4; i++ )
+	for ( int i = 0; i < 4; i++ )
 	{
 		pOut->m_EdgeNeighbors[i] = *pIn->GetEdgeNeighbor( i );
 		pOut->m_CornerNeighbors[i] = *pIn->GetCornerNeighbors( i );
@@ -383,7 +383,7 @@ void ExportNeighborData( CCoreDispInfo **ppListBase, ddispinfo_t *pBSPDispInfos,
 	FindNeighboringDispSurfs( ppListBase, listSize );
 
 	// Export the neighbor data.
-	for ( int i=0; i < nummapdispinfo; i++ )
+	for ( int i = 0; i < nummapdispinfo; i++ )
 	{
 		ExportCoreDispNeighborData( g_CoreDispInfos[i], &pBSPDispInfos[i] );
 	}
@@ -396,7 +396,7 @@ void ExportCoreDispAllowedVertList( const CCoreDispInfo *pIn, ddispinfo_t *pOut 
 		pIn->GetAllowedVerts().GetNumDWords() == sizeof( pOut->m_AllowedVerts ) / 4,
 		("ExportCoreDispAllowedVertList: size mismatch")
 		);
-	for ( int i=0; i < pIn->GetAllowedVerts().GetNumDWords(); i++ )
+	for ( int i = 0; i < pIn->GetAllowedVerts().GetNumDWords(); i++ )
 		pOut->m_AllowedVerts[i] = pIn->GetAllowedVerts().GetDWord( i );
 }
 
@@ -405,7 +405,7 @@ void ExportAllowedVertLists( CCoreDispInfo **ppListBase, ddispinfo_t *pBSPDispIn
 {
 	SetupAllowedVerts( ppListBase, listSize );
 
-	for ( int i=0; i < listSize; i++ )
+	for ( int i = 0; i < listSize; i++ )
 	{
 		ExportCoreDispAllowedVertList( ppListBase[i], &pBSPDispInfos[i] );
 	}
@@ -418,7 +418,7 @@ bool FindEnclosingTri(
 	int *pStartVert,
 	float bcCoords[3] )
 {
-	for ( int i=0; i < indices.Count(); i += 3 )
+	for ( int i = 0; i < indices.Count(); i += 3 )
 	{
 		GetBarycentricCoords2D( 
 			vertCoords[indices[i+0]],
@@ -454,7 +454,7 @@ void SnapRemainingVertsToSurface( CCoreDispInfo *pCoreDisp, ddispinfo_t *pDispIn
 	vertsTouched.SetSize( pCoreDisp->GetSize() );
 	memset( vertsTouched.Base(), 0, sizeof( bool ) * vertsTouched.Count() );
 
-	for ( int i=0; i < indices.Count(); i++ )
+	for ( int i = 0; i < indices.Count(); i++ )
 		vertsTouched[ indices[i] ] = true;
 
 	// Generate 2D floating point coordinates for each vertex. We use these to generate
@@ -514,7 +514,7 @@ void SnapRemainingVertsToSurface( CCoreDispInfo *pCoreDisp, ddispinfo_t *pDispIn
 void SnapRemainingVertsToSurface( CCoreDispInfo **ppListBase, ddispinfo_t *pBSPDispInfos, int listSize )
 {
 //g_pPad = ScratchPad3D_Create();
-	for ( int i=0; i < listSize; i++ )
+	for ( int i = 0; i < listSize; i++ )
 	{
 		SnapRemainingVertsToSurface( ppListBase[i], &pBSPDispInfos[i] );
 	}

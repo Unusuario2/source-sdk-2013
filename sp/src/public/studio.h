@@ -3159,7 +3159,7 @@ inline int Studio_LoadVertexes( const vertexFileHeader_t *pTempVvdHdr, vertexFil
 	// re-establish mesh ordered vertexes into cache memory, according to table
 	target      = 0;
 	pFixupTable = (vertexFileFixup_t *)((byte *)pTempVvdHdr + pTempVvdHdr->fixupTableStart);
-	for (i=0; i<pTempVvdHdr->numFixups; i++)
+	for (i = 0; i<pTempVvdHdr->numFixups; i++)
 	{
 		if (pFixupTable[i].lod < rootLOD)
 		{

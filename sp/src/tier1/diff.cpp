@@ -159,7 +159,7 @@ static uint32 hasher(uint8 const *mdata)
 {
   // attempt to scramble the bits of h1 and h2 together
   uint32 ret=0;
-  for(int i=0;i<MIN_MATCH_LEN;i++)
+  for(int i = 0;i<MIN_MATCH_LEN;i++)
   {
     ret=ret<<4;
     ret+=(*mdata++);
@@ -222,7 +222,7 @@ int FindDiffsForLargeFiles(uint8 const *NewBlock, uint8 const *OldBlock,
           int max_mlength=min(65535,OldBlock+OldSize-b->dataptr);
           max_mlength=min(max_mlength,NewBlock+NewSize-walk);
           int i;
-		  for(i=0;i<max_mlength;i++)
+		  for(i = 0;i<max_mlength;i++)
             if (walk[i]!=b->dataptr[i])
               break;
           if ((i>MIN_MATCH_LEN) && (i>longest))
@@ -358,7 +358,7 @@ int FindDiffs(uint8 const *NewBlock, uint8 const *OldBlock,
           int max_mlength=min(65535,OldBlock+OldSize-b->dataptr);
           max_mlength=min(max_mlength,NewBlock+NewSize-walk);
           int i;
-		  for(i=0;i<max_mlength;i++)
+		  for(i = 0;i<max_mlength;i++)
             if (walk[i]!=b->dataptr[i])
               break;
           if ((i>MIN_MATCH_LEN) && (i>longest))

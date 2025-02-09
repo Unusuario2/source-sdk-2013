@@ -1073,7 +1073,7 @@ void Cubemap_AddUnreferencedCubemaps()
 	PatchInfo_t			info;
 	dcubemapsample_t	*pSample;
 
-	for (int i=0; i<g_nCubemapSamples; ++i )
+	for (int i = 0; i<g_nCubemapSamples; ++i )
 	{
 		pSample = &g_CubemapSamples[i];	
 
@@ -1085,7 +1085,7 @@ void Cubemap_AddUnreferencedCubemaps()
 		GeneratePatchedName( "c", info, false, pTextureName, 1024 );
 		
 		// find or add
-		for (j=0; j<s_DefaultCubemapNames.Count(); ++j )
+		for (j = 0; j<s_DefaultCubemapNames.Count(); ++j )
 		{
 			if ( !stricmp( s_DefaultCubemapNames[j], pTextureName ) )
 			{

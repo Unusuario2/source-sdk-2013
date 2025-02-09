@@ -417,7 +417,7 @@ bspbrush_t *MakeBspBrushList (mapbrush_t **pBrushes, int nBrushCount, const Vect
 	ComputeBoundingPlanes( clipmins, clipmaxs );
 
 	bspbrush_t	*pBrushList = NULL;
-	for ( int i=0; i < nBrushCount; ++i )
+	for ( int i = 0; i < nBrushCount; ++i )
 	{
 		bspbrush_t *pNewBrush = CreateClippedBrush( pBrushes[i], clipmins, clipmaxs );
 		if ( pNewBrush )

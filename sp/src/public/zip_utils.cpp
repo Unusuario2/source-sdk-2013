@@ -698,7 +698,7 @@ void CZipFile::ParseFromBuffer( void *buffer, int bufferlength )
 	}
 
 	// Insert current data into rb tree
-	for ( i=0; i<numzipfiles; i++ )
+	for ( i = 0; i<numzipfiles; i++ )
 	{
 		CZipEntry e;
 		e.m_Name = newfiles[i].m_Name;

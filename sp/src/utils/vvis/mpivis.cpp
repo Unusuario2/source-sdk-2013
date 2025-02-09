@@ -249,7 +249,7 @@ void RunMPIBasePortalVis()
 			allPortalData.SetSize( g_numportals * 2 * portalbytes * 2 );
 
 			char *pOut = allPortalData.Base();
-			for ( i=0; i < g_numportals * 2; i++) 
+			for ( i = 0; i < g_numportals * 2; i++) 
 			{
 				portal_t *p = &portals[i];
 				
@@ -282,7 +282,7 @@ void RunMPIBasePortalVis()
 		if ( !fp )
 			Error( "\tCan't open '%s' to read portal info.", g_BasePortalVisResultsFilename.Base() );
 
-		for ( i=0; i < g_numportals * 2; i++) 
+		for ( i = 0; i < g_numportals * 2; i++) 
 		{
 			portal_t *p = &portals[i];
 
@@ -457,7 +457,7 @@ public:
 						ScratchPad_DrawWorld( pPad, false );
 						
 						// Draw the portals that haven't been vis'd.
-						for ( int i=0; i < g_numportals*2; i++ )
+						for ( int i = 0; i < g_numportals*2; i++ )
 						{
 							portal_t *p = sorted_portals[i];
 							ScratchPad_DrawWinding( pPad, p->winding->numpoints, p->winding->points, Vector( 1, 0, 0 ), Vector( .3, .3, .3 ) );
@@ -506,7 +506,7 @@ void CheckExitedEarly()
 		Warning("\tExited early, using fastvis results...\n" );
 		
 		// Use the fastvis results for portals that we didn't get results for.
-		for ( int i=0; i < g_numportals*2; i++ )
+		for ( int i = 0; i < g_numportals*2; i++ )
 		{
 			if ( sorted_portals[i]->status != stat_done )
 			{
@@ -544,7 +544,7 @@ void RunMPIPortalFlow()
 		g_PortalMCAddr.ip[3] = (unsigned char)RandomInt( 3, 255 );
 
 		g_pPortalMCSocket = CreateIPSocket();
-		int i=0;
+		int i = 0;
 		for ( i; i < 5; i++ )
 		{
 			if ( g_pPortalMCSocket->BindToAny( randomStream.RandomInt( 20000, 30000 ) ) )

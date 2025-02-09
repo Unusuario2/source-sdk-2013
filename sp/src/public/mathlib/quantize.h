@@ -80,7 +80,7 @@ inline struct Sample *AllocSamples(int ns, int nd)
 	size_t size5=(sizeof(struct Sample)+(nd-1))*ns;
 	void *ret=new uint8[size5];
 	memset(ret,0,size5);
-	for(int i=0;i<ns;i++)
+	for(int i = 0;i<ns;i++)
 		NthSample((struct Sample *)ret,i,nd)->Count=1;
 	return (struct Sample *) ret;
 }

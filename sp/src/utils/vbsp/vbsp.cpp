@@ -836,7 +836,7 @@ void MarkNoDynamicShadowSides()
 		g_MainMap->brushsides[iSide].m_bDynamicShadowsEnabled = true;
 	}
 
-	for ( int i=0; i < g_NoDynamicShadowSides.Count(); i++ )
+	for ( int i = 0; i < g_NoDynamicShadowSides.Count(); i++ )
 	{
 		int brushSideID = g_NoDynamicShadowSides[i];
 	

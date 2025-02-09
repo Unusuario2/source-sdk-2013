@@ -454,7 +454,7 @@ bool DoesPointHaveAnyNeighbors(
 
 	// Since points on corners touch two edges, we actually want to test two edges to see
 	// if the point has a neighbor on either edge.
-	for ( int i=0; i < 2; i++ )
+	for ( int i = 0; i < 2; i++ )
 	{
 		if ( TransformIntoNeighbor( pDisp, g_CornerEdges[iCorner][i], index, dummy ) )
 			return true;
@@ -604,7 +604,7 @@ bool CDispCircumferenceIterator::Next()
 // of the box defined by [bottomleft,topRight].
 static inline void SetupCoordXY( CNodeVert &out, CNodeVert const &bottomLeft, CNodeVert const &topRight, CNodeVert const &info )
 {
-	for( int i=0; i < 2; i++ )
+	for( int i = 0; i < 2; i++ )
 	{
 		if( info[i] == 0 )
 			out[i] = bottomLeft[i];
@@ -634,7 +634,7 @@ static unsigned short* DispCommon_GenerateTriIndices_R(
 		SetupCoordXY( verts[0], bottomLeft, topRight, CNodeVert(1,1) );
 		int iCurVert = 1;
 
-		for( int i=0; i < 9; i++ )
+		for( int i = 0; i < 9; i++ )
 		{
 			SetupCoordXY( verts[iCurVert], bottomLeft, topRight, g_NodeTriWinding[i] );
 			++iCurVert;
@@ -658,7 +658,7 @@ static unsigned short* DispCommon_GenerateTriIndices_R(
 	else
 	{
 		// Recurse into the children.
-		for( int i=0; i < 4; i++ )
+		for( int i = 0; i < 4; i++ )
 		{
 			CNodeVert childBottomLeft, childTopRight;
 			SetupCoordXY( childBottomLeft, bottomLeft, topRight, g_NodeChildLookup[i][0] );
@@ -758,7 +758,7 @@ static int g_CoreDispNeighborOrientationMap[4][4] =
 //-----------------------------------------------------------------------------
 void ClearNeighborData( CCoreDispInfo *pDisp )
 {
-	for ( int i=0; i < 4; i++ )
+	for ( int i = 0; i < 4; i++ )
 	{
 		pDisp->GetEdgeNeighbor( i )->SetInvalid();
 		pDisp->GetCornerNeighbors( i )->SetInvalid();
@@ -805,7 +805,7 @@ void SetupDispBoxes( CCoreDispInfo **ppListBase, int nListSize, CUtlVector<CDisp
 //-----------------------------------------------------------------------------
 inline bool DoBBoxesTouch( const CDispBox &a, const CDispBox &b )
 {
-	for ( int i=0; i < 3; i++ )
+	for ( int i = 0; i < 3; i++ )
 	{
 		if ( a.m_Max[i] < b.m_Min[i] )
 			return false;
@@ -957,7 +957,7 @@ void SetupEdgeNeighbors( CCoreDispInfo *pMain, CCoreDispInfo *pOther )
 //-----------------------------------------------------------------------------
 bool HasEdgeNeighbor( const CCoreDispInfo *pMain, int iNeighbor )
 {
-	for ( int i=0; i < 4; i++ )
+	for ( int i = 0; i < 4; i++ )
 	{
 		const CDispCornerNeighbors *pCorner = pMain->GetCornerNeighbors( i );
 		for ( int iNB=0; iNB < pCorner->m_nNeighbors; iNB++ )

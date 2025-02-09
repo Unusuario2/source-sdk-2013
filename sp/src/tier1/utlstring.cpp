@@ -502,7 +502,7 @@ CUtlString CUtlString::Replace( char cFrom, char cTo )
 {
 	CUtlString ret = *this;
 	int len = ret.Length();
-	for ( int i=0; i < len; i++ )
+	for ( int i = 0; i < len; i++ )
 	{
 		if ( ret.m_Storage[i] == cFrom )
 			ret.m_Storage[i] = cTo;

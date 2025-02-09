@@ -196,7 +196,7 @@ void RunThreads_Start( RunThreadsFn fn, void *pUserData, ERunThreadsPriority ePr
 	if ( numthreads > MAX_TOOL_THREADS )
 		numthreads = MAX_TOOL_THREADS;
 
-	for ( int i=0; i < numthreads ;i++ )
+	for ( int i = 0; i < numthreads ;i++ )
 	{
 		g_RunThreadsData[i].m_iThread = i;
 		g_RunThreadsData[i].m_pUserData = pUserData;
@@ -227,7 +227,7 @@ void RunThreads_Start( RunThreadsFn fn, void *pUserData, ERunThreadsPriority ePr
 void RunThreads_End()
 {
 	WaitForMultipleObjects( numthreads, g_ThreadHandles, TRUE, INFINITE );
-	for ( int i=0; i < numthreads; i++ )
+	for ( int i = 0; i < numthreads; i++ )
 		CloseHandle( g_ThreadHandles[i] );
 
 	threaded = false;

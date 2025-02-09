@@ -96,7 +96,7 @@ int CalcDatSize()
 		}
 	}
 
-	for( i=0; i < count; i++ )
+	for( i = 0; i < count; i++ )
 		ret += g_Dats[i].size;
 	
 	return ret;

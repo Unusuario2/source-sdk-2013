@@ -1298,7 +1298,7 @@ void CVradStaticPropMgr::SerializeLighting()
 		}
 
 		int totalVertexes = 0;
-		for ( int j=0; j<m_StaticProps[i].m_MeshData.Count(); j++ )
+		for ( int j = 0; j<m_StaticProps[i].m_MeshData.Count(); j++ )
 		{
 			totalVertexes += m_StaticProps[i].m_MeshData[j].m_Verts.Count();
 		}
@@ -1385,7 +1385,7 @@ void CVradStaticPropMgr::VMPI_ProcessStaticProp( int iThread, int iStaticProp, M
 	int nLists = results.m_ColorVertsArrays.Count();
 	pBuf->write( &nLists, sizeof( nLists ) );
 	
-	for ( int i=0; i < nLists; i++ )
+	for ( int i = 0; i < nLists; i++ )
 	{
 		CUtlVector<colorVertex_t> &curList = *results.m_ColorVertsArrays[i];
 		int count = curList.Count();
@@ -1405,7 +1405,7 @@ void CVradStaticPropMgr::VMPI_ReceiveStaticPropResults( int iStaticProp, Message
 	int nLists;
 	pBuf->read( &nLists, sizeof( nLists ) );
 	
-	for ( int i=0; i < nLists; i++ )
+	for ( int i = 0; i < nLists; i++ )
 	{
 		CUtlVector<colorVertex_t> *pList = new CUtlVector<colorVertex_t>;
 		results.m_ColorVertsArrays.AddToTail( pList );

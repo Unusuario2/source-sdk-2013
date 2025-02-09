@@ -76,7 +76,7 @@ void WCKVBase_Vector::AddKeyValue(const char *pszKey, const char *pszValue)
 
 int WCKVBase_Vector::FindByKeyName( const char *pKeyName ) const
 {
-	for ( int i=0; i < m_KeyValues.Count(); i++ )
+	for ( int i = 0; i < m_KeyValues.Count(); i++ )
 	{
 		if ( V_stricmp( m_KeyValues[i].szKey, pKeyName ) == 0 )
 			return i;

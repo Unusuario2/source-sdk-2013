@@ -135,7 +135,7 @@ ice_sboxes_init (void)
 {
 	register int	i;
 
-	for (i=0; i<1024; i++) {
+	for (i = 0; i<1024; i++) {
 	    int			col = (i >> 1) & 0xff;
 	    int			row = (i & 0x1) | ((i & 0x200) >> 8);
 	    unsigned long	x;
@@ -186,8 +186,8 @@ IceKey::~IceKey ()
 {
 	int	i, j;
 
-	for (i=0; i<_rounds; i++)
-	    for (j=0; j<3; j++)
+	for (i = 0; i<_rounds; i++)
+	    for (j = 0; j<3; j++)
 		_keysched[i].val[j] = 0;
 
 	_rounds = _size = 0;
@@ -312,15 +312,15 @@ IceKey::scheduleBuild (
 ) {
 	int		i;
 
-	for (i=0; i<8; i++) {
+	for (i = 0; i<8; i++) {
 	    register int	j;
 	    register int	kr = keyrot[i];
 	    IceSubkey		*isk = &_keysched[n + i];
 
-	    for (j=0; j<3; j++)
+	    for (j = 0; j<3; j++)
 		isk->val[j] = 0;
 
-	    for (j=0; j<15; j++) {
+	    for (j = 0; j<15; j++) {
 		register int	k;
 		unsigned long	*curr_sk = &isk->val[j % 3];
 
@@ -349,18 +349,18 @@ IceKey::set (
 	if (_rounds == 8) {
 	    unsigned short	kb[4];
 
-	    for (i=0; i<4; i++)
+	    for (i = 0; i<4; i++)
 		kb[3 - i] = (key[i*2] << 8) | key[i*2 + 1];
 
 	    scheduleBuild (kb, 0, ice_keyrot);
 	    return;
 	}
 
-	for (i=0; i<_size; i++) {
+	for (i = 0; i<_size; i++) {
 	    int			j;
 	    unsigned short	kb[4];
 
-	    for (j=0; j<4; j++)
+	    for (j = 0; j<4; j++)
 		kb[3 - j] = (key[i*8 + j*2] << 8) | key[i*8 + j*2 + 1];
 
 	    scheduleBuild (kb, i*8, ice_keyrot);

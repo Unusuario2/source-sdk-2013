@@ -653,9 +653,9 @@ inline void	VMatrix::Set3x4( matrix3x4_t& matrix3x4 ) const
 //-----------------------------------------------------------------------------
 inline const VMatrix& VMatrix::operator+=(const VMatrix &other)
 {
-	for(int i=0; i < 4; i++)
+	for(int i = 0; i < 4; i++)
 	{
-		for(int j=0; j < 4; j++)
+		for(int j = 0; j < 4; j++)
 		{
 			m[i][j] += other.m[i][j];
 		}
@@ -670,7 +670,7 @@ inline const VMatrix& VMatrix::operator+=(const VMatrix &other)
 inline VMatrix VMatrix::operator+(const VMatrix &other) const
 {
 	VMatrix ret;
-	for(int i=0; i < 16; i++)
+	for(int i = 0; i < 16; i++)
 	{
 		((float*)ret.m)[i] = ((float*)m)[i] + ((float*)other.m)[i];
 	}
@@ -681,9 +681,9 @@ inline VMatrix VMatrix::operator-(const VMatrix &other) const
 {
 	VMatrix ret;
 
-	for(int i=0; i < 4; i++)
+	for(int i = 0; i < 4; i++)
 	{
-		for(int j=0; j < 4; j++)
+		for(int j = 0; j < 4; j++)
 		{
 			ret.m[i][j] = m[i][j] - other.m[i][j];
 		}
@@ -695,7 +695,7 @@ inline VMatrix VMatrix::operator-(const VMatrix &other) const
 inline VMatrix VMatrix::operator-() const
 {
 	VMatrix ret;
-	for( int i=0; i < 16; i++ )
+	for( int i = 0; i < 16; i++ )
 	{
 		((float*)ret.m)[i] = ((float*)m)[i];
 	}

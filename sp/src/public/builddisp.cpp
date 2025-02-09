@@ -226,7 +226,7 @@ void CCoreDispSurface::Init( void )
 
 void CCoreDispSurface::SetNeighborData( const CDispNeighbor edgeNeighbors[4], const CDispCornerNeighbors cornerNeighbors[4] )
 {
-	for ( int i=0; i < 4; i++ )
+	for ( int i = 0; i < 4; i++ )
 	{
 		m_EdgeNeighbors[i] = edgeNeighbors[i];
 		m_CornerNeighbors[i] = cornerNeighbors[i];
@@ -846,7 +846,7 @@ void CCoreDispInfo::InitDispInfo( int power, int minTess, float smoothingAngle, 
 	float alphas[MAX_DISPVERTS];
 
 	int nVerts = NUM_DISP_POWER_VERTS( power );
-	for ( int i=0; i < nVerts; i++ )
+	for ( int i = 0; i < nVerts; i++ )
 	{
 		vectors[i] = pVerts[i].m_vVector;
 		dists[i] = pVerts[i].m_flDist;

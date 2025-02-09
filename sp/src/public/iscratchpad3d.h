@@ -284,7 +284,7 @@ inline CSPVertList::CSPVertList(CSPVert const *pVerts, int nVerts )
 inline CSPVertList::CSPVertList(Vector const *pVerts, int nVerts, CSPColor vColor )
 {
 	m_Verts.AddMultipleToTail( nVerts );
-	for( int i=0; i < nVerts; i++ )
+	for( int i = 0; i < nVerts; i++ )
 	{
 		m_Verts[i].m_vPos = pVerts[i];
 		m_Verts[i].m_vColor = vColor;
@@ -294,7 +294,7 @@ inline CSPVertList::CSPVertList(Vector const *pVerts, int nVerts, CSPColor vColo
 inline CSPVertList::CSPVertList( Vector const *pVerts, Vector const *pColors, int nVerts )
 {
 	m_Verts.AddMultipleToTail( nVerts );
-	for( int i=0; i < nVerts; i++ )
+	for( int i = 0; i < nVerts; i++ )
 	{
 		m_Verts[i].m_vPos = pVerts[i];
 		m_Verts[i].m_vColor = pColors[i];
@@ -304,7 +304,7 @@ inline CSPVertList::CSPVertList( Vector const *pVerts, Vector const *pColors, in
 inline CSPVertList::CSPVertList( Vector const *pVerts, CSPColor const *pColors, int nVerts )
 {
 	m_Verts.AddMultipleToTail( nVerts );
-	for( int i=0; i < nVerts; i++ )
+	for( int i = 0; i < nVerts; i++ )
 	{
 		m_Verts[i].m_vPos = pVerts[i];
 		m_Verts[i].m_vColor = pColors[i];

@@ -29,9 +29,9 @@ public:
 	void Seed( uint32 seed )
 	{
 		m_pRand_J=m_RandY+23; m_pRand_K=m_RandY+54;
-		for(int i=0;i<55;i++)
+		for(int i = 0;i<55;i++)
 		{
-			for(int j=0;j<4;j++)
+			for(int j = 0;j<4;j++)
 			{
 				SubFloat( m_RandY[i], j) = (seed>>16)/65536.0;
 				seed=(seed+1)*3141592621u;
@@ -81,7 +81,7 @@ int GetSIMDRandContext( void )
 {
 	for(;;)
 	{
-		for(int i=0; i < NELEMS( s_SIMDRandContexts ); i++)
+		for(int i = 0; i < NELEMS( s_SIMDRandContexts ); i++)
 		{
 			if ( ! s_nRandContextsInUse[i] )				// available?
 			{

@@ -155,25 +155,25 @@ void PrintQTree(struct QuantizedValue const *p,int idlevel)
 
 	if (p)
 	{
-		for(i=0;i<idlevel;i++)
+		for(i = 0;i<idlevel;i++)
 			printf(" ");
 		printf("node=%p NSamples=%d value=%d Mean={",p,p->NSamples,p->value);
-		for(i=0;i<current_ndims;i++)
+		for(i = 0;i<current_ndims;i++)
 			printf("%x,",p->Mean[i]);
 		printf("}\n");
-		for(i=0;i<idlevel;i++)
+		for(i = 0;i<idlevel;i++)
 			printf(" ");
 		printf("Errors={");
-		for(i=0;i<current_ndims;i++)
+		for(i = 0;i<current_ndims;i++)
 			printf("%f,",p->ErrorMeasure[i]);
 		printf("}\n");
-		for(i=0;i<idlevel;i++)
+		for(i = 0;i<idlevel;i++)
 			printf(" ");
 		printf("Mins={");
-		for(i=0;i<current_ndims;i++)
+		for(i = 0;i<current_ndims;i++)
 			printf("%d,",p->Mins[i]);
 		printf("} Maxs={");
-		for(i=0;i<current_ndims;i++)
+		for(i = 0;i<current_ndims;i++)
 			printf("%d,",p->Maxs[i]);
 		printf("}\n");
 		PrintQTree(p->Children[0],idlevel+2);
@@ -191,26 +191,26 @@ static void UpdateStats(struct QuantizedValue *v)
   
 	memset(Means,0,sizeof(Means));
 	int N=0;
-	for(i=0;i<v->NSamples;i++)
+	for(i = 0;i<v->NSamples;i++)
 	{
 		struct Sample *s=SAMPLE(v->Samples,i);
 		N+=s->Count;
-		for(j=0;j<current_ndims;j++)
+		for(j = 0;j<current_ndims;j++)
 		{
 			uint8 v=s->Value[j];
 			Means[j]+=v*s->Count;
 		}
 	}
-	for(j=0;j<current_ndims;j++)
+	for(j = 0;j<current_ndims;j++)
 	{
 		if (N) v->Mean[j]=(uint8) (Means[j]/N);
 		Errors[j]=WorstError[j]=0.;
 	}
-	for(i=0;i<v->NSamples;i++)
+	for(i = 0;i<v->NSamples;i++)
 	{
 		struct Sample *s=SAMPLE(v->Samples,i);
 		double c=s->Count;
-		for(j=0;j<current_ndims;j++)
+		for(j = 0;j<current_ndims;j++)
 		{
 			double diff=SQ(s->Value[j]-v->Mean[j]);
 			Errors[j]+=c*diff; // charles uses abs not sq()
@@ -220,7 +220,7 @@ static void UpdateStats(struct QuantizedValue *v)
 	}
 	v->TotalError=0.;
 	double ErrorScale=1.; // /sqrt((double) (N));
-	for(j=0;j<current_ndims;j++)
+	for(j = 0;j<current_ndims;j++)
 	{
 		v->ErrorMeasure[j]=(ErrorScale*Errors[j]*current_weights[j]);
 		v->TotalError+=v->ErrorMeasure[j];
@@ -278,13 +278,13 @@ static void SubdivideNode(struct QuantizedValue *n, int whichdim)
 	// which of the n-dimensional means the sample is closest to.
 	double LocalMean[MAXDIMS][2];
 	int totsamps[2];
-	for(i=0;i<current_ndims;i++)
+	for(i = 0;i<current_ndims;i++)
 		LocalMean[i][0]=LocalMean[i][1]=0.;
 	totsamps[0]=totsamps[1]=0;
 	uint8 minv=255;
 	uint8 maxv=0;
 	struct Sample *minS=0,*maxS=0;
-	for(i=0;i<n->NSamples;i++)
+	for(i = 0;i<n->NSamples;i++)
 	{
 		uint8 v;
 		int whichside=1;
@@ -302,7 +302,7 @@ static void SubdivideNode(struct QuantizedValue *n, int whichdim)
 	}
 
 	if (totsamps[0] && totsamps[1])
-		for(i=0;i<current_ndims;i++)
+		for(i = 0;i<current_ndims;i++)
 		{
 			LocalMean[i][0]/=totsamps[0];
 			LocalMean[i][1]/=totsamps[1];
@@ -315,7 +315,7 @@ static void SubdivideNode(struct QuantizedValue *n, int whichdim)
 		// extrema instead. LocalMean[i][0] will be the point with the lowest
 		// value on the dimension and LocalMean[i][1] the one with the lowest
 		// value.
-		for(int i=0;i<current_ndims;i++)
+		for(int i = 0;i<current_ndims;i++)
 		{
 			LocalMean[i][0]=minS->Value[i];
 			LocalMean[i][1]=maxS->Value[i];
@@ -324,7 +324,7 @@ static void SubdivideNode(struct QuantizedValue *n, int whichdim)
 
 	// now, we have 2 n-dimensional means. We will label each sample
 	// for which one it is nearer to by using the QNum field.
-	for(i=0;i<n->NSamples;i++)
+	for(i = 0;i<n->NSamples;i++)
 	{
 		double dist[2];
 		dist[0]=dist[1]=0.;
@@ -340,7 +340,7 @@ static void SubdivideNode(struct QuantizedValue *n, int whichdim)
 	// sort the array by moving the 0-labelled ones to the head of the array.
 	n->sortdim=-1;
 	qsort(n->Samples,n->NSamples,current_ssize,QNumSort);
-	for(i=0;i<n->NSamples;i++,NAdded++)
+	for(i = 0;i<n->NSamples;i++,NAdded++)
 		if (SAMPLE(n->Samples,i)->QNum)
 			break;
   
@@ -396,20 +396,20 @@ static void Label(struct QuantizedValue *q, int updatecolor)
 			if (updatecolor)
 			{
 				q->value=colorid++;
-				for(int j=0;j<q->NSamples;j++)
+				for(int j = 0;j<q->NSamples;j++)
 				{
 					SAMPLE(q->Samples,j)->QNum=q->value;
 					SAMPLE(q->Samples,j)->qptr=q;
 				}
 			}
-			for(int i=0;i<current_ndims;i++)
+			for(int i = 0;i<current_ndims;i++)
 			{
 				q->Mins[i]=q->Mean[i];
 				q->Maxs[i]=q->Mean[i];
 			}
 		}
 		else
-			for(int i=0;i<current_ndims;i++)
+			for(int i = 0;i<current_ndims;i++)
 			{
 				q->Mins[i]=min(q->Children[0]->Mins[i],q->Children[1]->Mins[i]);
 				q->Maxs[i]=max(q->Children[0]->Maxs[i],q->Children[1]->Maxs[i]);
@@ -443,7 +443,7 @@ void CheckInRange(struct QuantizedValue *q, uint8 *max, uint8 *min)
 			CheckInRange(q->Children[0],max, min);
 			CheckInRange(q->Children[1],max, min);
 		}
-		for (int i=0;i<current_ndims;i++)
+		for (int i = 0;i<current_ndims;i++)
 		{
 			if (q->Maxs[i]>max[i]) printf("error1\n");
 			if (q->Mins[i]<min[i]) printf("error2\n");
@@ -475,7 +475,7 @@ double MinimumError(struct QuantizedValue const *q, uint8 const *sample,
 					int ndims, uint8 const *weights)
 {
 	double err=0;
-	for(int i=0;i<ndims;i++)
+	for(int i = 0;i<ndims;i++)
 	{
 		int val1;
 		int val2=sample[i];
@@ -493,7 +493,7 @@ double MaximumError(struct QuantizedValue const *q, uint8 const *sample,
 					int ndims, uint8 const *weights)
 {
 	double err=0;
-	for(int i=0;i<ndims;i++)
+	for(int i = 0;i<ndims;i++)
 	{
 		int val2=sample[i];
 		int val1=(abs(val2-q->Mins[i])>abs(val2-q->Maxs[i]))?
@@ -621,7 +621,7 @@ struct QuantizedValue *FindMatch(uint8 const *sample, int ndims,
 	{
 		SquaredError+=besterror;
 		bestmatch->NQuant++;
-		for(int i=0;i<ndims;i++)
+		for(int i = 0;i<ndims;i++)
 			bestmatch->Sums[i]+=sample[i];
 	}
 	return bestmatch;
@@ -642,7 +642,7 @@ static void RecalcMeans(struct QuantizedValue *q)
 			// it's a leaf. Set the means
 			if (q->NQuant)
 			{
-				for(int i=0;i<current_ndims;i++)
+				for(int i = 0;i<current_ndims;i++)
 				{
 					q->Mean[i]=(uint8) (q->Sums[i]/q->NQuant);
 					q->Sums[i]=0;

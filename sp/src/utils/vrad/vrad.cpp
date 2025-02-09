@@ -323,7 +323,7 @@ void LightForTexture( const char *name, Vector& result )
 				// 'originalName_%d_%d_%d'.
 				strcpy( baseFilename, base );
 				bool foundSeparators = true;
-				for ( int i=0; i<3; ++i )
+				for ( int i = 0; i<3; ++i )
 				{
 					char *underscore = Q_strrchr( baseFilename, '_' );
 					if ( underscore && *underscore )
@@ -560,11 +560,11 @@ void MakePatchForFace (int fn, winding_t *w)
     if ( texscale )
     {
         // Compute the texture "scale" in s,t
-        for( i=0; i<2; i++ )
+        for( i = 0; i<2; i++ )
         {
             patch->scale[i] = 0.0f;
 			chopscale[i] = 0.0f;
-            for( j=0; j<3; j++ )
+            for( j = 0; j<3; j++ )
 			{
                 patch->scale[i] += 
 					tx->textureVecsTexelsPerWorldUnits[i][j] * 
@@ -829,7 +829,7 @@ int CreateChildPatch( int nParentIndex, winding_t *pWinding, float flArea, const
 	VectorScale( total, child->luxscale, total );
 	if ( child->chop > minchop && (total[0] < child->chop) && (total[1] < child->chop) && (total[2] < child->chop) )
 	{
-		for ( int i=0; i<3; ++i )
+		for ( int i = 0; i<3; ++i )
 		{
 			if ( (child->face_maxs[i] == child->maxs[i] || child->face_mins[i] == child->mins[i] )
 			  && total[i] > minchop )
@@ -1301,7 +1301,7 @@ void WriteWorld (char *name, int iBump)
 		Error ("\tCouldn't open %s", name);
 
 	unsigned int uiPatchCount = g_Patches.Size();
-	for (j=0; j<uiPatchCount; j++)
+	for (j = 0; j<uiPatchCount; j++)
 	{
 		patch = &g_Patches.Element( j );
 
@@ -1621,7 +1621,7 @@ void GatherLight (int threadnum, void *pUserData)
 				VectorSubtract (patch2->origin, patch->origin, delta);
 				VectorNormalize (delta);
 				// find light emitted from other patch
-				for(i=0; i<3; i++)
+				for(i = 0; i<3; i++)
 				{
 					v[i] = emitlight[trans->patch][i] * patch2->reflectivity[i];
 				}
@@ -1652,7 +1652,7 @@ void GatherLight (int threadnum, void *pUserData)
 			VectorFill( sum, 0 );
 			for (k=0 ; k<num ; k++, trans++)
 			{
-				for(i=0; i<3; i++)
+				for(i = 0; i<3; i++)
 				{
 					v[i] = emitlight[trans->patch][i] * g_Patches[trans->patch].reflectivity[i];
 				}
@@ -1702,7 +1702,7 @@ void BounceLight (void)
 
 	g_pFileSystem->Close( dFp );
 
-	for (i=0; i<num_patches ; i++)
+	for (i = 0; i<num_patches ; i++)
 	{
 		Vector total;
 
@@ -1794,7 +1794,7 @@ void RadWorld_Start()
 		float oldLightmapVecs[MAX_MAP_TEXINFO][2][4];
 		for (i = 0; i < texinfo.Count(); i++)
 		{
-			for( int j=0; j < 2; j++ )
+			for( int j = 0; j < 2; j++ )
 			{
 				for( int k=0; k < 3; k++ )
 				{
@@ -1946,7 +1946,7 @@ void BuildFacesVisibleToLights( bool bAllVisible )
 
 	// For stats.. figure out how many faces it's going to touch.
 	int nFacesToProcess = 0;
-	for( int i=0; i < numfaces; i++ )
+	for( int i = 0; i < numfaces; i++ )
 	{
 		if( g_FacesVisibleToLights[i>>3] & (1 << (i & 7)) )
 			++nFacesToProcess;
@@ -1992,7 +1992,7 @@ void MakeAllScales (void)
 		IScratchPad3D *pPad = ScratchPad3D_Create();
 		pPad->SetAutoFlush( false );
 
-		for ( int i=0; i < numfaces; i++ )
+		for ( int i = 0; i < numfaces; i++ )
 		{
 			dface_t *f = &g_pFaces[i];
 

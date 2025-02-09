@@ -80,7 +80,7 @@ static directlight_t *gAmbient = NULL;
 
 CNormalList::CNormalList() : m_Normals( 128 )
 {
-	for( int i=0; i < sizeof(m_NormalGrid)/sizeof(m_NormalGrid[0][0][0]); i++ )
+	for( int i = 0; i < sizeof(m_NormalGrid)/sizeof(m_NormalGrid[0][0][0]); i++ )
 	{
 		(&m_NormalGrid[0][0][0] + i)->SetGrowSize( 16 );
 	}
@@ -100,7 +100,7 @@ int CNormalList::FindOrAddNormal( Vector const &vNormal )
 
 	// Look for a matching vector in there.
 	CUtlVector<int> *pGridElement = &m_NormalGrid[gi[0]][gi[1]][gi[2]];
-	for( int i=0; i < pGridElement->Size(); i++ )
+	for( int i = 0; i < pGridElement->Size(); i++ )
 	{
 		int iNormal = pGridElement->Element(i);
 
@@ -1565,7 +1565,7 @@ void CreateDirectLights (void)
 	// surfaces
 	//
 	unsigned int uiPatchCount = g_Patches.Count();
-	for (i=0; i< uiPatchCount; i++)
+	for (i = 0; i< uiPatchCount; i++)
 	{
 		p = &g_Patches.Element( i );
 
@@ -2872,7 +2872,7 @@ static inline void ComputeLuxelIntensity( SSE_SampleInfo_t& info, int sampleIdx,
 //-----------------------------------------------------------------------------
 static void ComputeSampleIntensities( SSE_SampleInfo_t& info, LightingValue_t **ppLightSamples, float* pSampleIntensity )
 {
-	for (int i=0; i<info.m_pFaceLight->numsamples; i++)
+	for (int i = 0; i<info.m_pFaceLight->numsamples; i++)
 	{
 		ComputeLuxelIntensity( info, i, ppLightSamples, pSampleIntensity );
 	}
@@ -3321,7 +3321,7 @@ void BuildPatchLights( int facenum )
 	// add an ambient term if desired
 	if (ambient[0] || ambient[1] || ambient[2])
 	{
-		for( int j=0; j < MAXLIGHTMAPS && f->styles[j] != 255; j++ )
+		for( int j = 0; j < MAXLIGHTMAPS && f->styles[j] != 255; j++ )
 		{
 			if ( f->styles[j] == 0 )
 			{
@@ -3346,7 +3346,7 @@ void BuildPatchLights( int facenum )
 #if 0
 	// if( VectorAvg( g_FacePatches[facenum]->baselight ) >= dlight_threshold)	// Now all lighted surfaces glow
  {
-	 for( j=0; j < MAXLIGHTMAPS && f->styles[j] != 255; j++ )
+	 for( j = 0; j < MAXLIGHTMAPS && f->styles[j] != 255; j++ )
 	 {
 		 if ( f->styles[j] == 0 )
 		 {

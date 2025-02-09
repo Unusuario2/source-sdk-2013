@@ -828,14 +828,14 @@ void FreeFaceList( face_t *pFaces )
 
 void GetEdge2_InitOptimizedList()
 {
-	for( int i=0; i < MAX_MAP_VERTS; i++ )
+	for( int i = 0; i < MAX_MAP_VERTS; i++ )
 		g_VertEdgeList[i].RemoveAll();
 }
 
 
 void IntSort( CUtlVector<int> &theList )
 {
-	for( int i=0; i < theList.Size()-1; i++ )
+	for( int i = 0; i < theList.Size()-1; i++ )
 	{
 		if( theList[i] > theList[i+1] )
 		{
@@ -889,7 +889,7 @@ int GetEdge2 (int v1, int v2,  face_t *f)
 	{
 		// Check all edges connected to v1.
 		CUtlVector<int> &theList = g_VertEdgeList[v1];
-		for( int i=0; i < theList.Size(); i++ )
+		for( int i = 0; i < theList.Size(); i++ )
 		{
 			int iEdge = theList[i];
 			edge = &dedges[iEdge];

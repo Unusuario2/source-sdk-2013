@@ -329,7 +329,7 @@ void RayTracingEnvironment::Trace4Rays(const FourRays &rays, fltx4 TMin, fltx4 T
 				assert(msk!=-1);
 				Trace4Rays(tmprays,TMin,TMax,msk,&tmpresults,skip_id, pCallback);
 				// now, move results to proper place
-				for(int i=0;i<4;i++)
+				for(int i = 0;i<4;i++)
 					if (need_trace[i]==2)
 					{
 						need_trace[i]=0;
@@ -616,7 +616,7 @@ void RayTracingEnvironment::CalculateTriangleListBounds(int32 const *tris,int nt
 {
 	minout = Vector( 1.0e23, 1.0e23, 1.0e23);
 	maxout = Vector( -1.0e23, -1.0e23, -1.0e23);
-	for(int i=0; i<ntris; i++)
+	for(int i = 0; i<ntris; i++)
 	{
 		CacheOptimizedTriangle const &tri=OptimizedTriangleList[tris[i]];
 		for(int v=0; v<3; v++)
@@ -889,7 +889,7 @@ void RayTracingEnvironment::SetupAccelerationStructure(void)
 	delete[] root_triangle_list;
 
 	// now, convert all triangles to "intersection format"
-	for(int i=0;i<OptimizedTriangleList.Count();i++)
+	for(int i = 0;i<OptimizedTriangleList.Count();i++)
 		OptimizedTriangleList[i].ChangeIntoIntersectionFormat();
 }
 

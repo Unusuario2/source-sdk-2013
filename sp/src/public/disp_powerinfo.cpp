@@ -137,7 +137,7 @@ static CVertIndex WrapVertIndex( CVertIndex const &in, int sideLength )
 {
 	int out[2];
 
-	for( int i=0; i < 2; i++ )
+	for( int i = 0; i < 2; i++ )
 	{
 		if( in[i] < 0 )
 			out[i] = sideLength - 1 - (-in[i] % sideLength);
@@ -153,7 +153,7 @@ static CVertIndex WrapVertIndex( CVertIndex const &in, int sideLength )
 
 static int GetFreeDependency( CVertDependency *pDep, int nElements )
 {
-	for( int i=0; i < nElements; i++ )
+	for( int i = 0; i < nElements; i++ )
 	{
 		if( !pDep[i].IsValid() ) 
 			return i;
@@ -222,13 +222,13 @@ CTesselateVert::CTesselateVert( CVertIndex const &index, int iNode )
 CVertInfo::CVertInfo()
 {
 	int i;
-	for( i=0; i < sizeof(m_Dependencies)/sizeof(m_Dependencies[0]); i++ )
+	for( i = 0; i < sizeof(m_Dependencies)/sizeof(m_Dependencies[0]); i++ )
 	{
 		m_Dependencies[i].m_iVert = CVertIndex( -1, -1 );
 		m_Dependencies[i].m_iNeighbor = -1;
 	}
 
-	for( i=0; i < sizeof(m_ReverseDependencies)/sizeof(m_ReverseDependencies[0]); i++ )
+	for( i = 0; i < sizeof(m_ReverseDependencies)/sizeof(m_ReverseDependencies[0]); i++ )
 	{
 		m_ReverseDependencies[i].m_iVert = CVertIndex( -1, -1 );
 		m_ReverseDependencies[i].m_iNeighbor = -1;
@@ -525,7 +525,7 @@ void InitPowerInfo( CPowerInfo *pInfo, int iMaxPower )
 	// Init the node index increments.
 	int curPowerOf4 = 1;
 	int curTotal = 0;
-	for( int i=0; i < iMaxPower-1; i++ )
+	for( int i = 0; i < iMaxPower-1; i++ )
 	{
 		curTotal += curPowerOf4;
 
@@ -547,7 +547,7 @@ public:
 	{
 		Assert( MAX_MAP_DISP_POWER+1 == NUM_POWERINFOS );
 
-		for( int i=0; i <= MAX_MAP_DISP_POWER; i++ )
+		for( int i = 0; i <= MAX_MAP_DISP_POWER; i++ )
 		{
 			if( g_PowerInfos[i] )
 			{

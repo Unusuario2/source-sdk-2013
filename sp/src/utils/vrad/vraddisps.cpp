@@ -1193,7 +1193,7 @@ void CVRadDispMgr::RadialLuxelAddPatch( int ndxFace, Vector const &luxelPt,
 									    CUtlVector<CPatch*> &interestingPatches )
 {
 #ifdef SAMPLEHASH_QUERY_ONCE
-	for ( int i=0; i < interestingPatches.Count(); i++ )
+	for ( int i = 0; i < interestingPatches.Count(); i++ )
 	{
 		CPatch *pPatch = interestingPatches[i];	
 		bool bNeighborBump = texinfo[g_pFaces[pPatch->faceNumber].texinfo].flags & SURF_BUMPLIGHT ? true : false;
@@ -1271,7 +1271,7 @@ void CVRadDispMgr::GetInterestingPatchesForLuxels(
 	// Get the max bounds of all voxels that these luxels touch.
 	Vector vLuxelMin( FLT_MAX, FLT_MAX, FLT_MAX );
 	Vector vLuxelMax( -FLT_MAX, -FLT_MAX, -FLT_MAX );
-	for ( int i=0; i < pFaceLight->numluxels; i++ )
+	for ( int i = 0; i < pFaceLight->numluxels; i++ )
 	{
 		VectorMin( pFaceLight->luxel[i], vLuxelMin, vLuxelMin );
 		VectorMax( pFaceLight->luxel[i], vLuxelMax, vLuxelMax );
@@ -1291,7 +1291,7 @@ void CVRadDispMgr::GetInterestingPatchesForLuxels(
 	voxelBits.SetSize( ((allVoxelSize[0] * allVoxelSize[1] * allVoxelSize[2]) + 7) / 8 );
 	memset( voxelBits.Base(), 0, voxelBits.Count() );
 	
-	for ( int i=0; i < pFaceLight->numluxels; i++ )
+	for ( int i = 0; i < pFaceLight->numluxels; i++ )
 	{
 		int voxelMin[3], voxelMax[3];
 		for ( int axis=0; axis < 3; axis++ )
