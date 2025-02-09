@@ -157,8 +157,8 @@ int OpenGlobalFile( char *src )
 	if( CmdLib_HasBasePath( filename, pathLength ) )
 	{
 		char tmp[1024];
-		int i;
-		for( i = 0; i < numBasePaths; i++ )
+
+		for(int i = 0; i < numBasePaths; i++ )
 		{
 			strcpy( tmp, CmdLib_GetBasePath( i ) );
 			strcat( tmp, filename + pathLength );
@@ -991,14 +991,13 @@ typedef CUtlVector<int> CIntVector;
 void CalcModelTangentSpaces( s_source_t *pSrc )
 {
 	// Build a map from vertex to a list of triangles that share the vert.
-	int meshID;
-	for( meshID = 0; meshID < pSrc->nummeshes; meshID++ )
+	for(int meshID = 0; meshID < pSrc->nummeshes; meshID++ )
 	{
 		s_mesh_t *pMesh = &pSrc->mesh[pSrc->meshindex[meshID]];
 		CUtlVector<CIntVector> vertToTriMap;
 		vertToTriMap.AddMultipleToTail( pMesh->numvertices );
-		int triID;
-		for( triID = 0; triID < pMesh->numfaces; triID++ )
+
+		for(int triID = 0; triID < pMesh->numfaces; triID++ )
 		{
 			s_face_t *pFace = &pSrc->face[triID + pMesh->faceoffset];
 			vertToTriMap[pFace->a].AddToTail( triID );
@@ -1011,7 +1010,7 @@ void CalcModelTangentSpaces( s_source_t *pSrc )
 		CUtlVector<Vector> triTVect;
 		triSVect.AddMultipleToTail( pMesh->numfaces );
 		triTVect.AddMultipleToTail( pMesh->numfaces );
-		for( triID = 0; triID < pMesh->numfaces; triID++ )
+		for(int triID = 0; triID < pMesh->numfaces; triID++ )
 		{
 			s_face_t *pFace = &pSrc->face[triID + pMesh->faceoffset];
 			CalcTriangleTangentSpace( pSrc, 
@@ -1022,8 +1021,7 @@ void CalcModelTangentSpaces( s_source_t *pSrc )
 		}	
 
 		// calculate an average tangent space for each vertex.
-		int vertID;
-		for( vertID = 0; vertID < pMesh->numvertices; vertID++ )
+		for(int vertID = 0; vertID < pMesh->numvertices; vertID++ )
 		{
 			const Vector &normal = pSrc->normal[vertID+pMesh->vertexoffset];
 			Vector4D &finalSVect = pSrc->tangentS[vertID+pMesh->vertexoffset];
@@ -1031,7 +1029,7 @@ void CalcModelTangentSpaces( s_source_t *pSrc )
 
 			sVect.Init( 0.0f, 0.0f, 0.0f );
 			tVect.Init( 0.0f, 0.0f, 0.0f );
-			for( triID = 0; triID < vertToTriMap[vertID].Size(); triID++ )
+			for(int triID = 0; triID < vertToTriMap[vertID].Size(); triID++ )
 			{
 				sVect += triSVect[vertToTriMap[vertID][triID]];
 				tVect += triTVect[vertToTriMap[vertID][triID]];
@@ -1040,9 +1038,8 @@ void CalcModelTangentSpaces( s_source_t *pSrc )
 			// In the case of zbrush, everything needs to be treated as smooth.
 			if( g_bZBrush )
 			{
-				int vertID2;
 				Vector vertPos1( pSrc->vertex[vertID][0], pSrc->vertex[vertID][1], pSrc->vertex[vertID][2] );
-				for( vertID2 = 0; vertID2 < pMesh->numvertices; vertID2++ )
+				for(int vertID2 = 0; vertID2 < pMesh->numvertices; vertID2++ )
 				{
 					if( vertID2 == vertID )
 					{
@@ -1051,8 +1048,7 @@ void CalcModelTangentSpaces( s_source_t *pSrc )
 					Vector vertPos2( pSrc->vertex[vertID2][0], pSrc->vertex[vertID2][1], pSrc->vertex[vertID2][2] );
 					if( vertPos1 == vertPos2 )
 					{
-						int triID2;
-						for( triID2 = 0; triID2 < vertToTriMap[vertID2].Size(); triID2++ )
+						for(int triID2 = 0; triID2 < vertToTriMap[vertID2].Size(); triID2++ )
 						{
 							sVect += triSVect[vertToTriMap[vertID2][triID2]];
 							tVect += triTVect[vertToTriMap[vertID2][triID2]];
@@ -1131,8 +1127,7 @@ void BuildIndividualMeshes( s_source_t *psource )
 		Vector2Copy( g_texcoord[v_listdata[j].t], psource->texcoord[i] );
 
 		psource->localBoneweight[i].numbones		= g_bone[v_listdata[j].v].numbones;
-		int k;
-		for( k = 0; k < MAXSTUDIOBONEWEIGHTS; k++ )
+		for(int k = 0; k < MAXSTUDIOBONEWEIGHTS; k++ )
 		{
 			psource->localBoneweight[i].bone[k]		= g_bone[v_listdata[j].v].bone[k];
 			psource->localBoneweight[i].weight[k]	= g_bone[v_listdata[j].v].weight[k];
@@ -1436,11 +1431,10 @@ static void FlipFacing( s_source_t *pSrc )
 {
 	unsigned short tmp;
 
-	int i, j;
-	for( i = 0; i < pSrc->nummeshes; i++ )
+	for(int i = 0; i < pSrc->nummeshes; i++ )
 	{
 		s_mesh_t *pMesh = &pSrc->mesh[i];
-		for( j = 0; j < pMesh->numfaces; j++ )
+		for(int j = 0; j < pMesh->numfaces; j++ )
 		{
 			s_face_t &f = pSrc->face[pMesh->faceoffset + j];
 			tmp = f.b;  f.b  = f.c;  f.c  = tmp;
