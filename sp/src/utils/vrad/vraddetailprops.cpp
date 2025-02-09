@@ -206,8 +206,7 @@ static void ComputeMaxDirectLighting( DetailObjectLump_t& prop, Vector* maxcolor
 	}
 
 	// Find the max illumination
-	int i;
-	for ( i = 0; i < MAX_LIGHTSTYLES; ++i)
+	for (int i = 0; i < MAX_LIGHTSTYLES; ++i)
 	{
 		maxcolor[i].Init(0,0,0);
 	}
@@ -215,8 +214,7 @@ static void ComputeMaxDirectLighting( DetailObjectLump_t& prop, Vector* maxcolor
 	// NOTE: See version 10 for a method where we choose a normal based on whichever
 	// one produces the maximum possible illumination. This appeared to work better on
 	// e3_town, so I'm trying it now; hopefully it'll be good for all cases.
-	int j;
-	for ( j = 0; j < lights.Count(); ++j)
+	for (int j = 0; j < lights.Count(); ++j)
 	{
 		dl = lights[j];
 
@@ -235,7 +233,6 @@ static void ComputeMaxDirectLighting( DetailObjectLump_t& prop, Vector* maxcolor
 //-----------------------------------------------------------------------------
 // Computes the ambient term from a particular surface
 //-----------------------------------------------------------------------------
-
 static void ComputeAmbientFromSurface( dface_t* pFace, directlight_t* pSkylight, 
 									   Vector& radcolor )
 {
@@ -629,8 +626,7 @@ static void ComputeAmbientLightingAtPoint( int iThread, const Vector &origin, Ve
 	// sample world by casting N rays distributed across a sphere
 	Vector upend;
 
-	int j;
-	for ( j = 0; j < MAX_LIGHTSTYLES; ++j)
+	for (int j = 0; j < MAX_LIGHTSTYLES; ++j)
 	{
 		color[j].Init( 0,0,0 );
 	}
@@ -646,7 +642,7 @@ static void ComputeAmbientLightingAtPoint( int iThread, const Vector &origin, Ve
 //		DumpRayToGlView( ray, surfEnum.m_HitFrac, &color[0], "test.out" );
 	}
 
-	for ( j = 0; j < MAX_LIGHTSTYLES; ++j)
+	for (int j = 0; j < MAX_LIGHTSTYLES; ++j)
 	{
 		VectorMultiply( color[j], 255.0f / (float)NUMVERTEXNORMALS, color[j] );
 	}

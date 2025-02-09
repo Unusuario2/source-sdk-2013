@@ -6,6 +6,7 @@
 
 #include <halton.h>
 
+
 HaltonSequenceGenerator_t::HaltonSequenceGenerator_t(int b)
 {
 	base=b;
@@ -13,6 +14,7 @@ HaltonSequenceGenerator_t::HaltonSequenceGenerator_t(int b)
 	seed=1;
 
 }
+
 
 float HaltonSequenceGenerator_t::GetElement(int elem)
 {

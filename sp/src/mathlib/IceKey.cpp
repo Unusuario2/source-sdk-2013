@@ -28,12 +28,14 @@ static const int	ice_smod[4][4] = {
 				{361, 445, 451, 397},
 				{397, 425, 395, 505}};
 
+
 	/* XOR values for the S-boxes */
 static const int	ice_sxor[4][4] = {
 				{0x83, 0x85, 0x9b, 0xcd},
 				{0xcc, 0xa7, 0xad, 0x41},
 				{0x4b, 0x2e, 0xd4, 0x33},
 				{0xea, 0xcb, 0x2e, 0x04}};
+
 
 	/* Permutation values for the P-box */
 static const unsigned long	ice_pbox[32] = {
@@ -45,6 +47,7 @@ static const unsigned long	ice_pbox[32] = {
 		0x00020000, 0x00400000, 0x08000000, 0x10000000,
 		0x00000002, 0x00000040, 0x00000800, 0x00001000,
 		0x00040000, 0x00100000, 0x02000000, 0x80000000};
+
 
 	/* The key rotation schedule */
 static const int	ice_keyrot[16] = {
@@ -129,7 +132,6 @@ ice_perm32 (
  * Initialise the ICE S-boxes.
  * This only has to be done once.
  */
-
 static void
 ice_sboxes_init (void)
 {
@@ -158,7 +160,6 @@ ice_sboxes_init (void)
 /*
  * Create a new ICE key.
  */
-
 IceKey::IceKey (int n)
 {
 	if (!ice_sboxes_initialised) {
@@ -181,7 +182,6 @@ IceKey::IceKey (int n)
 /*
  * Destroy an ICE key.
  */
-
 IceKey::~IceKey ()
 {
 	int	i, j;
@@ -199,7 +199,6 @@ IceKey::~IceKey ()
 /*
  * The single round ICE f function.
  */
-
 static unsigned long
 ice_f (
 	register unsigned long	p,
@@ -233,7 +232,6 @@ ice_f (
 /*
  * Encrypt a block of 8 bytes of data with the given ICE key.
  */
-
 void
 IceKey::encrypt (
 	const unsigned char	*ptext,
@@ -268,7 +266,6 @@ IceKey::encrypt (
 /*
  * Decrypt a block of 8 bytes of data with the given ICE key.
  */
-
 void
 IceKey::decrypt (
 	const unsigned char	*ctext,
@@ -303,7 +300,6 @@ IceKey::decrypt (
 /*
  * Set 8 rounds [n, n+7] of the key schedule of an ICE key.
  */
-
 void
 IceKey::scheduleBuild (
 	unsigned short	*kb,
@@ -339,7 +335,6 @@ IceKey::scheduleBuild (
 /*
  * Set the key schedule of an ICE key.
  */
-
 void
 IceKey::set (
 	const unsigned char	*key
@@ -372,7 +367,6 @@ IceKey::set (
 /*
  * Return the key size, in bytes.
  */
-
 int
 IceKey::keySize () const
 {
@@ -383,11 +377,9 @@ IceKey::keySize () const
 /*
  * Return the block size, in bytes.
  */
-
 int
 IceKey::blockSize () const
 {
 	return (8);
 }
-
 #endif // !_STATIC_LINKED || _SHARED_LIB

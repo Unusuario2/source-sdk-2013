@@ -15,11 +15,11 @@
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
+
 //-----------------------------------------------------------------------------
 // Gamma conversion support
 //-----------------------------------------------------------------------------
 static byte		texgammatable[256];	// palette is sent through this to convert to screen gamma
-
 static float	texturetolinear[256];	// texture (0..255) to linear (0..1)
 static int		lineartotexture[1024];	// linear (0..1) to texture (0..255)
 static int		lineartoscreen[1024];	// linear (0..1) to gamma corrected vertex light (0..255)
@@ -30,6 +30,7 @@ unsigned char	lineartolightmap[4096];	// linear (0..4) to screen corrected textu
 
 static float	g_Mathlib_GammaToLinear[256];	// gamma (0..1) to linear (0..1)
 static float	g_Mathlib_LinearToGamma[256];	// linear (0..1) to gamma (0..1)
+
 
 // This is aligned to 16-byte boundaries so that we can load it
 // onto SIMD registers easily if needed (used by SSE version of lightmaps)
@@ -103,6 +104,7 @@ ALIGN128 float	power2_n[256] = 			// 2**(index - 128) / 255
 	8.340254091199472000E+034, 1.668050818239894400E+035, 3.336101636479788800E+035, 6.672203272959577600E+035 
 };
 
+
 // You can use this to double check the exponent table and assert that 
 // the precomputation is correct.
 #ifdef DBGFLAG_ASSERT
@@ -122,6 +124,7 @@ static void CheckExponentTable()
 }
 #pragma warning(pop)
 #endif
+
 
 void BuildGammaTable( float gamma, float texGamma, float brightness, int overbright )
 {
@@ -261,15 +264,18 @@ void BuildGammaTable( float gamma, float texGamma, float brightness, int overbri
 	}
 }
 
+
 float GammaToLinearFullRange( float gamma )
 {
 	return pow( gamma, 2.2f );
 }
 
+
 float LinearToGammaFullRange( float linear )
 {
 	return pow( linear, 1.0f / 2.2f );
 }
+
 
 float GammaToLinear( float gamma )
 {
@@ -292,6 +298,7 @@ float GammaToLinear( float gamma )
 	return g_Mathlib_GammaToLinear[index];
 }
 
+
 float LinearToGamma( float linear )
 {
 	Assert( s_bMathlibInitialized );
@@ -311,6 +318,7 @@ float LinearToGamma( float linear )
 	return g_Mathlib_LinearToGamma[index];
 }
 
+
 //-----------------------------------------------------------------------------
 // Helper functions to convert between sRGB and 360 gamma space
 //-----------------------------------------------------------------------------
@@ -320,11 +328,13 @@ float SrgbGammaToLinear( float flSrgbGammaValue )
 	return ( x <= 0.04045f ) ? ( x / 12.92f ) : ( pow( ( x + 0.055f ) / 1.055f, 2.4f ) );
 }
 
+
 float SrgbLinearToGamma( float flLinearValue )
 {
 	float x = clamp( flLinearValue, 0.0f, 1.0f );
 	return ( x <= 0.0031308f ) ? ( x * 12.92f ) : ( 1.055f * pow( x, ( 1.0f / 2.4f ) ) ) - 0.055f;
 }
+
 
 float X360GammaToLinear( float fl360GammaValue )
 {
@@ -363,6 +373,7 @@ float X360GammaToLinear( float fl360GammaValue )
 	return flLinearValue;
 }
 
+
 float X360LinearToGamma( float flLinearValue )
 {
 	float fl360GammaValue;
@@ -399,12 +410,14 @@ float X360LinearToGamma( float flLinearValue )
 	return fl360GammaValue;
 }
 
+
 float SrgbGammaTo360Gamma( float flSrgbGammaValue )
 {
 	float flLinearValue = SrgbGammaToLinear( flSrgbGammaValue );
 	float fl360GammaValue = X360LinearToGamma( flLinearValue );
 	return fl360GammaValue;
 }
+
 
 // convert texture to linear 0..1 value
 float TextureToLinear( int c )
@@ -417,6 +430,7 @@ float TextureToLinear( int c )
 
 	return texturetolinear[c];
 }
+
 
 // convert texture to linear 0..1 value
 int LinearToTexture( float f )
@@ -447,6 +461,7 @@ int LinearToScreenGamma( float f )
 	return lineartoscreen[i];
 }
 
+
 void ColorRGBExp32ToVector( const ColorRGBExp32& in, Vector& out )
 {
 	Assert( s_bMathlibInitialized );
@@ -455,6 +470,7 @@ void ColorRGBExp32ToVector( const ColorRGBExp32& in, Vector& out )
 	out.y = 255.0f * TexLightToLinear( in.g, in.exponent );
 	out.z = 255.0f * TexLightToLinear( in.b, in.exponent );
 }
+
 
 #if 0
 // assumes that the desired mantissa range is 128..255
@@ -526,8 +542,8 @@ void VectorToColorRGBExp32( const Vector& vin, ColorRGBExp32 &c )
 	c.b = ( unsigned char )v[2];
 	c.exponent = ( signed char )exponent;
 }
-
 #else
+
 
 // given a floating point number  f, return an exponent e such that
 // for f' = f * 2^e,  f is on [128..255].
@@ -553,7 +569,6 @@ inline static int VectorToColorRGBExp32_CalcExponent( const float *pin )
 	expComponent -= biasedSeven; // now the difference from seven (positive if was less than, etc)
 	return expComponent;
 }
-
 
 
 /// Slightly faster version of the function to turn a float-vector color into 
@@ -633,5 +648,4 @@ void VectorToColorRGBExp32( const Vector& vin, ColorRGBExp32 &c )
 
 	c.exponent = ( signed char )exponent;
 }
-
 #endif

@@ -332,18 +332,17 @@ void PairEdges (void)
 void SaveVertexNormals( void )
 {
 	faceneighbor_t *fn;
-	int i, j;
 	dface_t *f;
 	CNormalList normalList;
 
 	g_numvertnormalindices = 0;
 
-	for( i = 0 ;i<numfaces ; i++ )
+	for(int i = 0 ;i<numfaces ; i++ )
 	{
 		fn = &faceneighbor[i];
 		f = &g_pFaces[i];
 
-		for( j = 0; j < f->numedges; j++ )
+		for(int j = 0; j < f->numedges; j++ )
 		{
 			Vector vNormal; 
 			if( fn->normal )
@@ -421,18 +420,13 @@ void ErrorLightInfo(const char *s, lightinfo_t *l)
 void CalcFaceVectors(lightinfo_t *l)
 {
 	texinfo_t	*tex;
-	int			i, j;
 
 	tex = &texinfo[l->face->texinfo];
 	
     // move into lightinfo_t
-	for (i=0 ; i<2 ; i++)
-	{
-		for (j=0 ; j<3 ; j++)
-		{
+	for (int i=0 ; i<2 ; i++)
+		for (int j=0 ; j<3 ; j++)
 			l->worldToLuxelSpace[i][j] = tex->lightmapVecsLuxelsPerWorldUnits[i][j];
-		}
-	}
 
 	//Solve[ { x * w00 + y * w01 + z * w02 - s == 0, x * w10 + y * w11 + z * w12 - t == 0, A * x + B * y + C * z + D == 0 }, { x, y, z } ]
 	//Rule(x,(  C*s*w11 - B*s*w12 + B*t*w02 - C*t*w01 + D*w02*w11 - D*w01*w12) / (+ A*w01*w12 - A*w02*w11 + B*w02*w10 - B*w00*w12 + C*w00*w11 - C*w01*w10 )),
@@ -479,15 +473,13 @@ void CalcFaceVectors(lightinfo_t *l)
 }
 
 
-
 winding_t *LightmapCoordWindingForFace( lightinfo_t *l )
 {
-	int			i;
 	winding_t	*w;
 
 	w = WindingFromFace( l->face, l->modelorg );
 
-	for (i = 0; i < w->numpoints; i++)
+	for (int i = 0; i < w->numpoints; i++)
 	{
 		Vector2D coord;
 		WorldToLuxelSpace( l, w->p[i], coord );
@@ -502,11 +494,10 @@ winding_t *LightmapCoordWindingForFace( lightinfo_t *l )
 
 void WriteCoordWinding (FILE *out, lightinfo_t *l, winding_t *w, Vector& color )
 {
-	int			i;
 	Vector		pos;
 
 	fprintf (out, "%i\n", w->numpoints);
-	for (i=0 ; i<w->numpoints ; i++)
+	for (int i=0 ; i<w->numpoints ; i++)
 	{
 		LuxelSpaceToWorld( l, w->p[i][0], w->p[i][1], pos );
 		fprintf (out, "%5.2f %5.2f %5.2f %5.3f %5.3f %5.3f\n",
@@ -815,8 +806,7 @@ bool BuildFacesamples( lightinfo_t *pLightInfo, facelight_t *pFaceLight )
 //-----------------------------------------------------------------------------
 void FreeSampleWindings( facelight_t *fl )
 {
-	int i;
-	for (i = 0; i < fl->numsamples; i++)
+	for (int i = 0; i < fl->numsamples; i++)
 	{
 		if (fl->sample[i].w)
 		{
@@ -944,10 +934,9 @@ int				numdlights;
 */
 entity_t *FindTargetEntity (char *target)
 {
-	int		i;
 	char	*n;
 
-	for (i=0 ; i<num_entities ; i++)
+	for (int i=0 ; i<num_entities ; i++)
 	{
 		n = ValueForKey (&entities[i], "targetname");
 		if (!strcmp (n, target))
@@ -1550,7 +1539,6 @@ static void ParseLightPoint( entity_t* e, directlight_t* dl )
 #define DIRECT_SCALE (100.0*100.0)
 void CreateDirectLights (void)
 {
-	unsigned        i;
 	CPatch	        *p = NULL;
 	directlight_t	*dl = NULL;
 	entity_t	    *e = NULL;
@@ -1561,11 +1549,9 @@ void CreateDirectLights (void)
 
 	FreeDLights();
 
-	//
 	// surfaces
-	//
 	unsigned int uiPatchCount = g_Patches.Count();
-	for (i = 0; i< uiPatchCount; i++)
+	for (unsigned int i = 0; i< uiPatchCount; i++)
 	{
 		p = &g_Patches.Element( i );
 
@@ -1594,7 +1580,7 @@ void CreateDirectLights (void)
 	//
 	// entities
 	//
-	for (i=0 ; i<(unsigned)num_entities ; i++)
+	for (unsigned int i=0 ; i<(unsigned)num_entities ; i++)
 	{
 		e = &entities[i];
 		name = ValueForKey (e, "classname");
@@ -1641,12 +1627,10 @@ void CreateDirectLights (void)
 
 void ExportDirectLightsToWorldLights()
 {
-	directlight_t		*dl;
-
 	// In case the level has already been VRADed.
 	*pNumworldlights = 0;
 
-	for (dl = activelights; dl != NULL; dl = dl->next )
+	for (directlight_t	*dl = activelights; dl != NULL; dl = dl->next )
 	{
 		dworldlight_t *wl = &dworldlights[(*pNumworldlights)++];
 
@@ -2077,17 +2061,14 @@ void AddSampleToPatch (sample_t *s, LightingValue_t& light, int facenum)
 {
 	CPatch	*patch;
 	Vector	mins, maxs;
-	int		i;
 
 	if (numbounce == 0)
 		return;
 	if( VectorAvg( light.m_vecLighting ) < 1)
 		return;
 
-	//
 	// fixed the sample position and normal -- need to find the equiv pos, etc to set up 
 	// patches
-	//
 	if( g_FacePatches.Element( facenum ) == g_FacePatches.InvalidIndex() )
 		return;
 
@@ -2113,7 +2094,7 @@ void AddSampleToPatch (sample_t *s, LightingValue_t& light, int facenum)
 		// see if the point is in this patch (roughly)
 		WindingBounds (patch->winding, mins, maxs);
 
-		for (i=0 ; i<3 ; i++)
+		for (int i=0 ; i<3 ; i++)
 		{
 			if (mins[i] > s->pos[i] + radius)
 				goto nextpatch;
@@ -2133,7 +2114,6 @@ void AddSampleToPatch (sample_t *s, LightingValue_t& light, int facenum)
 
 void GetPhongNormal( int facenum, Vector const& spot, Vector& phongnormal )
 {
-	int	j;
 	dface_t		*f = &g_pFaces[facenum];
 //	dplane_t	*p = &dplanes[f->planenum];
 	Vector		facenormal, vspot;
@@ -2151,7 +2131,7 @@ void GetPhongNormal( int facenum, Vector const& spot, Vector& phongnormal )
 		// Second attempt: find edge points+center that bound the point and do a three-point triangulation(baricentric)
 		// Better third attempt: generate the point normals for all vertices and do baricentric triangulation.
 
-		for (j=0 ; j<f->numedges ; j++)
+		for (int j=0 ; j<f->numedges ; j++)
 		{
 			Vector	v1, v2;
 			//int e = dsurfedges[f->firstedge + j];
@@ -2232,7 +2212,6 @@ void GetPhongNormal( int facenum, Vector const& spot, Vector& phongnormal )
 
 void GetPhongNormal( int facenum, FourVectors const& spot, FourVectors& phongnormal )
 {
-	int	j;
 	dface_t		*f = &g_pFaces[facenum];
 	//	dplane_t	*p = &dplanes[f->planenum];
 	Vector		facenormal;
@@ -2254,7 +2233,7 @@ void GetPhongNormal( int facenum, FourVectors const& spot, FourVectors& phongnor
 		// Second attempt: find edge points+center that bound the point and do a three-point triangulation(baricentric)
 		// Better third attempt: generate the point normals for all vertices and do baricentric triangulation.
 
-		for ( j = 0; j < f->numedges; ++j )
+		for (int j = 0; j < f->numedges; ++j )
 		{
 			Vector	v1, v2;
 			fltx4		a1, a2;
@@ -3074,13 +3053,12 @@ static void InitSampleInfo( lightinfo_t const& l, int iThread, SSE_SampleInfo_t&
 
 void BuildFacelights (int iThread, int facenum)
 {
-	int	i, j;
+	int			j;
 
 	lightinfo_t	l;
 	dface_t *f;
 	facelight_t	*fl;
 	SSE_SampleInfo_t sampleInfo;
-	directlight_t *dl;
 	Vector spot;
 	Vector v[4], n[4];
 
@@ -3164,7 +3142,7 @@ void BuildFacelights (int iThread, int facenum)
 	// Tell the incremental light manager that we're done with this face.
 	if( g_pIncremental )
 	{
-		for (dl = activelights; dl != NULL; dl = dl->next)
+		for (directlight_t* dl = activelights; dl != NULL; dl = dl->next)
 		{
 			// Only deal with lightstyle 0 for incremental lighting
 			if (dl->light.style == 0)
@@ -3180,7 +3158,7 @@ void BuildFacelights (int iThread, int facenum)
 	if (do_extra && !sampleInfo.m_IsDispFace)
 	{
 		// For each lightstyle, perform a supersampling pass
-		for ( i = 0; i < MAXLIGHTMAPS; ++i )
+		for (int i = 0; i < MAXLIGHTMAPS; ++i )
 		{
 			// Stop when we run out of lightstyles
 			if (f->styles[i] == 255)
@@ -3211,7 +3189,7 @@ void BuildFacelights (int iThread, int facenum)
 
 void BuildPatchLights( int facenum )
 {
-	int i, k;
+	int			k;
 
 	CPatch		*patch;
 
@@ -3227,7 +3205,7 @@ void BuildPatchLights( int facenum )
 	if (k >= MAXLIGHTMAPS)
 		return;
 
-	for (i = 0; i < fl->numsamples; i++)
+	for (int i = 0; i < fl->numsamples; i++)
 	{
 		AddSampleToPatch( &fl->sample[i], fl->light[k][0][i], facenum);
 	}
@@ -3325,7 +3303,7 @@ void BuildPatchLights( int facenum )
 		{
 			if ( f->styles[j] == 0 )
 			{
-				for (i = 0; i < fl->numsamples; i++)
+				for (int i = 0; i < fl->numsamples; i++)
 				{
 					fl->light[j][0][i].m_vecLighting += ambient;
 					if( needsBumpmap )
@@ -3455,8 +3433,7 @@ static void ColorClampBumped( Vector& color1, Vector& color2, Vector& color3 )
 	CONDITION(2,0,1);
 	CONDITION(2,1,0);
 
-	int i;
-	for( i = 0; i < 3; i++ )
+	for(int i = 0; i < 3; i++ )
 	{
 		float max = VectorMaximum( *colors[order[i]] );
 		if( max <= 1.0f )

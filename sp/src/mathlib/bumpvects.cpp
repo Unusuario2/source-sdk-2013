@@ -13,7 +13,6 @@
 
 #if !defined(_STATIC_LINKED) || defined(_SHARED_LIB)
 
-
 #ifdef QUIVER
 #include "r_local.h"
 #endif
@@ -24,14 +23,13 @@
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
-// z is coming out of the face.
 
+// z is coming out of the face.
 void GetBumpNormals( const Vector& sVect, const Vector& tVect, const Vector& flatNormal, 
 					 const Vector& phongNormal, Vector bumpNormals[NUM_BUMP_VECTS] )
 {
 	Vector tmpNormal;
 	bool leftHanded;
-	int i;
 
 	assert( NUM_BUMP_VECTS == 3 );
 	
@@ -60,7 +58,7 @@ void GetBumpNormals( const Vector& sVect, const Vector& tVect, const Vector& fla
 	}
 	
 	// move the g_localBumpBasis into world space to create bumpNormals
-	for( i = 0; i < 3; i++ )
+	for(int i = 0; i < 3; i++ )
 	{
 		VectorIRotate( g_localBumpBasis[i], smoothBasis, bumpNormals[i] );
 	}

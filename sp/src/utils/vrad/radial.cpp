@@ -75,11 +75,9 @@ void AddDirectToRadial( radial_t *rad,
 {
 	int     s_min, s_max, t_min, t_max;
 	Vector2D  coord;
-	int	    s, t;
 	float   ds, dt;
 	float   r;
 	float	area;
-	int		bumpSample;
 
 	// convert world pos into local lightmap texture coord
 	WorldToLuxelSpace( &rad->l, pnt, coord );
@@ -94,9 +92,9 @@ void AddDirectToRadial( radial_t *rad,
 	s_max = min( s_max, rad->w );
 	t_max = min( t_max, rad->h );
 
-	for( s = s_min; s < s_max; s++ )
+	for(int s = s_min; s < s_max; s++ )
 	{
-		for( t = t_min; t < t_max; t++ )
+		for(int t = t_min; t < t_max; t++ )
 		{
 			float s0 = max( coordmins[0] - s, -1.0 );
 			float t0 = max( coordmins[1] - t, -1.0 );
@@ -127,7 +125,7 @@ void AddDirectToRadial( radial_t *rad,
 				{
 					if( neighborHasBumpmap )
 					{
-						for( bumpSample = 0; bumpSample < NUM_BUMP_VECTS + 1; bumpSample++ )
+						for(int bumpSample = 0; bumpSample < NUM_BUMP_VECTS + 1; bumpSample++ )
 						{
 							rad->light[bumpSample][i].AddWeighted( light[bumpSample], r );
 						}
@@ -135,7 +133,7 @@ void AddDirectToRadial( radial_t *rad,
 					else
 					{
 						rad->light[0][i].AddWeighted(light[0],r );
-						for( bumpSample = 1; bumpSample < NUM_BUMP_VECTS + 1; bumpSample++ )
+						for(int bumpSample = 1; bumpSample < NUM_BUMP_VECTS + 1; bumpSample++ )
 						{
 							rad->light[bumpSample][i].AddWeighted( light[0], r * OO_SQRT_3 );
 						}
@@ -153,7 +151,6 @@ void AddDirectToRadial( radial_t *rad,
 }
 
 
-
 void AddBouncedToRadial( radial_t *rad, 
 						 Vector const &pnt, 
 						 Vector2D const &coordmins, Vector2D const &coordmaxs, 
@@ -162,10 +159,8 @@ void AddBouncedToRadial( radial_t *rad,
 {
 	int     s_min, s_max, t_min, t_max;
 	Vector2D  coord;
-	int	    s, t;
 	float   ds, dt;
 	float   r;
-	int		bumpSample;
 
 	// convert world pos into local lightmap texture coord
 	WorldToLuxelSpace( &rad->l, pnt, coord );
@@ -191,9 +186,9 @@ void AddBouncedToRadial( radial_t *rad,
 	s_max = min( s_max, rad->w );
 	t_max = min( t_max, rad->h );
 
-	for( s = s_min; s < s_max; s++ )
+	for(int s = s_min; s < s_max; s++ )
 	{
-		for( t = t_min; t < t_max; t++ )
+		for(int t = t_min; t < t_max; t++ )
 		{
 			// patch influence is based on patch size
   			ds = ( coord[0] - s ) / dists;
@@ -209,7 +204,7 @@ void AddBouncedToRadial( radial_t *rad,
 				{
 					if( neighborHasBumpmap )
 					{
-						for( bumpSample = 0; bumpSample < NUM_BUMP_VECTS + 1; bumpSample++ )
+						for(int bumpSample = 0; bumpSample < NUM_BUMP_VECTS + 1; bumpSample++ )
 						{
 							rad->light[bumpSample][i].AddWeighted( light[bumpSample], r );
 						}
@@ -217,7 +212,7 @@ void AddBouncedToRadial( radial_t *rad,
 					else
 					{
 						rad->light[0][i].AddWeighted( light[0], r );
-						for( bumpSample = 1; bumpSample < NUM_BUMP_VECTS + 1; bumpSample++ )
+						for(int bumpSample = 1; bumpSample < NUM_BUMP_VECTS + 1; bumpSample++ )
 						{
 							rad->light[bumpSample][i].AddWeighted( light[0], r * OO_SQRT_3 );
 						}
@@ -237,7 +232,6 @@ void AddBouncedToRadial( radial_t *rad,
 void PatchLightmapCoordRange( radial_t *rad, int ndxPatch, Vector2D &mins, Vector2D &maxs )
 {
 	winding_t	*w;
-	int i;
 	Vector2D coord;
 
 	mins.Init( 1E30, 1E30 );
@@ -246,7 +240,7 @@ void PatchLightmapCoordRange( radial_t *rad, int ndxPatch, Vector2D &mins, Vecto
 	CPatch *patch = &g_Patches.Element( ndxPatch );
 	w = patch->winding;
 
-	for (i = 0; i < w->numpoints; i++)
+	for (int i = 0; i < w->numpoints; i++)
 	{
 		WorldToLuxelSpace( &rad->l, w->p[i], coord );
 		mins[0] = min( mins[0], coord[0] );
@@ -280,7 +274,6 @@ void FreeRadial( radial_t *rad )
 
 radial_t *BuildPatchRadial( int facenum )
 {
-	int             j;
 	radial_t        *rad;
 	CPatch	        *patch;
 	faceneighbor_t  *fn;
@@ -340,7 +333,7 @@ radial_t *BuildPatchRadial( int facenum )
 		}
 	}
 
-	for (j=0 ; j<fn->numneighbors; j++)
+	for (int j=0 ; j<fn->numneighbors; j++)
 	{
 		if( g_FacePatches.Element( fn->neighbor[j] ) != g_FacePatches.InvalidIndex() )
 		{

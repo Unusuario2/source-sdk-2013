@@ -21,7 +21,6 @@ typedef struct
 
 char *CClassInputOutputBase::g_pszEmpty = "";
 
-
 //-----------------------------------------------------------------------------
 // Maps type names to type enums for inputs and outputs.
 //-----------------------------------------------------------------------------

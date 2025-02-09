@@ -11,6 +11,7 @@
 
 #include "mathlib/mathlib.h"
 
+
 static inline bool AE_IsInfinite(float a)
 {
     const int kInfAsInt = 0x7F800000;
@@ -21,6 +22,7 @@ static inline bool AE_IsInfinite(float a)
         return true;
     return false;
 }
+
 
 static inline bool AE_IsNan(float a)
 {
@@ -33,11 +35,13 @@ static inline bool AE_IsNan(float a)
     return false;
 }
 
+
 static inline int AE_Sign(float a)
 {
     // The sign bit of a number is the high bit.
     return (*(int*)&a) & 0x80000000;
 }
+
 
 // This is the 'final' version of the AlmostEqualUlps function.
 // The optional checks are included for completeness, but in many

@@ -8,6 +8,7 @@
 #include <lightdesc.h>
 #include "mathlib.h"
 
+
 void LightDesc_t::RecalculateDerivedValues(void)
 {
 	m_Flags = LIGHTTYPE_OPTIMIZATIONFLAGS_DERIVED_VALUES_CALCED;
@@ -45,6 +46,7 @@ void LightDesc_t::RecalculateDerivedValues(void)
 	m_RangeSquared=m_Range*m_Range;
 
 }
+
 
 void LightDesc_t::ComputeLightAtPointsForDirectional(
 	const FourVectors &pos, const FourVectors &normal,
@@ -164,7 +166,6 @@ void LightDesc_t::ComputeLightAtPoints( const FourVectors &pos, const FourVector
 }
 
 
-
 void LightDesc_t::ComputeNonincidenceLightAtPoints( const FourVectors &pos, FourVectors &color ) const
 {
 	FourVectors delta;
@@ -256,7 +257,6 @@ void LightDesc_t::ComputeNonincidenceLightAtPoints( const FourVectors &pos, Four
 }
 
 
-
 void LightDesc_t::SetupOldStyleAttenuation( float fQuadraticAttn, float fLinearAttn, float fConstantAttn )
 {
 	// old-style manually typed quadrtiac coefficients
@@ -282,6 +282,7 @@ void LightDesc_t::SetupOldStyleAttenuation( float fQuadraticAttn, float fLinearA
 	if ( fScaleFactor > 0 )
 		m_Color *= fScaleFactor;
 }
+
 
 void LightDesc_t::SetupNewStyleAttenuation( float fFiftyPercentDistance, 
 											float fZeroPercentDistance )
