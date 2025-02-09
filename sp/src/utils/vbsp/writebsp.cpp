@@ -49,13 +49,11 @@ brushes will be saved in the map.
 */
 void EmitPlanes (void)
 {
-	int			i;
 	dplane_t	*dp;
-	plane_t		*mp;
+	plane_t* mp = g_MainMap->mapplanes;
 	int		planetranslate[MAX_MAP_PLANES];
 
-	mp = g_MainMap->mapplanes;
-	for (i=0 ; i<g_MainMap->nummapplanes ; i++, mp++)
+	for (int i=0 ; i<g_MainMap->nummapplanes ; i++, mp++)
 	{
 		dp = &dplanes[numplanes];
 		planetranslate[i] = numplanes;
@@ -568,7 +566,6 @@ int EmitDrawNode_r (node_t *node)
 {
 	dnode_t	*n;
 	face_t	*f;
-	int		i;
 
 	if (node->planenum == PLANENUM_LEAF)
 	{
@@ -607,7 +604,7 @@ int EmitDrawNode_r (node_t *node)
 	//
 	// recursively output the other nodes
 	//	
-	for (i=0 ; i<2 ; i++)
+	for (int i=0 ; i<2 ; i++)
 	{
 		if (node->children[i]->planenum == PLANENUM_LEAF)
 		{
@@ -675,6 +672,7 @@ int FindMatchingBrushSideTexinfo( int sideIndex, const texinfomap_t *pMap )
 	int sideTexFlags = texinfo[side.texinfo].flags;
 	int sideTexData = texinfo[side.texinfo].texdata;
 	int sideSurfaceProp = g_SurfaceProperties[sideTexData];
+
 	for ( int j = 0; j < texinfo.Count(); j++ )
 	{
 		if ( pMap[j].refCount > 0 && 
@@ -698,6 +696,7 @@ void ComapctTexinfoArray( texinfomap_t *pMap )
 	texinfo.RemoveAll();
 	int firstSky = -1;
 	int first2DSky = -1;
+
 	for ( int i = 0; i < old.Count(); i++ )
 	{
 		if ( !pMap[i].refCount )
@@ -740,6 +739,7 @@ void CompactTexdataArray( texdatamap_t *pMap )
 	oldTexData.CopyArray( dtexdata, numtexdata );
 	// clear current table and rebuild
 	numtexdata = 0;
+
 	for ( int i = 0; i < oldTexData.Count(); i++ )
 	{
 		// unreferenced, note in map and skip
@@ -768,6 +768,7 @@ void CompactTexinfos()
 	memset( texinfoMap, 0, sizeof(texinfoMap[0])*texinfo.Count() );
 	memset( texdataMap, 0, sizeof(texdataMap[0])*numtexdata );
 	int i;
+
 	// get texinfos referenced by faces
 	for ( i = 0; i < numfaces; i++ )
 	{
@@ -1318,7 +1319,6 @@ void BeginModel (void)
 	dmodel_t	*mod;
 	int			start, end;
 	mapbrush_t	*b;
-	int			j;
 	entity_t	*e;
 	Vector		mins, maxs;
 
@@ -1341,7 +1341,7 @@ void BeginModel (void)
 	end = start + e->numbrushes;
 	ClearBounds (mins, maxs);
 
-	for (j=start ; j<end ; j++)
+	for (int j=start ; j<end ; j++)
 	{
 		b = &g_MainMap->mapbrushes[j];
 		if (!b->numsides)
@@ -1423,15 +1423,14 @@ static void AddNodeToBounds(int node, CUtlVector<int>& skipAreas, Vector& mins, 
 			return;
 
 		// Skip 3D skybox
-		int i;
-		for ( i = skipAreas.Count(); --i >= 0; )
+		for (int i = skipAreas.Count(); --i >= 0; )
 		{
 			if (dleafs[leaf].area == skipAreas[i])
 				return;
 		}
 
 		unsigned int firstface = dleafs[leaf].firstleafface;
-		for ( i = 0; i < dleafs[leaf].numleaffaces; ++i )
+		for (int i = 0; i < dleafs[leaf].numleaffaces; ++i )
 		{
 			unsigned int face = dleaffaces[ firstface + i ];
 
@@ -1477,8 +1476,7 @@ bool IsBoxInsideWorld( int node, CUtlVector<int> &skipAreas, const Vector &vecMi
 				return false;
 
 			// Skip 3D skybox
-			int i;
-			for ( i = skipAreas.Count(); --i >= 0; )
+			for (int i = skipAreas.Count(); --i >= 0; )
 			{
 				if ( dleafs[leaf].area == skipAreas[i] )
 					return false;
@@ -1525,8 +1523,7 @@ void AddDispsToBounds( int nHeadNode, CUtlVector<int>& skipAreas, Vector &vecMin
 	Vector vecDispMins, vecDispMaxs;
 
 	// first determine how many displacement surfaces there will be per leaf
-	int i;
-	for ( i = 0; i < g_dispinfo.Count(); ++i )
+	for (int i = 0; i < g_dispinfo.Count(); ++i )
 	{
 		ComputeDispInfoBounds( i, vecDispMins, vecDispMaxs );
 		if ( IsBoxInsideWorld( nHeadNode, skipAreas, vecDispMins, vecDispMaxs ) )

@@ -548,8 +548,7 @@ static tree_t *ClipOccluderBrushes( )
 
 		entity_t *e = &entities[entity_num];
 		int end = e->firstbrush + e->numbrushes;
-		int i;
-		for ( i = e->firstbrush; i < end; ++i )
+		for (int i = e->firstbrush; i < end; ++i )
 		{
 			mapBrushes.AddToTail( &g_MainMap->mapbrushes[i] );
 		}
@@ -586,11 +585,11 @@ static void GenerateOccluderSideList( int nEntity, CUtlVector<side_t*> &occluder
 {
 	entity_t *e = &entities[nEntity];
 	int end = e->firstbrush + e->numbrushes;
-	int i, j;
-	for ( i = e->firstbrush; i < end; ++i )
+
+	for (int i = e->firstbrush; i < end; ++i )
 	{
 		mapbrush_t *mb = &g_MainMap->mapbrushes[i];
-		for ( j = 0; j < mb->numsides; ++j )
+		for (int j = 0; j < mb->numsides; ++j )
 		{
 			occluderSides.AddToTail( &(mb->original_sides[j]) );
 		}

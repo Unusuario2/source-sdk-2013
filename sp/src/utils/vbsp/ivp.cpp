@@ -672,10 +672,8 @@ static void VisitLeaves_r( CPlaneList &planes, int node )
 		int leafIndex = -1 - node;
 		if ( planes.IsLeafReferenced(leafIndex) )
 		{
-			int i;
-
 			// Add the solids in the "empty" leaf
-			for ( i = 0; i < dleafs[leafIndex].numleafbrushes; i++ )
+			for (int i = 0; i < dleafs[leafIndex].numleafbrushes; i++ )
 			{
 				int brushIndex = dleafbrushes[dleafs[leafIndex].firstleafbrush + i];
 				planes.ReferenceBrush( brushIndex );
@@ -879,11 +877,9 @@ extern node_t *dfacenodes[MAX_MAP_FACES];
 
 
 static void WriteFogVolumeIDs( dmodel_t *pModel )
-{
-	int i;
-	
+{	
 	// write fog volume ID to each face in this model
-	for( i = pModel->firstface; i < pModel->firstface + pModel->numfaces; i++ )
+	for(int i = pModel->firstface; i < pModel->firstface + pModel->numfaces; i++ )
 	{
 		dface_t *pFace = &dfaces[i];
 		node_t *pFaceNode = dfacenodes[i];
@@ -929,8 +925,7 @@ static bool PortalCrossesWater( waterleaf_t &baseleaf, portal_t *portal )
 
 static int FindOrCreateLeafWaterData( float surfaceZ, float minZ, int surfaceTexInfoID )
 {
-	int i;
-	for( i = 0; i < numleafwaterdata; i++ )
+	for(int i = 0; i < numleafwaterdata; i++ )
 	{
 		dleafwaterdata_t *pLeafWaterData = &dleafwaterdata[i];
 		if( pLeafWaterData->surfaceZ == surfaceZ &&
@@ -1118,8 +1113,7 @@ void EmitWaterVolumesForBSP( dmodel_t *pModel, node_t *node )
 	// make a sorted list to flood fill
 	CUtlVector<waterleaf_t>	list;
 	
-	int i;
-	for ( i = 0; i < leafListAnyWater.Count(); i++ )
+	for (int i = 0; i < leafListAnyWater.Count(); i++ )
 	{
 		waterleaf_t waterLeaf;
 		BuildWaterLeaf( leafListAnyWater[i], waterLeaf );
@@ -1128,7 +1122,7 @@ void EmitWaterVolumesForBSP( dmodel_t *pModel, node_t *node )
 
 	leafbitarray_t visited;
 	CUtlVector<node_t *> waterAreaList;
-	for ( i = 0; i < list.Count(); i++ )
+	for (int i = 0; i < list.Count(); i++ )
 	{
 		Flood_FindConnectedWaterVolumes_r( waterAreaList, list[i].pNode, list[i], visited );
 
@@ -1480,9 +1474,7 @@ static void ConvertModelToPhysCollide( CUtlVector<CPhysCollisionEntry *> &collis
 
 static void ClearLeafWaterData( void )
 {
-	int i;
-
-	for( i = 0; i < numleafs; i++ )
+	for(int i = 0; i < numleafs; i++ )
 	{
 		dleafs[i].leafWaterDataID = -1;
 		dleafs[i].contents &= ~CONTENTS_TESTFOGVOLUME;

@@ -1016,13 +1016,13 @@ void Cubemap_AttachDefaultCubemapToSpecularSides( void )
 	// build a mapping from side to entity id so that we can get the entity origin
 	CUtlVector<int> sideToEntityIndex;
 	sideToEntityIndex.SetCount(g_MainMap->nummapbrushsides);
-	int i;
-	for ( i = 0; i < g_MainMap->nummapbrushsides; i++ )
+
+	for (int i = 0; i < g_MainMap->nummapbrushsides; i++ )
 	{
 		sideToEntityIndex[i] = -1;
 	}
 
-	for ( i = 0; i < g_MainMap->nummapbrushes; i++ )
+	for (int i = 0; i < g_MainMap->nummapbrushes; i++ )
 	{
 		int entityIndex = g_MainMap->mapbrushes[i].entitynum;
 		for ( int j = 0; j < g_MainMap->mapbrushes[i].numsides; j++ )
@@ -1067,13 +1067,13 @@ void Cubemap_AttachDefaultCubemapToSpecularSides( void )
 // Populate with cubemaps that were skipped
 void Cubemap_AddUnreferencedCubemaps()
 {
+	int					j;
 	char				pTextureName[1024];
 	char				pFileName[1024];
 	PatchInfo_t			info;
 	dcubemapsample_t	*pSample;
-	int					i,j;
 
-	for ( i=0; i<g_nCubemapSamples; ++i )
+	for (int i=0; i<g_nCubemapSamples; ++i )
 	{
 		pSample = &g_CubemapSamples[i];	
 
@@ -1085,7 +1085,7 @@ void Cubemap_AddUnreferencedCubemaps()
 		GeneratePatchedName( "c", info, false, pTextureName, 1024 );
 		
 		// find or add
-		for ( j=0; j<s_DefaultCubemapNames.Count(); ++j )
+		for (j=0; j<s_DefaultCubemapNames.Count(); ++j )
 		{
 			if ( !stricmp( s_DefaultCubemapNames[j], pTextureName ) )
 			{

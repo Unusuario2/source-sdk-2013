@@ -112,13 +112,12 @@ Uses hashing
 int	GetVertexnum (Vector& in)
 {
 	int			h;
-	int			i;
 	Vector		vert;
 	int			vnum;
 
 	c_totalverts++;
 
-	for (i=0 ; i<3 ; i++)
+	for (int i=0 ; i<3 ; i++)
 	{
 		if ( fabs(in[i] - (int)(in[i]+0.5)) < INTEGRAL_EPSILON)
 			vert[i] = (int)(in[i]+0.5);
@@ -223,7 +222,6 @@ void FaceFromSuperverts (face_t **pListHead, face_t *f, int base)
 {
 	face_t	*newf;
 	int		remaining;
-	int		i;
 
 	remaining = numsuperverts;
 	while (remaining > MAXEDGES)
@@ -237,7 +235,7 @@ void FaceFromSuperverts (face_t **pListHead, face_t *f, int base)
 		*pListHead = newf;
 
 		newf->numpoints = MAXEDGES;
-		for (i=0 ; i<MAXEDGES ; i++)
+		for (int i=0 ; i<MAXEDGES ; i++)
 			newf->vertexnums[i] = superverts[(i+base)%numsuperverts];
 
 		f->split[1] = NewFaceFromFace (f);
@@ -252,7 +250,7 @@ void FaceFromSuperverts (face_t **pListHead, face_t *f, int base)
 
 	// copy the vertexes back to the face
 	f->numpoints = remaining;
-	for (i=0 ; i<remaining ; i++)
+	for (int i=0 ; i<remaining ; i++)
 		f->vertexnums[i] = superverts[(i+base)%numsuperverts];
 }
 
@@ -265,13 +263,12 @@ EmitFaceVertexes
 void EmitFaceVertexes (face_t **pListHead, face_t *f)
 {
 	winding_t	*w;
-	int			i;
 
 	if (f->merged || f->split[0] || f->split[1])
 		return;
 
 	w = f->w;
-	for (i=0 ; i<w->numpoints ; i++)
+	for (int i=0 ; i<w->numpoints ; i++)
 	{
 		if (noweld)
 		{	// make every point unique
@@ -299,21 +296,18 @@ EmitNodeFaceVertexes_r
 */
 void EmitNodeFaceVertexes_r (node_t *node)
 {
-	int		i;
-	face_t	*f;
-
 	if (node->planenum == PLANENUM_LEAF)
 	{
 		// leaf faces are emitted in second pass
 		return;
 	}
 
-	for (f=node->faces ; f ; f=f->next)
+	for (face_t* f=node->faces ; f ; f=f->next)
 	{
 		EmitFaceVertexes (&node->faces, f);
 	}
 
-	for (i=0 ; i<2 ; i++)
+	for (int i=0 ; i<2 ; i++)
 	{
 		EmitNodeFaceVertexes_r (node->children[i]);
 	}
@@ -425,7 +419,7 @@ Can be recursively reentered
 */
 void TestEdge (vec_t start, vec_t end, int p1, int p2, int startvert)
 {
-	int		j, k;
+	int		j;
 	vec_t	dist;
 	Vector	delta;
 	Vector	exact;
@@ -439,7 +433,7 @@ void TestEdge (vec_t start, vec_t end, int p1, int p2, int startvert)
 		return;		// degenerate edge
 	}
 
-	for (k=startvert ; k<num_edge_verts ; k++)
+	for (int k=startvert ; k<num_edge_verts ; k++)
 	{
 		j = edge_verts[k];
 		if (j==p1 || j == p2)
@@ -701,18 +695,15 @@ FixEdges_r
 */
 void FixEdges_r (node_t *node)
 {
-	int		i;
-	face_t	*f;
-
 	if (node->planenum == PLANENUM_LEAF)
 	{
 		return;
 	}
 
-	for (f=node->faces ; f ; f=f->next)
+	for (face_t* f=node->faces ; f ; f=f->next)
 		FixFaceEdges (&node->faces, f);
 
-	for (i=0 ; i<2 ; i++)
+	for (int i=0 ; i<2 ; i++)
 		FixEdges_r (node->children[i]);
 }
 
@@ -722,12 +713,8 @@ void FixEdges_r (node_t *node)
 //-----------------------------------------------------------------------------
 void FixLeafFaceEdges( face_t **ppLeafFaceList )
 {
-	face_t *f;
-
-	for ( f = *ppLeafFaceList; f; f = f->next )
-	{
+	for (face_t* f = *ppLeafFaceList; f; f = f->next )
 		FixFaceEdges( ppLeafFaceList, f );
-	}
 }
 
 /*
@@ -1124,17 +1111,16 @@ MergeFaceList
 */
 void MergeFaceList(face_t **pList)
 {
-	face_t	*f1, *f2, *end;
-	face_t	*merged;
+	face_t	*merged,*end;
 	plane_t	*plane;
 
 	merged = NULL;
 	
-	for (f1 = *pList; f1 ; f1 = f1->next)
+	for (face_t* f1 = *pList; f1 ; f1 = f1->next)
 	{
 		if (f1->merged || f1->split[0] || f1->split[1])
 			continue;
-		for (f2 = *pList; f2 != f1 ; f2=f2->next)
+		for (face_t* f2 = *pList; f2 != f1 ; f2=f2->next)
 		{
 			if (f2->merged || f2->split[0] || f2->split[1])
 				continue;
@@ -1273,10 +1259,10 @@ static bool AssignBottomWaterMaterialToFace( face_t *f )
 	//Assert( mapplanes[f->planenum].normal.z < 0 );
 	texinfo_t newTexInfo;
 	newTexInfo.flags = pTexInfo->flags;
-	int j, k;
-	for (j=0 ; j<2 ; j++)
+
+	for (int j=0 ; j<2 ; j++)
 	{
-		for (k=0 ; k<4 ; k++)
+		for (int k=0 ; k<4 ; k++)
 		{
 			newTexInfo.textureVecsTexelsPerWorldUnits[j][k] = pTexInfo->textureVecsTexelsPerWorldUnits[j][k];
 			newTexInfo.lightmapVecsLuxelsPerWorldUnits[j][k] = pTexInfo->lightmapVecsLuxelsPerWorldUnits[j][k];

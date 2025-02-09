@@ -36,12 +36,11 @@ void OutputWinding (winding_t *w, FileHandle_t glview)
 {
 	static	int	level = 128;
 	vec_t		light;
-	int			i;
 
 	CmdLib_FPrintf( glview, "%i\n", w->numpoints);
 	level+=28;
 	light = (level&255)/255.0;
-	for (i=0 ; i<w->numpoints ; i++)
+	for (int i=0 ; i<w->numpoints ; i++)
 	{
 		CmdLib_FPrintf(glview, "%6.3f %6.3f %6.3f %6.3f %6.3f %6.3f\n",
 			w->p[i][0],
@@ -56,13 +55,12 @@ void OutputWinding (winding_t *w, FileHandle_t glview)
 
 void OutputWindingColor (winding_t *w, FileHandle_t glview, int r, int g, int b)
 {
-	int			i;
-
 	CmdLib_FPrintf( glview, "%i\n", w->numpoints);
 	float lr = r * (1.0f/255.0f);
 	float lg = g * (1.0f/255.0f);
 	float lb = b * (1.0f/255.0f);
-	for (i=0 ; i<w->numpoints ; i++)
+
+	for (int i=0 ; i<w->numpoints ; i++)
 	{
 		CmdLib_FPrintf(glview, "%6.3f %6.3f %6.3f %6.3f %6.3f %6.3f\n",
 			w->p[i][0],
@@ -109,7 +107,7 @@ WriteGLView_r
 */
 void WriteGLView_r (node_t *node, FileHandle_t glview)
 {
-	portal_t	*p, *nextp;
+	portal_t	*nextp;
 
 	if (node->planenum != PLANENUM_LEAF)
 	{
@@ -119,7 +117,7 @@ void WriteGLView_r (node_t *node, FileHandle_t glview)
 	}
 
 	// write all the portals
-	for (p=node->portals ; p ; p=nextp)
+	for (portal_t *p=node->portals ; p ; p=nextp)
 	{
 		if (p->nodes[0] == node)
 		{
@@ -134,7 +132,7 @@ void WriteGLView_r (node_t *node, FileHandle_t glview)
 
 void WriteGLViewFaces_r( node_t *node, FileHandle_t glview )
 {
-	portal_t	*p, *nextp;
+	portal_t	*nextp;
 
 	if (node->planenum != PLANENUM_LEAF)
 	{
@@ -144,7 +142,7 @@ void WriteGLViewFaces_r( node_t *node, FileHandle_t glview )
 	}
 
 	// write all the portals
-	for (p=node->portals ; p ; p=nextp)
+	for (portal_t *p=node->portals ; p ; p=nextp)
 	{
 		int s = (p->nodes[1] == node);
 
