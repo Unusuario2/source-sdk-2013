@@ -448,9 +448,8 @@ void CCompileCaptionsApp::DescribeCaptions( char const *file )
 	directory.RedoSort( true );
 	buf.SeekGet( CUtlBuffer::SEEK_HEAD, header.dataoffset );
 
-	int i;
 	CUtlVector< CaptionBlock_t >	blocks;
-	for ( i = 0; i < header.numblocks; ++i )
+	for (int i = 0; i < header.numblocks; ++i )
 	{
 		CaptionBlock_t& newBlock = blocks[ blocks.AddToTail() ];
 		Q_memset( newBlock.data, 0, sizeof( newBlock.data ) );
@@ -468,7 +467,7 @@ void CCompileCaptionsApp::DescribeCaptions( char const *file )
 	}
 
 	// Now print everything out...
-	for ( i = 0; i < header.directorysize; ++i )
+	for (int i = 0; i < header.directorysize; ++i )
 	{
 		const CaptionLookup_t& entry = directory[ i ];
 		char const *name = g_pVGuiLocalize->GetNameByIndex( inverseMap.Element( inverseMap.Find( entry.hash ) ) );
@@ -489,8 +488,7 @@ int CCompileCaptionsApp::Main()
 {
 	CUtlVector< CUtlSymbol >	worklist;
 
-	int i = 1;
-	for ( i ; i<CommandLine()->ParmCount() ; i++)
+	for (int i = 1; i<CommandLine()->ParmCount() ; i++)
 	{
 		if ( CommandLine()->GetParm( i )[ 0 ] == '-' )
 		{
