@@ -31,11 +31,9 @@ int g_TraceClusterStop = -1;
 
 int CountBits (byte *bits, int numbits)
 {
-	int		i;
-	int		c;
+	int		c = 0;
 
-	c = 0;
-	for (i=0 ; i<numbits ; i++)
+	for (int i=0 ; i<numbits ; i++)
 		if ( CheckBit( bits, i ) )
 			c++;
 
@@ -55,14 +53,12 @@ extern bool g_bVMPIEarlyExit;
 
 void CheckStack (leaf_t *leaf, threaddata_t *thread)
 {
-	pstack_t	*p, *p2;
-
-	for (p=thread->pstack_head.next ; p ; p=p->next)
+	for (pstack_t *p=thread->pstack_head.next ; p ; p=p->next)
 	{
 //		Msg ("=");
 		if (p->leaf == leaf)
 			Error ("\tCheckStack: leaf recursion");
-		for (p2=thread->pstack_head.next ; p2 != p ; p2=p2->next)
+		for (pstack_t *p2=thread->pstack_head.next ; p2 != p ; p2=p2->next)
 			if (p2->leaf == p->leaf)
 				Error ("\tCheckStack: late leaf recursion");
 	}
@@ -72,9 +68,7 @@ void CheckStack (leaf_t *leaf, threaddata_t *thread)
 
 winding_t *AllocStackWinding (pstack_t *stack)
 {
-	int		i;
-
-	for (i=0 ; i<3 ; i++)
+	for (int i=0 ; i<3 ; i++)
 	{
 		if (stack->freewindings[i])
 		{
@@ -82,7 +76,6 @@ winding_t *AllocStackWinding (pstack_t *stack)
 			return &stack->windings[i];
 		}
 	}
-
 	Error ("\tOut of memory. AllocStackWinding: failed");
 
 	return NULL;
@@ -382,11 +375,10 @@ public:
 
 void WindingCenter (winding_t *w, Vector &center)
 {
-	int		i;
 	float	scale;
 
 	VectorCopy (vec3_origin, center);
-	for (i=0 ; i<w->numpoints ; i++)
+	for (int i=0 ; i<w->numpoints ; i++)
 		VectorAdd (w->points[i], center, center);
 
 	scale = 1.0/w->numpoints;
@@ -825,7 +817,6 @@ void RecursiveLeafBitFlow (int leafnum, byte *mightsee, byte *cansee)
 {
 	portal_t	*p;
 	leaf_t 		*leaf;
-	int			i, j;
 	long		more;
 	int			pnum;
 	byte		newmight[MAX_PORTALS/8];
@@ -833,7 +824,7 @@ void RecursiveLeafBitFlow (int leafnum, byte *mightsee, byte *cansee)
 	leaf = &leafs[leafnum];
 	
 // check all portals for flowing into other leafs	
-	for (i=0 ; i<leaf->portals.Count(); i++)
+	for (int i=0 ; i<leaf->portals.Count(); i++)
 	{
 		p = leaf->portals[i];
 		pnum = p - portals;
@@ -844,7 +835,7 @@ void RecursiveLeafBitFlow (int leafnum, byte *mightsee, byte *cansee)
 
 		// if this portal can see some portals we mightsee, recurse
 		more = 0;
-		for (j=0 ; j<portallongs ; j++)
+		for (int j=0 ; j<portallongs ; j++)
 		{
 			((long *)newmight)[j] = ((long *)mightsee)[j] 
 				& ((long *)p->portalflood)[j];
