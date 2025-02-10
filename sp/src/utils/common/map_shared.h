@@ -57,11 +57,7 @@ public:
 	//-----------------------------------------------------------------------------
 	void ReportError( const char *pErrorString )
 	{
-#ifdef MAPBASE
-		Error("\tBrush %i: %s\n\tSide %i\n\tTexture: %s\n", m_brushID, pErrorString, m_sideIndex, m_textureName );
-	#else
-		Error("\tBrush %i: %s\nSide %i\nTexture: %s\n", m_brushID, pErrorString, m_sideIndex, m_textureName );
-#endif
+		Error( "Brush %i: %s\nSide %i\nTexture: %s\n", m_brushID, pErrorString, m_sideIndex, m_textureName );
 	}
 
 	//-----------------------------------------------------------------------------
@@ -70,11 +66,7 @@ public:
 	//-----------------------------------------------------------------------------
 	void ReportWarning( const char *pWarningString )
 	{
-#ifdef MAPBASE
-		Warning( "\tBrush %i, Side %i: %s\n", m_brushID, m_sideIndex, pWarningString );
-#else
 		printf( "Brush %i, Side %i: %s\n", m_brushID, m_sideIndex, pWarningString );
-#endif
 	}
 
 private:

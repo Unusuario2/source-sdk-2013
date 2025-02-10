@@ -17,10 +17,6 @@
 #include "builddisp.h"
 #include "mathlib/vector.h"
 
-#ifdef MAPBASE
-#include "../common/StandartColorFormat.h" //this control the color of the console.
-#endif 
-
 // map displacement info -- runs parallel to the dispinfos struct
 int              nummapdispinfo = 0;
 mapdispinfo_t    mapdispinfo[MAX_MAP_DISPINFO];
@@ -523,12 +519,8 @@ void SnapRemainingVertsToSurface( CCoreDispInfo **ppListBase, ddispinfo_t *pBSPD
 void EmitDispLMAlphaAndNeighbors()
 {
 	int i;
-#ifdef MAPBASE
-	Msg("Finding displacement neighbors... ");
-	ColorSpewMessage(SPEW_MESSAGE, &green, "done (0)\n");
-#else 
-	Msg("Finding displacement neighbors...\n");
-#endif 
+
+	Msg( "Finding displacement neighbors...\n" );
 
 	// Build the CCoreDispInfos.
 	CUtlVector<dface_t*> faces;
@@ -591,13 +583,7 @@ void EmitDispLMAlphaAndNeighbors()
 	// overlay code works right.
 	SnapRemainingVertsToSurface( g_CoreDispInfos.Base(), g_dispinfo.Base(), nummapdispinfo );
 
-#ifdef MAPBASE
-		Msg("Finding lightmap sample positions... ");
-		ColorSpewMessage(SPEW_MESSAGE, &green, "done (0)\n");
-#else 
-	Msg("Finding lightmap sample positions...\n");
-#endif 
-	
+	Msg( "Finding lightmap sample positions...\n" );
 	for ( i=0; i < nummapdispinfo; i++ )
 	{
 		dface_t *pFace = faces[i];
@@ -609,7 +595,7 @@ void EmitDispLMAlphaAndNeighbors()
 		CalculateLightmapSamplePositions( pCoreDispInfo, pFace, g_DispLightmapSamplePositions );
 	}
 
-	StartPacifier( "Displacement Alpha -> ");
+	StartPacifier( "Displacement Alpha : ");
 
 	// Build lightmap alphas.
 	int dispCount = 0;	// How many we've processed.
@@ -641,7 +627,7 @@ void DispGetFaceInfo( mapbrush_t *pBrush )
 	if( pBrush->entitynum != 0 )
 	{
 		char* pszEntityName = ValueForKey( &g_LoadingMap->entities[pBrush->entitynum], "classname" );
-		Error("\tError: displacement found on a(n) %s entity - not supported (entity %d, brush %d)\n", pszEntityName, pBrush->entitynum, pBrush->brushnum );
+		Error( "Error: displacement found on a(n) %s entity - not supported (entity %d, brush %d)\n", pszEntityName, pBrush->entitynum, pBrush->brushnum );
 	}
 
 	for( i = 0; i < pBrush->numsides; i++ )
@@ -651,7 +637,7 @@ void DispGetFaceInfo( mapbrush_t *pBrush )
 		{
 			// error checking!!
 			if( pSide->winding->numpoints != 4 )
-				Error("\tTrying to create a non-quad displacement! (entity %d, brush %d)\n", pBrush->entitynum, pBrush->brushnum );
+				Error( "Trying to create a non-quad displacement! (entity %d, brush %d)\n", pBrush->entitynum, pBrush->brushnum );
 			pSide->pMapDisp->face.originalface = pSide;
 			pSide->pMapDisp->face.texinfo = pSide->texinfo;
 			pSide->pMapDisp->face.dispinfo = -1;

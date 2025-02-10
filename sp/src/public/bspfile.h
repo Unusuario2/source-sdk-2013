@@ -112,13 +112,9 @@
 #define MAX_MAP_PRIMITIVES				32768
 #define MAX_MAP_PRIMVERTS				65536
 #define MAX_MAP_PRIMINDICES				65536
-#ifdef MAPBASE
-#define MAX_MAP_DETAIL_PROPS			65535 // This is a soft limit that can be raised up without any issues.
-#else
-#define MAX_MAP_DETAIL_PROPS			65535
-#endif
 
-#else 
+#else
+
 // Xbox 360 - Force static arrays to be very small
 #define	MAX_MAP_MODELS					2
 #define	MAX_MAP_BRUSHES					2

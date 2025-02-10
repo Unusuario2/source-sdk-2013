@@ -23,10 +23,6 @@
 #include "tier1/strtools.h"
 #include "KeyValues.h"
 
-#ifdef MAPBASE
-#include "../common/StandartColorFormat.h" //this control the color of the console.
-#endif
-
 static void SetCurrentModel( studiohdr_t *pStudioHdr );
 static void FreeCurrentModelVertexes();
 
@@ -176,12 +172,12 @@ bool LoadStudioModel( char const* pModelName, char const* pEntityType, CUtlBuffe
 	{
 		if ( isStaticProp == RET_FAIL_NOT_MARKED_STATIC_PROP )
 		{
-			Warning("\tError! To use model \"%s\"\n"
+			Warning("Error! To use model \"%s\"\n"
 				"      with %s, it must be compiled with $staticprop!\n", pModelName, pEntityType );
 		}
 		else if ( isStaticProp == RET_FAIL_DYNAMIC )
 		{
-			Warning("\tError! %s using model \"%s\", which must be used on a dynamic entity (i.e. prop_physics). Deleted.\n", pEntityType, pModelName );
+			Warning("Error! %s using model \"%s\", which must be used on a dynamic entity (i.e. prop_physics). Deleted.\n", pEntityType, pModelName );
 		}
 		return false;
 	}
@@ -271,7 +267,7 @@ static CPhysCollide* GetCollisionModel( char const* pModelName )
 	CUtlBuffer buf;
 	if (!LoadStudioModel(pModelName, "prop_static", buf))
 	{
-		Warning("\tError loading studio model \"%s\"!\n", pModelName );
+		Warning("Error loading studio model \"%s\"!\n", pModelName );
 
 		// This way we don't try to load it multiple times
 		lookup.m_pCollide = 0;
@@ -291,7 +287,7 @@ static CPhysCollide* GetCollisionModel( char const* pModelName )
 
 	if ( !lookup.m_pCollide )
 	{
-		Warning("\tBad geometry on \"%s\"!\n", pModelName );
+		Warning("Bad geometry on \"%s\"!\n", pModelName );
 	}
 
 	// Debugging
@@ -490,7 +486,7 @@ static void AddStaticPropToLump( StaticPropBuild_t const& build )
 
 	if ( !leafList.Count() )
 	{
-		Warning("\tStatic prop %s outside the map (%.2f, %.2f, %.2f)\n", build.m_pModelName, build.m_Origin.x, build.m_Origin.y, build.m_Origin.z );
+		Warning( "Static prop %s outside the map (%.2f, %.2f, %.2f)\n", build.m_pModelName, build.m_Origin.x, build.m_Origin.y, build.m_Origin.z );
 		return;
 	}
 	// Insert an element into the lump data...
@@ -570,15 +566,8 @@ static void SetLumpData( )
 void EmitStaticProps()
 {
 #ifdef MAPBASE
-	#ifdef _WIN32
-		Msg("Placing static props... ");
-	#else
-		Msg("Placing static props...\n");
-	#endif
-#else
 	Msg("Placing static props...\n");
 #endif
-
 
 	CreateInterfaceFn physicsFactory = GetPhysicsFactory();
 	if ( physicsFactory )
@@ -699,7 +688,7 @@ void EmitStaticProps()
 #ifdef MAPBASE
 		else if ( g_bPropperStripEntities && !strncmp( pEntity, "propper_", 8 ) ) // Strip out any entities with 'propper_' in their classname, as they don't actually exist in-game.
 		{
-			Warning("\tNot including %s in BSP compile due to it being a propper entity that isn't used in-game.\n", pEntity );
+			Warning( "Not including %s in BSP compile due to it being a propper entity that isn't used in-game.\n", pEntity );
 			entities[i].epairs = 0;
 		}
 #endif
@@ -715,11 +704,6 @@ void EmitStaticProps()
 
 
 	SetLumpData( );
-#ifdef MAPBASE
-	ColorSpewMessage(SPEW_MESSAGE, &green, "done (0)\n");
-#else
-	Msg("done (%d)\n", (int)(Plat_FloatTime() - start));
-#endif
 }
 
 static studiohdr_t *g_pActiveStudioHdr;
@@ -765,7 +749,7 @@ const vertexFileHeader_t * mstudiomodel_t::CacheVertexData( void * pModelData )
 	fileHandle = g_pFileSystem->Open( fileName, "rb" );
 	if ( !fileHandle )
 	{
-		Error( "\tUnable to load vertex data \"%s\"\n", fileName );
+		Error( "Unable to load vertex data \"%s\"\n", fileName );
 	}
 
 	// Get the file size
@@ -773,7 +757,7 @@ const vertexFileHeader_t * mstudiomodel_t::CacheVertexData( void * pModelData )
 	if (size == 0)
 	{
 		g_pFileSystem->Close( fileHandle );
-		Error( "\tBad size for vertex data \"%s\"\n", fileName );
+		Error( "Bad size for vertex data \"%s\"\n", fileName );
 	}
 
 	pVvdHdr = (vertexFileHeader_t *)malloc(size);
@@ -783,15 +767,15 @@ const vertexFileHeader_t * mstudiomodel_t::CacheVertexData( void * pModelData )
 	// check header
 	if (pVvdHdr->id != MODEL_VERTEX_FILE_ID)
 	{
-		Error("\tError Vertex File %s id %d should be %d\n", fileName, pVvdHdr->id, MODEL_VERTEX_FILE_ID);
+		Error("Error Vertex File %s id %d should be %d\n", fileName, pVvdHdr->id, MODEL_VERTEX_FILE_ID);
 	}
 	if (pVvdHdr->version != MODEL_VERTEX_FILE_VERSION)
 	{
-		Error("\tError Vertex File %s version %d should be %d\n", fileName, pVvdHdr->version, MODEL_VERTEX_FILE_VERSION);
+		Error("Error Vertex File %s version %d should be %d\n", fileName, pVvdHdr->version, MODEL_VERTEX_FILE_VERSION);
 	}
 	if (pVvdHdr->checksum != g_pActiveStudioHdr->checksum)
 	{
-		Error("\tError Vertex File %s checksum %d should be %d\n", fileName, pVvdHdr->checksum, g_pActiveStudioHdr->checksum);
+		Error("Error Vertex File %s checksum %d should be %d\n", fileName, pVvdHdr->checksum, g_pActiveStudioHdr->checksum);
 	}
 
 	g_pActiveStudioHdr->pVertexBase = (void*)pVvdHdr;

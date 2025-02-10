@@ -387,9 +387,10 @@ CScriptKeyValues::~CScriptKeyValues( )
 //=============================================================================
 CScriptColorInstanceHelper g_ColorScriptInstanceHelper;
 
-BEGIN_SCRIPTDESC_ROOT_WITH_HELPER( Color, "", &g_ColorScriptInstanceHelper )
+BEGIN_SCRIPTDESC_ROOT( Color, "" )
 
 	DEFINE_SCRIPT_CONSTRUCTOR()
+	DEFINE_SCRIPT_INSTANCE_HELPER( &g_ColorScriptInstanceHelper )
 
 	DEFINE_SCRIPTFUNC( SetColor, "Sets the color." )
 

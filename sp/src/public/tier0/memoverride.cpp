@@ -602,7 +602,7 @@ ALLOC_CALL void *__cdecl _aligned_realloc_base( void *ptr, size_t size, size_t a
 
 ALLOC_CALL void *__cdecl _aligned_recalloc_base( void *ptr, size_t size, size_t align )
 {
-	Error("\tUnsupported function\n" );
+	Error( "Unsupported function\n" );
 	return NULL;
 }
 
