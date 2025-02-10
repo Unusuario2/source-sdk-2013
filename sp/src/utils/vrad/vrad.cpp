@@ -2864,7 +2864,7 @@ void PrintUsage( int argc, char **argv )
 		"                          on terrain. The compile will take longer, but it will gather\n"
 		"                          light across a wider area.\n"
 #ifdef MAPBASE
-		"  -compressconstant #: compress lightmaps whose color variation is less than # units.\n"
+		"  -compressconstant #: compress lightmaps whose color variation is less than # units, a good start is 4. (default 0)\n"
 #endif
         "  -StaticPropLighting   : generate backed static prop vertex lighting\n"
         "  -StaticPropPolys   : Perform shadow tests of static props at polygon precision\n"
