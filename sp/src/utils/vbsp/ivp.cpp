@@ -24,10 +24,6 @@
 #include "materialpatch.h"
 #include "bitvec.h"
 
-#ifdef MAPBASE
-#include "../common/StandartColorFormat.h" //this control the color of the console.
-#endif
-
 // bit per leaf
 typedef CBitVec<MAX_MAP_LEAFS> leafbitarray_t;
 
@@ -525,7 +521,7 @@ CPhysConvex *CPlaneList::BuildConvexForBrush( int brushnumber, float shrink, CPh
 			if ( fabs(thick) < shrinkMinimum )
 			{
 #if _DEBUG
-				Warning("\tCan't shrink brush %d, plane %d (%.2f, %.2f, %.2f)\n", brushnumber, pside->planenum, pplane->normal[0], pplane->normal[1], pplane->normal[2] );
+				Warning("Can't shrink brush %d, plane %d (%.2f, %.2f, %.2f)\n", brushnumber, pside->planenum, pplane->normal[0], pplane->normal[1], pplane->normal[2] );
 #endif
 				shrinkThisPlane = 0;
 			}
@@ -1323,7 +1319,7 @@ static void BuildWorldPhysModel( CUtlVector<CPhysCollisionEntry *> &collisionLis
 
 	if ( !g_bNoVirtualMesh && Disp_HasPower4Displacements() )
 	{
-		Warning("\tWARNING: Map using power 4 displacements, terrain physics cannot be compressed, map will need additional memory and CPU.\n");
+		Warning("WARNING: Map using power 4 displacements, terrain physics cannot be compressed, map will need additional memory and CPU.\n");
 		g_bNoVirtualMesh = true;
 	}
 
@@ -1511,7 +1507,7 @@ void EmitPhysCollision()
 
 	if ( !physcollision )
 	{
-		Warning("\t!!! WARNING: Can't build collision data!\n" );
+		Warning("!!! WARNING: Can't build collision data!\n" );
 		return;
 	}
 
@@ -1522,11 +1518,7 @@ void EmitPhysCollision()
 
 	int start = Plat_FloatTime();
 
-#ifdef MAPBASE
-		Msg("Building Physics collision data...");
-#else 
-	Msg("Building Physics collision data...\n");
-#endif 
+	Msg("Building Physics collision data...\n" );
 
 	int i, j;
 	for ( i = 0; i < nummodels; i++ )
@@ -1658,12 +1650,7 @@ void EmitPhysCollision()
 	memcpy( ptr, &model, sizeof(model) );
 	ptr += sizeof(model);
 	Assert( (ptr-g_pPhysCollide) == g_PhysCollideSize);
+	Msg("done (%d) (%d bytes)\n", (int)(Plat_FloatTime() - start), g_PhysCollideSize );
 
-#ifdef MAPBASE
-	ColorSpewMessage(SPEW_MESSAGE, &magenta, " (%d bytes)", g_PhysCollideSize);
-	ColorSpewMessage(SPEW_MESSAGE, &green, " done(%d)\n", (int)(Plat_FloatTime() - start));
-#else
-	Msg("done (%d)\n", (int)(Plat_FloatTime() - start));
-#endif
 	// UNDONE: Collision models (collisionList) memory leak!
 }

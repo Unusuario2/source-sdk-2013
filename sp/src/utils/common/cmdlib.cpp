@@ -87,7 +87,7 @@ void CmdLib_FPrintf( FileHandle_t hFile, const char *pFormat, ... )
 			buf.SetCount( newSize );
 			if ( buf.Count() != newSize )
 			{
-				Error("\tCmdLib_FPrintf: can't allocate space for text." );
+				Error( "CmdLib_FPrintf: can't allocate space for text." );
 			}
 		}
 	}
@@ -138,7 +138,7 @@ public:
 	{
 		if ( g_bStopOnExit )
 		{
-			Warning("\t\nPress any key to quit.\n" );
+			Warning( "\nPress any key to quit.\n" );
 			getch();
 		}
 	}
@@ -344,7 +344,7 @@ void InstallExtraSpewHook( SpewHookFn pFn )
 #if 0
 void CmdLib_AllocError( unsigned long size )
 {
-	Error("\tError trying to allocate %d bytes.\n", size );
+	Error( "Error trying to allocate %d bytes.\n", size );
 }
 
 
@@ -368,11 +368,7 @@ void SetSpewFunctionLogFile( char const *pFilename )
 
 	Assert( g_pLogFile );
 	if (!g_pLogFile)
-#ifdef MAPBASE
-		Error("\tCan't create Log file: +- \"%s\"\n", pFilename );
-#else
-		Error("\tCan't create LogFile: \"%s\"\n", pFilename );
-#endif
+		Error("Can't create LogFile:\"%s\"\n", pFilename );
 
 	CmdLib_FPrintf( g_pLogFile, "\n\n\n" );
 }
@@ -591,14 +587,14 @@ void Q_mkdir (char *path)
 		return;
 #endif
 //	if (errno != EEXIST)
-	Error ("\tmkdir failed %s\n", path );
+	Error ("mkdir failed %s\n", path );
 }
 
 void CmdLib_InitFileSystem( const char *pFilename, int maxMemoryUsage )
 {
 	FileSystem_Init( pFilename, maxMemoryUsage );
 	if ( !g_pFileSystem )
-		Error("\tCmdLib_InitFileSystem failed." );
+		Error( "CmdLib_InitFileSystem failed." );
 }
 
 void CmdLib_TermFileSystem()
@@ -693,9 +689,9 @@ FileHandle_t SafeOpenWrite ( const char *filename )
 
 	if (!f)
 	{
-		//Error ("\tError opening %s: %s",filename,strerror(errno));
+		//Error ("Error opening %s: %s",filename,strerror(errno));
 		// BUGBUG: No way to get equivalent of errno from IFileSystem!
-		Error ("\tError opening %s! (Check for write enable)\n",filename);
+		Error ("Error opening %s! (Check for write enable)\n",filename);
 	}
 
 	return f;
@@ -797,14 +793,14 @@ FileHandle_t SafeOpenRead( const char *filename )
 				return f;
 			}
 		}
-		Error ("\tError opening %s\n",filename );
+		Error ("Error opening %s\n",filename );
 		return f;
 	}
 	else
 	{
 		f = g_pFileSystem->Open( filename, "rb" );
 		if ( !f )
-			Error ("\tError opening %s",filename );
+			Error ("Error opening %s",filename );
 
 		return f;
 	}
@@ -813,14 +809,14 @@ FileHandle_t SafeOpenRead( const char *filename )
 void SafeRead( FileHandle_t f, void *buffer, int count)
 {
 	if ( g_pFileSystem->Read (buffer, count, f) != (size_t)count)
-		Error ("\tFile read failure");
+		Error ("File read failure");
 }
 
 
 void SafeWrite ( FileHandle_t f, void *buffer, int count)
 {
 	if (g_pFileSystem->Write (buffer, count, f) != (size_t)count)
-		Error ("\tFile write failure");
+		Error ("File write failure");
 }
 
 
@@ -917,7 +913,7 @@ int ParseHex (char *hex)
 		else if (*str >= 'A' && *str <= 'F')
 			num += 10 + *str-'A';
 		else
-			Error ("\tBad hex number: %s",hex);
+			Error ("Bad hex number: %s",hex);
 		str++;
 	}
 

@@ -20,10 +20,6 @@
 #include "pacifier.h"
 
 #ifdef MAPBASE
-#include "../common/StandartColorFormat.h" //this control the color of the console.
-#endif 
-
-#ifdef MAPBASE
 // This was suggested in that Source 2013 pull request that fixed Vrad.
 // I trust their judgement on this.
 #define	MAX_THREADS	32
@@ -150,11 +146,7 @@ void ThreadSetDefault (void)
 			numthreads = 1;
 	}
 
-#ifdef MAPBASE
-	ColorSpewMessage(SPEW_MESSAGE, &cyan, "(Threads: %i)\n", numthreads);
-#else
-	Msg ("%i threads \n", numthreads);
-#endif
+	Msg ("%i threads\n", numthreads);
 }
 
 
@@ -164,7 +156,7 @@ void ThreadLock (void)
 		return;
 	EnterCriticalSection (&crit);
 	if (enter)
-		Error ("\tRecursive ThreadLock\n");
+		Error ("Recursive ThreadLock\n");
 	enter = 1;
 }
 
@@ -173,7 +165,7 @@ void ThreadUnlock (void)
 	if (!threaded)
 		return;
 	if (!enter)
-		Error ("\tThreadUnlock without lock\n");
+		Error ("ThreadUnlock without lock\n");
 	enter = 0;
 	LeaveCriticalSection (&crit);
 }
@@ -254,19 +246,17 @@ void RunThreadsOn( int workcnt, qboolean showpacifier, RunThreadsFn fn, void *pU
 	(*func)( 0 );
 	return;
 #endif
+
 	
 	RunThreads_Start( fn, pUserData );
 	RunThreads_End();
+
 
 	end = Plat_FloatTime();
 	if (pacifier)
 	{
 		EndPacifier(false);
-#ifdef MAPBASE
-		printf("] (%i)\n", end - start);
-#else
 		printf (" (%i)\n", end-start);
-#endif
 	}
 }
 

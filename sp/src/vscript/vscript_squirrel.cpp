@@ -23,14 +23,12 @@
 #include "sqstdstring.h"
 
 // HACK: Include internal parts of squirrel for serialization
-#include "squirrel/squirrel/sqvm.h"
 #include "squirrel/squirrel/sqobject.h"
 #include "squirrel/squirrel/sqstate.h"
 #include "squirrel/squirrel/sqtable.h"
-#include "squirrel/squirrel/sqarray.h"
 #include "squirrel/squirrel/sqclass.h"
 #include "squirrel/squirrel/sqfuncproto.h"
-#include "squirrel/squirrel/squserdata.h"
+#include "squirrel/squirrel/sqvm.h"
 #include "squirrel/squirrel/sqclosure.h"
 
 #include "tier1/utlbuffer.h"
@@ -43,26 +41,25 @@
 
 extern ConVar developer;
 
-
 struct WriteStateMap
 {
-	CUtlRBTree< void* > cache;
-
-	WriteStateMap() : cache( DefLessFunc(void*) )
+	CUtlMap<void*, int> cache;
+	WriteStateMap() : cache(DefLessFunc(void*))
 	{}
 
-	bool CheckCache( void* ptr, CUtlBuffer* pBuffer )
+	bool CheckCache(CUtlBuffer* pBuffer, void* ptr)
 	{
-		int idx = cache.Find( ptr );
-		if ( idx != cache.InvalidIndex() )
+		auto idx = cache.Find(ptr);
+		if (idx != cache.InvalidIndex())
 		{
-			pBuffer->PutInt( idx );
+			pBuffer->PutInt(cache[idx]);
 			return true;
 		}
 		else
 		{
-			int newIdx = cache.Insert( ptr );
-			pBuffer->PutInt( newIdx );
+			int newIdx = cache.Count();
+			cache.Insert(ptr, newIdx);
+			pBuffer->PutInt(newIdx);
 			return false;
 		}
 	}
@@ -70,42 +67,71 @@ struct WriteStateMap
 
 struct ReadStateMap
 {
-	CUtlMap< int, SQObject > cache;
-
-	ReadStateMap() : cache( DefLessFunc(int) )
+	CUtlMap<int, HSQOBJECT> cache;
+#ifdef _DEBUG
+	CUtlMap<int, bool> allocated;
+#endif
+	HSQUIRRELVM vm_;
+	ReadStateMap(HSQUIRRELVM vm) : 
+		cache(DefLessFunc(int)),
+#ifdef _DEBUG
+		allocated(DefLessFunc(int)), 
+#endif
+		vm_(vm)
 	{}
 
-	bool CheckCache( SQObject* ptr, CUtlBuffer* pBuffer, int* outmarker )
+	~ReadStateMap()
+	{
+		FOR_EACH_MAP_FAST(cache, i)
+		{
+			HSQOBJECT& obj = cache[i];
+			sq_release(vm_, &obj);
+		}
+	}
+
+	bool CheckCache(CUtlBuffer* pBuffer, HSQUIRRELVM vm, int * outmarker)
 	{
 		int marker = pBuffer->GetInt();
-		int idx = cache.Find( marker );
-		if ( idx != cache.InvalidIndex() )
+
+		auto idx = cache.Find(marker);
+
+#ifdef _DEBUG
+		auto allocatedIdx = allocated.Find(marker);
+		bool hasSeen = allocatedIdx != allocated.InvalidIndex();
+		if (!hasSeen)
 		{
-			const SQObject &o = cache[idx];
+			allocated.Insert(marker, true);
+		}
+#endif
 
-			Assert( o._type == ptr->_type );
-
-			ptr->_type = o._type;
-			ptr->_unVal.raw = o._unVal.raw;
-
+		if (idx != cache.InvalidIndex())
+		{
+			sq_pushobject(vm, cache[idx]);
 			return true;
 		}
 		else
 		{
+#ifdef _DEBUG
+			Assert(!hasSeen);
+#endif
 			*outmarker = marker;
 			return false;
 		}
 	}
 
-	void StoreInCache( int marker, const SQObject &obj )
+	void StoreInCache(int marker, HSQOBJECT& obj)
 	{
-		int idx = cache.Insert( marker );
-		SQObject &o = cache[idx];
-		o._type = obj._type;
-		o._unVal.raw = obj._unVal.raw;
+		cache.Insert(marker, obj);
+	}
+
+	void StoreTopInCache(int marker)
+	{
+		HSQOBJECT obj;
+		sq_getstackobj(vm_, -1, &obj);
+		sq_addref(vm_, &obj);
+		cache.Insert(marker, obj);
 	}
 };
-
 
 class SquirrelVM : public IScriptVM
 {
@@ -241,59 +267,9 @@ public:
 
 	virtual bool RaiseException(const char* pszExceptionText) override;
 
-	void WriteObject( const SQObjectPtr &obj, CUtlBuffer* pBuffer, WriteStateMap& writeState );
 
-	// Do not implicitly add/remove ref
-	void WriteObject( const SQObject &obj, CUtlBuffer* pBuffer, WriteStateMap& writeState )
-	{
-		WriteObject( (const SQObjectPtr&)obj, pBuffer, writeState );
-	}
-
-	void WriteObject( SQTable *pObj, CUtlBuffer* pBuffer, WriteStateMap& writeState )
-	{
-		SQObject obj;
-		obj._type = OT_TABLE;
-		obj._unVal.pUserPointer = pObj;
-		WriteObject( (const SQObjectPtr&)obj, pBuffer, writeState );
-	}
-
-	void WriteObject( SQClass *pObj, CUtlBuffer* pBuffer, WriteStateMap& writeState )
-	{
-		SQObject obj;
-		obj._type = OT_CLASS;
-		obj._unVal.pUserPointer = pObj;
-		WriteObject( (const SQObjectPtr&)obj, pBuffer, writeState );
-	}
-
-	void WriteObject( SQWeakRef *pObj, CUtlBuffer* pBuffer, WriteStateMap& writeState )
-	{
-		SQObject obj;
-		obj._type = OT_WEAKREF;
-		obj._unVal.pUserPointer = pObj;
-		WriteObject( (const SQObjectPtr&)obj, pBuffer, writeState );
-	}
-
-	void WriteObject( SQFunctionProto *pObj, CUtlBuffer* pBuffer, WriteStateMap& writeState )
-	{
-		SQObject obj;
-		obj._type = OT_FUNCPROTO;
-		obj._unVal.pUserPointer = pObj;
-		WriteObject( (const SQObjectPtr&)obj, pBuffer, writeState );
-	}
-
-	void ReadObject( SQObjectPtr &obj, CUtlBuffer* pBuffer, ReadStateMap& readState );
-
-	// Do not implicity add/remove ref
-	void ReadObject( SQObject &obj, CUtlBuffer* pBuffer, ReadStateMap& readState )
-	{
-		obj._type = OT_NULL;
-		obj._unVal.pUserPointer = 0;
-		ReadObject( (SQObjectPtr&)obj, pBuffer, readState );
-	}
-
-	void WriteVM( SQVM *pThis, CUtlBuffer *pBuffer, WriteStateMap &writeState );
-	void ReadVM( SQVM *pThis, CUtlBuffer *pBuffer, ReadStateMap &readState );
-
+	void WriteObject(CUtlBuffer* pBuffer, WriteStateMap& writeState, SQInteger idx);
+	void ReadObject(CUtlBuffer* pBuffer, ReadStateMap& readState);
 	HSQUIRRELVM vm_ = nullptr;
 	HSQOBJECT lastError_;
 	HSQOBJECT vectorClass_;
@@ -1100,7 +1076,7 @@ struct ClassInstanceData
 
 	void* instance;
 	ScriptClassDesc_t* desc;
-	CUtlConstString instanceId;
+	CUtlString instanceId;
 
 	// Indicates this game-created instance is a weak reference and can be destructed (Blixibon)
 	bool allowDestruct;
@@ -1159,8 +1135,8 @@ void PushVariant(HSQUIRRELVM vm, const ScriptVariant_t& value)
 		break;
 	case FIELD_VECTOR:
 	{
-		SquirrelVM* pSquirrelVM = (SquirrelVM*)sq_getsharedforeignptr(vm);
-		Assert(pSquirrelVM);
+		SquirrelVM* pSquirrelVM = (SquirrelVM*)sq_getforeignptr(vm);
+		assert(pSquirrelVM);
 		sq_pushobject(vm, pSquirrelVM->vectorClass_);
 		sq_createinstance(vm, -1);
 		SQUserPointer p;
@@ -1422,8 +1398,8 @@ SQInteger function_stub(HSQUIRRELVM vm)
 
 	ScriptVariant_t retval;
 
-	SquirrelVM* pSquirrelVM = (SquirrelVM*)sq_getsharedforeignptr(vm);
-	Assert(pSquirrelVM);
+	SquirrelVM* pSquirrelVM = (SquirrelVM*)sq_getforeignptr(vm);
+	assert(pSquirrelVM);
 
 	sq_resetobject(&pSquirrelVM->lastError_);
 
@@ -1475,8 +1451,8 @@ SQInteger constructor_stub(HSQUIRRELVM vm)
 		return sqstd_throwerrorf(vm, "Unable to construct instances of %s", pClassDesc->m_pszScriptName);
 	}
 
-	SquirrelVM* pSquirrelVM = (SquirrelVM*)sq_getsharedforeignptr(vm);
-	Assert(pSquirrelVM);
+	SquirrelVM* pSquirrelVM = (SquirrelVM*)sq_getforeignptr(vm);
+	assert(pSquirrelVM);
 
 	sq_resetobject(&pSquirrelVM->lastError_);
 
@@ -1727,7 +1703,7 @@ struct SquirrelSafeCheck
 		if ( top_ != diff )
 		{
 			Assert(!"Squirrel VM stack is not consistent");
-			Error("\tSquirrel VM stack is not consistent\n");
+			Error("Squirrel VM stack is not consistent\n");
 		}
 
 		// TODO: Handle error state checks
@@ -1756,7 +1732,7 @@ void errorfunc(HSQUIRRELVM SQ_UNUSED_ARG(v), const SQChar* format, ...)
 	va_start(args, format);
 	V_vsnprintf(buffer, sizeof(buffer), format, args);
 	va_end(args);
-	Warning("\t%s", buffer);
+	Warning("%s", buffer);
 }
 
 const char * ScriptDataTypeToName(ScriptDataType_t datatype)
@@ -2008,7 +1984,7 @@ bool SquirrelVM::Init()
 	if (vm_ == nullptr)
 		return false;
 
-	sq_setsharedforeignptr(vm_, this);
+	sq_setforeignptr(vm_, this);
 	sq_resetobject(&lastError_);
 
 	sq_setprintfunc(vm_, printfunc, errorfunc);
@@ -2560,7 +2536,7 @@ bool SquirrelVM::RegisterClass(ScriptClassDesc_t* pClassDesc)
 		char typemask[64];
 		if (!CreateParamCheck(scriptFunction, typemask))
 		{
-			Warning("\tUnable to create param check for %s.%s\n",
+			Warning("Unable to create param check for %s.%s\n",
 				pClassDesc->m_pszClassname, scriptFunction.m_desc.m_pszFunction);
 			break;
 		}
@@ -3182,9 +3158,6 @@ bool SquirrelVM::ArrayAppend(HSCRIPT hArray, const ScriptVariant_t &val)
 	return ret;
 }
 
-//-------------------------------------------------------------
-//-------------------------------------------------------------
-
 enum ClassType
 {
 	VectorClassType = 0,
@@ -3192,1342 +3165,876 @@ enum ClassType
 	ScriptClassType = 2
 };
 
-// Use iterator as SQTable::_nodes is private
-#define FOREACH_SQTABLE( pTable, key, val )\
-	SQInteger i = 0;\
-	SQObjectPtr pi = i;\
-	for ( ; (i = pTable->Next( false, pi, key, val )) != -1; pi._unVal.nInteger = i )
-
-
-#define NATIVE_NAME_READBUF_SIZE 128
-
-void SquirrelVM::WriteObject( const SQObjectPtr &obj, CUtlBuffer* pBuffer, WriteStateMap& writeState )
+SQInteger closure_write(SQUserPointer file, SQUserPointer p, SQInteger size)
 {
-	pBuffer->PutInt( obj._type );
+	((CUtlBuffer*)file)->Put(p, size);
+	return size;
+}
 
-	switch ( obj._type )
+void SquirrelVM::WriteObject(CUtlBuffer* pBuffer, WriteStateMap& writeState, SQInteger idx)
+{
+	SquirrelSafeCheck safeCheck(vm_);
+
+	HSQOBJECT obj;
+	sq_resetobject(&obj);
+	sq_getstackobj(vm_, idx, &obj);
+
+	switch (obj._type)
 	{
 	case OT_NULL:
+	{
+		pBuffer->PutInt(OT_NULL);
 		break;
-
+	}
 	case OT_INTEGER:
-#ifdef _SQ64
-		pBuffer->PutInt64( obj._unVal.nInteger );
-#else
-		pBuffer->PutInt( obj._unVal.nInteger );
-#endif
+	{
+		pBuffer->PutInt(OT_INTEGER);
+		pBuffer->PutInt64(sq_objtointeger(&obj));
 		break;
-
+	}
 	case OT_FLOAT:
-#ifdef SQUSEDOUBLE
-		pBuffer->PutDouble( obj._unVal.fFloat );
-#else
-		pBuffer->PutFloat( obj._unVal.fFloat );
-#endif
+	{
+		pBuffer->PutInt(OT_FLOAT);
+		pBuffer->PutFloat(sq_objtofloat(&obj));
 		break;
-
+	}
 	case OT_BOOL:
-		Assert( ( obj._unVal.nInteger & -2 ) == 0 );
-		pBuffer->PutChar( obj._unVal.nInteger );
+	{
+		pBuffer->PutInt(OT_BOOL);
+		pBuffer->PutChar(sq_objtobool(&obj));
 		break;
-
+	}
 	case OT_STRING:
-		pBuffer->PutInt( obj._unVal.pString->_len );
-		pBuffer->Put( obj._unVal.pString->_val, obj._unVal.pString->_len );
+	{
+		pBuffer->PutInt(OT_STRING);
+		const char* val = nullptr;
+		SQInteger size = 0;
+		sq_getstringandsize(vm_, idx, &val, &size);
+		pBuffer->PutInt(size);
+		pBuffer->Put(val, size);
 		break;
-
+	}
 	case OT_TABLE:
 	{
-		SQTable *pThis = obj._unVal.pTable;
-
-		if ( writeState.CheckCache( pThis, pBuffer ) )
+		pBuffer->PutInt(OT_TABLE);
+		if (writeState.CheckCache(pBuffer, obj._unVal.pTable))
+		{
 			break;
-
-		int count = pThis->CountUsed();
-		DBG_CODE_NOSCOPE( int nCountPut = pBuffer->TellPut(); )
-		pBuffer->PutInt( count );
-
-		pBuffer->PutChar( pThis->_delegate != NULL );
-		if ( pThis->_delegate )
-		{
-			WriteObject( pThis->_delegate, pBuffer, writeState );
 		}
-
+		sq_getdelegate(vm_, idx);
+		WriteObject(pBuffer, writeState, -1);
+		sq_poptop(vm_);
+		int count = sq_getsize(vm_, idx);
+		sq_push(vm_, idx);
+		sq_pushnull(vm_);
+		pBuffer->PutInt(count);
+		while (SQ_SUCCEEDED(sq_next(vm_, -2)))
 		{
-			SQObjectPtr key, val;
-			FOREACH_SQTABLE( pThis, key, val )
-			{
-				WriteObject( key, pBuffer, writeState );
-				WriteObject( val, pBuffer, writeState );
-				DBG_CODE( count--; );
-			}
+			WriteObject(pBuffer, writeState, -2);
+			WriteObject(pBuffer, writeState, -1);
+			sq_pop(vm_, 2);
+			--count;
 		}
-
-#ifdef _DEBUG
-		if ( count )
-		{
-			int prev = *(int*)( (char*)pBuffer->Base() + nCountPut );
-			*(int*)( (char*)pBuffer->Base() + nCountPut ) = prev - count;
-			Warning( "Table serialisation error, changed count %d->%d\n", prev, prev - count );
-			Assert(0);
-		}
-#endif
+		sq_pop(vm_, 2);
+		Assert(count == 0);
 		break;
 	}
 	case OT_ARRAY:
 	{
-		SQArray *pThis = obj._unVal.pArray;
-
-		if ( writeState.CheckCache( pThis, pBuffer ) )
+		pBuffer->PutInt(OT_ARRAY);
+		if (writeState.CheckCache(pBuffer, obj._unVal.pArray))
+		{
 			break;
-
-		int count = pThis->_values.size();
-		DBG_CODE_NOSCOPE(
-			int counter = count;
-			int nCountPut = pBuffer->TellPut();
-		)
-		pBuffer->PutInt( count );
-
-		for ( int i = 0; i < count; ++i )
-		{
-			WriteObject( pThis->_values[i], pBuffer, writeState );
-			DBG_CODE( counter--; );
 		}
-
-#ifdef _DEBUG
-		if ( counter )
+		int count = sq_getsize(vm_, idx);
+		pBuffer->PutInt(count);
+		sq_push(vm_, idx);
+		sq_pushnull(vm_);
+		while (SQ_SUCCEEDED(sq_next(vm_, -2)))
 		{
-			int prev = *(int*)( (char*)pBuffer->Base() + nCountPut );
-			*(int*)( (char*)pBuffer->Base() + nCountPut ) = prev - counter;
-			Warning( "Array serialisation error, changed count %d->%d\n", prev, prev - count );
-			Assert(0);
+			WriteObject(pBuffer, writeState, -1);
+			sq_pop(vm_, 2);
+			--count;
 		}
-#endif
+		sq_pop(vm_, 2);
+		Assert(count == 0);
 		break;
 	}
 	case OT_CLOSURE:
 	{
-		SQClosure *pThis = obj._unVal.pClosure;
-
-		if ( writeState.CheckCache( pThis, pBuffer ) )
+		pBuffer->PutInt(OT_CLOSURE);
+		if (writeState.CheckCache(pBuffer, obj._unVal.pClosure))
+		{
 			break;
-
-		Assert( pThis->_function );
-
-		WriteObject( pThis->_function, pBuffer, writeState );
-
-		pBuffer->PutChar( pThis->_root != NULL );
-		if ( pThis->_root )
-		{
-			WriteObject( pThis->_root, pBuffer, writeState );
 		}
 
-		pBuffer->PutChar( pThis->_env != NULL );
-		if ( pThis->_env )
+		SQInteger nparams = 0, nfreevars = 0;
+		sq_getclosureinfo(vm_, idx, &nparams, &nfreevars);
+		if (nfreevars == 0 && _closure(obj)->_function->_defaultparams == 0)
 		{
-			WriteObject( pThis->_env, pBuffer, writeState );
-		}
+			pBuffer->PutChar(0);
 
-		// NOTE: Used for class functions to access the base class via 'base' keyword.
-		// This is assigned in SQClass::NewSlot().
-		// The alternative to writing SQClosure::_base would be always using SQClass::NewSlot() on class restore.
-		pBuffer->PutChar( pThis->_base != NULL );
-		if ( pThis->_base )
-		{
-			WriteObject( pThis->_base, pBuffer, writeState );
-		}
-
-		int count = pThis->_function->_noutervalues;
-		pBuffer->PutInt( count );
-		for ( int i = 0; i < count; ++i )
-		{
-			WriteObject( pThis->_outervalues[i], pBuffer, writeState );
-		}
-
-		count = pThis->_function->_ndefaultparams;
-		pBuffer->PutInt( count );
-		for ( int i = 0; i < count; ++i )
-		{
-			WriteObject( pThis->_defaultparams[i], pBuffer, writeState );
-		}
-
-		break;
-	}
-	// TODO: Nameless and non-global native closures
-	// if _name == NULL and _noutervalues == 0 then it is member IsValid etc.
-	// if _name != NULL and _outervalues[0] == USERPOINTER then global or member functions
-	// if this is a non-bound (!_env) member native closure, it will be written but won't be read,
-	// or wrong closure will be read if a closure with the same name exists in the root table.
-	//
-	// An identifier can be added to script descriptions to determine the type of this native closure to read/write
-	case OT_NATIVECLOSURE:
-	{
-		SQNativeClosure *pThis = obj._unVal.pNativeClosure;
-
-#ifdef _DEBUG
-		bool bAsserted = false;
-
-		if ( pThis->_noutervalues && pThis->_name._type == OT_STRING && pThis->_name._unVal.pString )
-		{
-			Assert( pThis->_noutervalues == 1 );
-			Assert( pThis->_outervalues[0]._type == OT_USERPOINTER );
-
-			const SQUserPointer userpointer = pThis->_outervalues[0]._unVal.pUserPointer;
-			const CUtlVector< ScriptClassDesc_t* > &classes = ScriptClassDesc_t::AllClassesDesc();
-			FOR_EACH_VEC( classes, i )
+			sq_push(vm_, idx);
+			if (SQ_FAILED(sq_writeclosure(vm_, closure_write, pBuffer)))
 			{
-				const CUtlVector< ScriptFunctionBinding_t > &funcs = classes[i]->m_FunctionBindings;
-				FOR_EACH_VEC( funcs, j )
-				{
-					if ( &funcs[j] == userpointer )
-					{
-						AssertMsg( 0, "SquirrelVM: Native closure is not saved! '%s' -> %s::%s",
-								pThis->_name._unVal.pString->_val,
-								classes[i]->m_pszScriptName,
-								funcs[j].m_desc.m_pszScriptName );
-						bAsserted = true;
-						goto done;
-					}
-				}
+				Error("Failed to write closure");
 			}
-			done:;
-		}
-#endif
-
-		if ( pThis->_name._type == OT_STRING && pThis->_name._unVal.pString && !pThis->_env )
-		{
-			Assert( pThis->_name._unVal.pString->_len < NATIVE_NAME_READBUF_SIZE );
-			pBuffer->Put( pThis->_name._unVal.pString->_val, pThis->_name._unVal.pString->_len + 1 );
-			break;
-		}
-
-#ifdef _DEBUG
-		if ( pThis->_name._type == OT_STRING && pThis->_name._unVal.pString )
-		{
-			if ( !bAsserted )
-				AssertMsg( 0, "SquirrelVM: Native closure is not saved! '%s'", pThis->_name._unVal.pString->_val );
+			sq_pop(vm_, 1);
 		}
 		else
 		{
-			AssertMsg( 0, "SquirrelVM: Native closure is not saved!" );
-		}
-#endif
+			// Unfortunately we can't use sq_writeclosure because it doesn't work well with
+			// outer variables
 
-		Assert( *(int*)pBuffer->PeekPut( -(int)sizeof(int) ) == OT_NATIVECLOSURE );
-		*(int*)pBuffer->PeekPut( -(int)sizeof(int) ) = OT_NULL;
+			pBuffer->PutChar(1);
+
+			if (!_closure(obj)->Save(vm_, pBuffer, closure_write))
+			{
+				Error("Failed to write closure\n");
+			}
+
+			int noutervalues = _closure(obj)->_function->_noutervalues;
+			for (int i = 0; i < noutervalues; ++i)
+			{
+				sq_pushobject(vm_, _closure(obj)->_outervalues[i]);
+				WriteObject(pBuffer, writeState, -1);
+				sq_poptop(vm_);
+			}
+
+			int ndefaultparams = _closure(obj)->_function->_ndefaultparams;
+			for (int i = 0; i < ndefaultparams; ++i)
+			{
+				sq_pushobject(vm_, _closure(obj)->_defaultparams[i]);
+				WriteObject(pBuffer, writeState, -1);
+				sq_poptop(vm_);
+			}
+		}
+
+		if (_closure(obj)->_env)
+		{
+			sq_pushobject(vm_, _closure(obj)->_env->_obj);
+		}
+		else
+		{
+			sq_pushnull(vm_);
+		}
+		WriteObject(pBuffer, writeState, -1);
+		sq_poptop(vm_);
 
 		break;
 	}
-	case OT_FUNCPROTO:
+	case OT_NATIVECLOSURE:
 	{
-		SQFunctionProto *pThis = obj._unVal.pFunctionProto;
+		pBuffer->PutInt(OT_NATIVECLOSURE);
+		sq_getclosurename(vm_, idx);
 
-		if ( writeState.CheckCache( pThis, pBuffer ) )
-			break;
+		const char* name = nullptr;
+		sq_getstring(vm_, -1, &name);
+		pBuffer->PutString(name);
 
-		// NOTE: SQFunctionProto::Save cannot save non-primitive literals. Save everything manually!
-		pBuffer->PutInt( pThis->_nliterals );
-		pBuffer->PutInt( pThis->_nparameters );
-		pBuffer->PutInt( pThis->_noutervalues );
-		pBuffer->PutInt( pThis->_nlocalvarinfos );
-		pBuffer->PutInt( pThis->_nlineinfos );
-		pBuffer->PutInt( pThis->_ndefaultparams );
-		pBuffer->PutInt( pThis->_ninstructions );
-		pBuffer->PutInt( pThis->_nfunctions );
-
-		WriteObject( pThis->_sourcename, pBuffer, writeState );
-		WriteObject( pThis->_name, pBuffer, writeState );
-
-		for ( int i = 0; i < pThis->_nliterals; ++i )
-		{
-			WriteObject( pThis->_literals[i], pBuffer, writeState );
-		}
-
-		for ( int i = 0; i < pThis->_nparameters; ++i )
-		{
-			WriteObject( pThis->_parameters[i], pBuffer, writeState );
-		}
-
-		for ( int i = 0; i < pThis->_noutervalues; ++i )
-		{
-			SQOuterVar &p = pThis->_outervalues[i];
-			pBuffer->PutUnsignedInt( p._type );
-			WriteObject( p._src, pBuffer, writeState );
-			WriteObject( p._name, pBuffer, writeState );
-		}
-
-		for ( int i = 0; i < pThis->_nlocalvarinfos; ++i )
-		{
-			SQLocalVarInfo &p = pThis->_localvarinfos[i];
-			WriteObject( p._name, pBuffer, writeState );
-			pBuffer->PutUnsignedInt( p._pos );
-			pBuffer->PutUnsignedInt( p._start_op );
-			pBuffer->PutUnsignedInt( p._end_op );
-		}
-
-		pBuffer->Put( pThis->_lineinfos, sizeof(SQLineInfo) * pThis->_nlineinfos );
-		pBuffer->Put( pThis->_defaultparams, sizeof(SQInteger) * pThis->_ndefaultparams );
-		pBuffer->Put( pThis->_instructions, sizeof(SQInstruction) * pThis->_ninstructions );
-
-		for ( int i = 0; i < pThis->_nfunctions; ++i )
-		{
-			WriteObject( pThis->_functions[i], pBuffer, writeState );
-		}
-
-		pBuffer->PutInt( pThis->_stacksize );
-		pBuffer->PutChar( pThis->_bgenerator );
-		pBuffer->PutInt( pThis->_varparams );
-
+		sq_pop(vm_, 1);
 		break;
 	}
 	case OT_CLASS:
 	{
-		SQClass *pThis = obj._unVal.pClass;
-
-		if ( writeState.CheckCache( pThis, pBuffer ) )
-			break;
-
-		SQUserPointer typetag = pThis->_typetag;
-
-		if ( typetag != NULL )
+		pBuffer->PutInt(OT_CLASS);
+		if (writeState.CheckCache(pBuffer, obj._unVal.pClass))
 		{
-			if ( typetag == TYPETAG_VECTOR )
-			{
-				pBuffer->PutChar( VectorClassType );
-			}
-			else
-			{
-				ScriptClassDesc_t *pDesc = (ScriptClassDesc_t*)typetag;
-				pBuffer->PutChar( NativeClassType );
-				pBuffer->PutString( pDesc->m_pszScriptName );
-				Assert( strlen(pDesc->m_pszScriptName) < NATIVE_NAME_READBUF_SIZE );
-			}
-
 			break;
 		}
-
-		if ( pThis == _class(regexpClass_) )
+		SQUserPointer typetag = nullptr;
+		sq_gettypetag(vm_, idx, &typetag);
+		if (typetag == TYPETAG_VECTOR)
 		{
-			pBuffer->PutChar( NativeClassType );
-			pBuffer->PutString( "regexp" );
-
-			break;
+			pBuffer->PutInt(VectorClassType);
 		}
-
-		pBuffer->PutChar( ScriptClassType );
-
-		pBuffer->PutChar( pThis->_base != NULL );
-		if ( pThis->_base )
+		else if (typetag != nullptr)
 		{
-			WriteObject( pThis->_base, pBuffer, writeState );
+			// Seems so dangerous to treat typetag as ScriptClassDesc_t*
+			// however we don't really have an option without some sort of tagged
+			// pointer.
+			pBuffer->PutInt(NativeClassType);
+			pBuffer->PutString(((ScriptClassDesc_t*)typetag)->m_pszScriptName);
 		}
-
-		// FIXME: This is inefficient for inheritance, broken for native class inheritance
-
-		WriteObject( pThis->_members, pBuffer, writeState );
-
-		int count = pThis->_defaultvalues.size();
-		pBuffer->PutInt( count );
-
-		for ( int i = 0; i < count; ++i )
+		else
 		{
-			WriteObject( pThis->_defaultvalues[i].val, pBuffer, writeState );
-		}
-
-		count = pThis->_methods.size();
-		pBuffer->PutInt( count );
-
-		for ( int i = 0; i < count; ++i )
-		{
-			WriteObject( pThis->_methods[i].val, pBuffer, writeState );
-		}
-
-		// only write valid metmathods instead of writing 18 nulls every time
-		int mask = 0;
-		int nMaskPut = pBuffer->TellPut();
-		pBuffer->PutInt( mask );
-
-		// all metamethods can fit in an int32 mask
-		Assert( SQMetaMethod::MT_LAST <= (sizeof(int) << 3) );
-
-		for ( unsigned i = 0; i < SQMetaMethod::MT_LAST; ++i )
-		{
-			if ( pThis->_metamethods[i]._type != OT_NULL )
+			// HACK: We can't easily identify when the type is a builtin to exclude
+			// so we just check against the only class we need to deal with at the moment
+			// which is "regexp"
+			const char* builtinName = nullptr;
+			if (_class(obj) == _class(regexpClass_))
 			{
-				mask |= 1 << i;
-				WriteObject( pThis->_metamethods[i], pBuffer, writeState );
+				builtinName = "regexp";
 			}
+
+			if (builtinName)
+			{
+				pBuffer->PutInt(NativeClassType);
+				pBuffer->PutString(builtinName);
+				break;
+			}
+
+			pBuffer->PutInt(ScriptClassType);
+
+			sq_getbase(vm_, idx);
+			WriteObject(pBuffer, writeState, -1);
+			sq_pop(vm_, 1);
+
+			sq_push(vm_, idx);
+			sq_pushnull(vm_);
+			sq_getattributes(vm_, -2);
+			WriteObject(pBuffer, writeState, -1);
+			sq_pop(vm_, 1);
+
+			sq_pushnull(vm_);
+			while (SQ_SUCCEEDED(sq_next(vm_, -2)))
+			{
+				pBuffer->PutChar(1);
+				// TODO: Member Attributes
+				WriteObject(pBuffer, writeState, -2);
+				WriteObject(pBuffer, writeState, -1);
+				sq_pop(vm_, 2);
+			}
+			sq_pop(vm_, 2);
+
+			{
+				// HACK: Meta-methods are not included in an iterator of OT_CLASS
+				SQObjectPtrVec& metamethods = *(_ss(vm_)->_metamethods);
+				for (int i = 0; i < MT_LAST; ++i)
+				{
+					if (sq_type(_class(obj)->_metamethods[i]) != OT_NULL)
+					{
+						pBuffer->PutChar(1);
+						sq_pushobject(vm_, metamethods[i]);
+						sq_pushobject(vm_, _class(obj)->_metamethods[i]);
+						WriteObject(pBuffer, writeState, -2);
+						WriteObject(pBuffer, writeState, -1);
+						sq_pop(vm_, 2);
+					}
+				}
+			}
+
+			pBuffer->PutChar(0);
 		}
-
-		if ( mask )
-		{
-			*(int*)( (char*)pBuffer->Base() + nMaskPut ) = mask;
-		}
-
-		pBuffer->PutInt( pThis->_constructoridx );
-
 		break;
 	}
 	case OT_INSTANCE:
 	{
-		SQInstance *pThis = obj._unVal.pInstance;
-
-		if ( writeState.CheckCache( pThis, pBuffer ) )
-			break;
-
-		WriteObject( pThis->_class, pBuffer, writeState );
-
-		if ( pThis->_class == _class(regexpClass_) )
+		pBuffer->PutInt(OT_INSTANCE);
+		if (writeState.CheckCache(pBuffer, obj._unVal.pInstance))
 		{
-			SQObjectPtr key = SQString::Create( _ss(vm_), "pattern_" );
-			SQObjectPtr val;
-			pThis->Get( key, val );
-			WriteObject( val, pBuffer, writeState );
+			break;
+		}
+		sq_getclass(vm_, idx);
+		WriteObject(pBuffer, writeState, -1);
+		sq_pop(vm_, 1);
 
+		if (_instance(obj)->_class == _class(regexpClass_))
+		{
+			sq_push(vm_, idx);
+			sq_pushstring(vm_, "pattern_", -1);
+			sq_rawget(vm_, -2);
+			WriteObject(pBuffer, writeState, -1);
+			sq_pop(vm_, 2);
 			break;
 		}
 
-		SQUserPointer typetag = pThis->_class->_typetag;
-		if ( typetag )
 		{
-			if ( typetag == TYPETAG_VECTOR )
-			{
-				Vector *v = (Vector *)pThis->_userpointer;
-				Assert(v);
-				pBuffer->PutFloat( v->x );
-				pBuffer->PutFloat( v->y );
-				pBuffer->PutFloat( v->z );
+			// HACK: No way to get the default values part from accessing the class directly
+			SQUnsignedInteger nvalues = _instance(obj)->_class->_defaultvalues.size();
+			for (SQUnsignedInteger n = 0; n < nvalues; n++) {
+				sq_pushobject(vm_, _instance(obj)->_values[n]);
+				WriteObject(pBuffer, writeState, -1);
+				sq_pop(vm_, 1);
 			}
-			else
-			{
-				ClassInstanceData *pData = (ClassInstanceData *)pThis->_userpointer;
-				if ( pData )
-				{
-					if ( pData->desc->m_pszDescription[0] == SCRIPT_SINGLETON[0] )
-					{
-						// Do nothing, singleton should be created from just the class
-					}
-					else if ( !pData->instanceId.IsEmpty() )
-					{
-						Assert( strlen(pData->instanceId.Get()) < NATIVE_NAME_READBUF_SIZE );
-						pBuffer->PutString( pData->instanceId );
-						pBuffer->PutChar( pData->allowDestruct ? 1 : 0 );
-					}
-					else
-					{
-						DevWarning( "SquirrelVM::WriteObject: no instanceID for '%s', unable to serialize\n",
-							pData->desc->m_pszClassname );
+		}
 
-						pBuffer->PutString( "" );
-					}
+		SQUserPointer typetag;
+		sq_gettypetag(vm_, idx, &typetag);
+
+		if (typetag == TYPETAG_VECTOR)
+		{
+			Vector* v = nullptr;
+			sq_getinstanceup(vm_, idx, (SQUserPointer*)&v, TYPETAG_VECTOR);
+			Assert(v);
+			pBuffer->PutFloat(v->x);
+			pBuffer->PutFloat(v->y);
+			pBuffer->PutFloat(v->z);
+		}
+		else if (typetag)
+		{
+			ClassInstanceData* pClassInstanceData;
+			sq_getinstanceup(vm_, idx, (SQUserPointer*)&pClassInstanceData, typetag);
+
+			if (pClassInstanceData)
+			{
+				if (pClassInstanceData->desc->m_pszDescription[0] == SCRIPT_SINGLETON[0])
+				{
+					// Do nothing, singleton should be created from just the class
+				}
+				else if (!pClassInstanceData->instanceId.IsEmpty())
+				{
+					pBuffer->PutString(pClassInstanceData->instanceId);
+
+					pBuffer->PutChar(pClassInstanceData->allowDestruct ? 1 : 0);
 				}
 				else
 				{
-					pBuffer->PutString( "" );
+					DevWarning("SquirrelVM::WriteObject: Unable to find instanceID for object of type %s, unable to serialize\n",
+						pClassInstanceData->desc->m_pszClassname);
+					pBuffer->PutString("");
 				}
 			}
-
-			break;
-		}
-
-		// NOTE: move this up if native classes can have default values
-		int count = pThis->_class->_defaultvalues.size();
-		pBuffer->PutInt( count );
-		for ( int i = 0; i < count; ++i )
-		{
-			WriteObject( pThis->_values[i], pBuffer, writeState );
+			else
+			{
+				pBuffer->PutString("");
+			}
 		}
 
 		break;
 	}
 	case OT_WEAKREF:
 	{
-		SQWeakRef *pThis = obj._unVal.pWeakRef;
-		WriteObject( pThis->_obj, pBuffer, writeState );
+		pBuffer->PutInt(OT_WEAKREF);
+		sq_getweakrefval(vm_, idx);
+		WriteObject(pBuffer, writeState, -1);
+		sq_pop(vm_, 1);
 		break;
 	}
-	case OT_OUTER:
+	case OT_FUNCPROTO: //internal usage only
 	{
-		SQOuter *pThis = obj._unVal.pOuter;
+		pBuffer->PutInt(OT_FUNCPROTO);
 
-		if ( writeState.CheckCache( pThis, pBuffer ) )
-			break;
-
-		Assert( pThis->_valptr == &pThis->_value ); // otherwise untested
-
-		WriteObject( pThis->_value, pBuffer, writeState );
-		break;
-	}
-	case OT_THREAD:
-	{
-		SQVM *pThis = obj._unVal.pThread;
-
-		if ( writeState.CheckCache( pThis, pBuffer ) )
-			break;
-
-		pBuffer->PutInt( pThis->_stack.size() );
-		pBuffer->PutInt( pThis->_callsstacksize );
-
-		if ( pThis->_callsstacksize )
+		if (writeState.CheckCache(pBuffer, obj._unVal.pFunctionProto))
 		{
-			int stackidx = -1;
-
-			for ( int i = pThis->_callsstacksize; i--; )
-			{
-				const SQVM::CallInfo *ci = &pThis->_callsstack[i];
-
-				if ( pThis->ci == ci )
-					stackidx = i;
-
-				Assert( !ci->_generator );
-				Assert( ci->_ip && ci->_ip >= ci->_closure._unVal.pClosure->_function->_instructions );
-				Assert( pThis->_etraps.size() >= (SQUnsignedInteger)ci->_etraps );
-				Assert( ci->_closure._type == OT_CLOSURE && ci->_closure._unVal.pClosure );
-
-				WriteObject( ci->_closure, pBuffer, writeState );
-
-				int offset = (int)ci->_ip - (int)ci->_closure._unVal.pClosure->_function->_instructions;
-				pBuffer->PutInt( offset );
-				pBuffer->PutInt( ci->_etraps );
-				pBuffer->PutInt( ci->_prevstkbase );
-				pBuffer->PutInt( ci->_prevtop );
-				pBuffer->PutInt( ci->_target );
-				pBuffer->PutInt( ci->_ncalls );
-				pBuffer->PutChar( ci->_root );
-
-				for ( int j = ci->_etraps; j--; )
-				{
-					const SQExceptionTrap &et = pThis->_etraps[j];
-					pBuffer->PutInt( et._extarget );
-					pBuffer->PutInt( et._stackbase );
-					pBuffer->PutInt( et._stacksize );
-					Assert( et._ip == ci->_ip );
-				}
-			}
-
-			Assert( stackidx >= 0 && stackidx < pThis->_callsstacksize );
-			pBuffer->PutInt( stackidx );
+			break;
 		}
 
-		pBuffer->PutInt( pThis->_nnativecalls );
-		pBuffer->PutInt( pThis->_nmetamethodscall );
-
-		pBuffer->PutChar( pThis->_suspended );
-		pBuffer->PutChar( pThis->_suspended_root );
-		pBuffer->PutInt( pThis->_suspended_target );
-		pBuffer->PutInt( pThis->_suspended_traps );
-
-		WriteVM( pThis, pBuffer, writeState );
-
-		break;
+		_funcproto(obj)->Save(vm_, pBuffer, closure_write);
 	}
-	case OT_GENERATOR:
+	case OT_OUTER: //internal usage only
 	{
-		SQGenerator *pThis = obj._unVal.pGenerator;
+		pBuffer->PutInt(OT_OUTER);
 
-		if ( writeState.CheckCache( pThis, pBuffer ) )
-			break;
-
-		pBuffer->PutChar( pThis->_state );
-
-		if ( pThis->_state == SQGenerator::SQGeneratorState::eDead )
-			break;
-
-		WriteObject( pThis->_closure, pBuffer, writeState );
-
-		const SQVM::CallInfo &ci = pThis->_ci;
-
-		Assert( !ci._generator );
-		Assert( pThis->_closure._unVal.pClosure == ci._closure._unVal.pClosure );
-		Assert( ci._ip && ci._ip >= ci._closure._unVal.pClosure->_function->_instructions );
-		Assert( pThis->_etraps.size() >= (SQUnsignedInteger)ci._etraps );
-
-		int offset = (int)ci._ip - (int)ci._closure._unVal.pClosure->_function->_instructions;
-		pBuffer->PutInt( offset );
-		pBuffer->PutInt( ci._etraps );
-		pBuffer->PutInt( ci._prevstkbase );
-		pBuffer->PutInt( ci._prevtop );
-		pBuffer->PutInt( ci._target );
-		pBuffer->PutInt( ci._ncalls );
-		pBuffer->PutChar( ci._root );
-
-		for ( int j = ci._etraps; j--; )
+		if (writeState.CheckCache(pBuffer, obj._unVal.pOuter))
 		{
-			const SQExceptionTrap &et = pThis->_etraps[j];
-			pBuffer->PutInt( et._extarget );
-			pBuffer->PutInt( et._stackbase );
-			pBuffer->PutInt( et._stacksize );
-			Assert( et._ip == ci._ip );
+			break;
 		}
 
-		int stacksize = pThis->_stack.size();
-		pBuffer->PutInt( stacksize );
-		for ( int i = 0; i < stacksize; ++i )
-		{
-			WriteObject( pThis->_stack[i], pBuffer, writeState );
-		}
+		sq_pushobject(vm_, *_outer(obj)->_valptr);
+		WriteObject(pBuffer, writeState, -1);
+		sq_poptop(vm_);
 
 		break;
 	}
-	case OT_USERDATA:
-	case OT_USERPOINTER:
-		Assert(0);
-		break;
+	// case OT_USERDATA:
+	// case OT_GENERATOR:
+	// case OT_USERPOINTER:
+	// case OT_THREAD:
+	// 
 	default:
-		AssertMsgAlways( 0, "SquirrelVM::WriteObject: unknown type" );
+		Warning("SquirrelVM::WriteObject: Unexpected type %d", sq_gettype(vm_, idx));
+		// Save a null instead
+		pBuffer->PutInt(OT_NULL);
 	}
 }
 
-
-void SquirrelVM::ReadObject( SQObjectPtr &pObj, CUtlBuffer* pBuffer, ReadStateMap& readState )
+void SquirrelVM::WriteState(CUtlBuffer* pBuffer)
 {
-	SQObject obj;
-	obj._type = (SQObjectType)pBuffer->GetInt();
-	DBG_CODE( obj._unVal.raw = 0xCC; );
-
-	switch ( obj._type )
-	{
-	case OT_NULL:
-		obj._unVal.raw = 0;
-		break;
-
-	case OT_INTEGER:
-#ifdef _SQ64
-		obj._unVal.nInteger = (SQInteger)pBuffer->GetInt64();
-#else
-		obj._unVal.nInteger = (SQInteger)pBuffer->GetInt();
-#endif
-		break;
-
-	case OT_FLOAT:
-#ifdef SQUSEDOUBLE
-		obj._unVal.fFloat = (SQFloat)pBuffer->GetDouble();
-#else
-		obj._unVal.fFloat = (SQFloat)pBuffer->GetFloat();
-#endif
-		break;
-
-	case OT_BOOL:
-		obj._unVal.nInteger = pBuffer->GetChar();
-		Assert( ( obj._unVal.nInteger & -2 ) == 0 );
-		break;
-
-	case OT_STRING:
-	{
-		int len = pBuffer->GetInt();
-		char *psz;
-
-		if ( len < 1024 )
-		{
-			psz = (char*)stackalloc( len );
-		}
-		else
-		{
-			psz = (char*)malloc( len );
-		}
-
-		pBuffer->Get( psz, len );
-
-		obj._unVal.pString = SQString::Create( _ss(vm_), psz, len );
-
-		if ( len >= 1024 )
-		{
-			free( psz );
-		}
-
-		break;
-	}
-	case OT_TABLE:
-	{
-		int marker;
-		if ( readState.CheckCache( &obj, pBuffer, &marker ) )
-			break;
-
-		SQTable *pThis;
-
-		int count = pBuffer->GetInt();
-
-		// NOTE: Hack for VM load - do not release the current roottable
-		// which would remove native funcs which are looked up from the root
-		if ( pObj._unVal.pTable != vm_->_roottable._unVal.pTable )
-		{
-			pThis = SQTable::Create( _ss(vm_), count );
-		}
-		else
-		{
-			pThis = pObj._unVal.pTable;
-		}
-
-		obj._unVal.pTable = pThis;
-		readState.StoreInCache( marker, obj );
-
-		if ( pBuffer->GetChar() )
-		{
-			SQObject delegate;
-			ReadObject( delegate, pBuffer, readState );
-			pThis->_delegate = delegate._unVal.pTable;
-		}
-
-		SQObjectPtr key, val;
-		while ( count-- )
-		{
-			ReadObject( key, pBuffer, readState );
-			ReadObject( val, pBuffer, readState );
-			Assert( key._type != OT_NULL );
-			pThis->NewSlot( key, val );
-		}
-
-		break;
-	}
-	case OT_ARRAY:
-	{
-		int marker;
-		if ( readState.CheckCache( &obj, pBuffer, &marker ) )
-			break;
-
-		int count = pBuffer->GetInt();
-
-		SQArray *pThis = SQArray::Create( _ss(vm_), count );
-		obj._unVal.pArray = pThis;
-		readState.StoreInCache( marker, obj );
-
-		for ( int i = 0; i < count; ++i )
-		{
-			ReadObject( pThis->_values[i], pBuffer, readState );
-		}
-
-		break;
-	}
-	case OT_CLOSURE:
-	{
-		int marker;
-		if ( readState.CheckCache( &obj, pBuffer, &marker ) )
-			break;
-
-		SQObjectPtr func, root;
-		ReadObject( func, pBuffer, readState );
-		Assert( func._type == OT_FUNCPROTO && func._unVal.pFunctionProto );
-
-		if ( pBuffer->GetChar() )
-		{
-			ReadObject( root, pBuffer, readState );
-			Assert( root._type != OT_NULL && root._unVal.pWeakRef );
-		}
-		else
-		{
-			root = vm_->_roottable._unVal.pTable->GetWeakRef( OT_TABLE );
-		}
-
-		SQClosure *pThis = SQClosure::Create( _ss(vm_), func._unVal.pFunctionProto, root._unVal.pWeakRef );
-		obj._unVal.pClosure = pThis;
-		readState.StoreInCache( marker, obj );
-
-		if ( pBuffer->GetChar() )
-		{
-			SQObject env;
-			ReadObject( env, pBuffer, readState );
-			pThis->_env = env._unVal.pWeakRef;
-		}
-
-		if ( pBuffer->GetChar() )
-		{
-			SQObjectPtr base;
-			ReadObject( base, pBuffer, readState );
-			pThis->_base = base._unVal.pClass;
-		}
-
-		int count = pBuffer->GetInt();
-		for ( int i = 0; i < count; ++i )
-		{
-			ReadObject( pThis->_outervalues[i], pBuffer, readState );
-		}
-
-		count = pBuffer->GetInt();
-		for ( int i = 0; i < count; ++i )
-		{
-			ReadObject( pThis->_defaultparams[i], pBuffer, readState );
-		}
-
-		break;
-	}
-	case OT_NATIVECLOSURE:
-	{
-		char psz[NATIVE_NAME_READBUF_SIZE] = "";
-		pBuffer->GetString( psz, sizeof(psz) );
-
-		SQObjectPtr key = SQString::Create( _ss(vm_), psz );
-		SQObjectPtr val;
-
-		if ( !vm_->_roottable._unVal.pTable->Get( key, val ) )
-		{
-			Warning( "\tSquirrelVM::ReadObject: failed to find native closure '%s'\n", psz );
-			obj._type = OT_NULL;
-			obj._unVal.raw = 0;
-			break;
-		}
-
-#ifdef _DEBUG
-		// If it's a script closure which references this native closure,
-		// these references will stack up on each load-save
-		if ( val._type != OT_NATIVECLOSURE )
-			Warning( "SquirrelVM::ReadObject: '%s' is not nativeclosure\n", psz );
-#endif
-
-		AssertMsg( val._type == OT_NATIVECLOSURE || val._type == OT_CLOSURE, "'%s' is not a closure", psz );
-
-		obj._type = val._type;
-		obj._unVal.pNativeClosure = val._unVal.pNativeClosure;
-
-		break;
-	}
-	case OT_FUNCPROTO:
-	{
-		int marker;
-		if ( readState.CheckCache( &obj, pBuffer, &marker ) )
-			break;
-
-		int nliterals = pBuffer->GetInt();
-		int nparameters = pBuffer->GetInt();
-		int noutervalues = pBuffer->GetInt();
-		int nlocalvarinfos = pBuffer->GetInt();
-		int nlineinfos = pBuffer->GetInt();
-		int ndefaultparams = pBuffer->GetInt();
-		int ninstructions = pBuffer->GetInt();
-		int nfunctions = pBuffer->GetInt();
-
-		SQFunctionProto *pThis = SQFunctionProto::Create( _ss(vm_), ninstructions, nliterals, nparameters,
-			nfunctions, noutervalues, nlineinfos, nlocalvarinfos, ndefaultparams );
-		obj._unVal.pFunctionProto = pThis;
-		readState.StoreInCache( marker, obj );
-
-		ReadObject( pThis->_sourcename, pBuffer, readState );
-		ReadObject( pThis->_name, pBuffer, readState );
-
-		for ( int i = 0; i < pThis->_nliterals; ++i )
-		{
-			ReadObject( pThis->_literals[i], pBuffer, readState );
-		}
-
-		for ( int i = 0; i < pThis->_nparameters; ++i )
-		{
-			ReadObject( pThis->_parameters[i], pBuffer, readState );
-		}
-
-		for ( int i = 0; i < pThis->_noutervalues; ++i )
-		{
-			SQOuterVar &p = pThis->_outervalues[i];
-			p._type = (SQOuterType)pBuffer->GetUnsignedInt();
-			ReadObject( p._src, pBuffer, readState );
-			ReadObject( p._name, pBuffer, readState );
-		}
-
-		for ( int i = 0; i < pThis->_nlocalvarinfos; ++i )
-		{
-			SQLocalVarInfo &p = pThis->_localvarinfos[i];
-			ReadObject( p._name, pBuffer, readState );
-			p._pos = pBuffer->GetUnsignedInt();
-			p._start_op = pBuffer->GetUnsignedInt();
-			p._end_op = pBuffer->GetUnsignedInt();
-		}
-
-		pBuffer->Get( pThis->_lineinfos, sizeof(SQLineInfo) * pThis->_nlineinfos );
-		pBuffer->Get( pThis->_defaultparams, sizeof(SQInteger) * pThis->_ndefaultparams );
-		pBuffer->Get( pThis->_instructions, sizeof(SQInstruction) * pThis->_ninstructions );
-
-		for ( int i = 0; i < pThis->_nfunctions; ++i )
-		{
-			ReadObject( pThis->_functions[i], pBuffer, readState );
-		}
-
-		pThis->_stacksize = pBuffer->GetInt();
-		pThis->_bgenerator = ( pBuffer->GetChar() != 0 );
-		pThis->_varparams = pBuffer->GetInt();
-
-		break;
-	}
-	case OT_CLASS:
-	{
-		int marker;
-		if ( readState.CheckCache( &obj, pBuffer, &marker ) )
-			break;
-
-		ClassType type = (ClassType)pBuffer->GetChar();
-
-		if ( type == VectorClassType )
-		{
-			obj._unVal.pClass = vectorClass_._unVal.pClass;
-			readState.StoreInCache( marker, obj );
-		}
-		else if ( type == NativeClassType )
-		{
-			char psz[NATIVE_NAME_READBUF_SIZE] = "";
-			pBuffer->GetString( psz, sizeof(psz) );
-
-			SQObjectPtr key = SQString::Create( _ss(vm_), psz );
-			SQObjectPtr val;
-
-			if ( !vm_->_roottable._unVal.pTable->Get( key, val ) )
-			{
-				Warning( "\tSquirrelVM::ReadObject: failed to find native class '%s'\n", psz );
-				obj._type = OT_NULL;
-				obj._unVal.raw = 0;
-				break;
-			}
-
-			Assert( val._type == OT_CLASS );
-
-			obj._unVal.pClass = val._unVal.pClass;
-			readState.StoreInCache( marker, obj );
-		}
-		else if ( type == ScriptClassType )
-		{
-			SQObjectPtr base, members;
-
-			if ( pBuffer->GetChar() )
-			{
-				ReadObject( base, pBuffer, readState );
-				Assert( base._type == OT_CLASS );
-			}
-
-			SQClass *pThis = SQClass::Create( _ss(vm_), base._unVal.pClass );
-			obj._unVal.pClass = pThis;
-			readState.StoreInCache( marker, obj );
-
-			ReadObject( members, pBuffer, readState );
-
-			Assert( members._type == OT_TABLE );
-
-			// Replace with restored members
-			pThis->_members->Release();
-			pThis->_members = members._unVal.pTable;
-			__ObjAddRef( pThis->_members );
-
-			int count = pBuffer->GetInt();
-			pThis->_defaultvalues.resize( count );
-
-			for ( int i = 0; i < count; ++i )
-			{
-				ReadObject( pThis->_defaultvalues[i].val, pBuffer, readState );
-			}
-
-			count = pBuffer->GetInt();
-			pThis->_methods.resize( count );
-
-			for ( int i = 0; i < count; ++i )
-			{
-				ReadObject( pThis->_methods[i].val, pBuffer, readState );
-			}
-
-			int mask = pBuffer->GetInt();
-			if ( mask )
-			{
-				for ( unsigned i = 0; i < SQMetaMethod::MT_LAST; ++i )
-					if ( mask & (1 << i) )
-						ReadObject( pThis->_metamethods[i], pBuffer, readState );
-			}
-
-			pThis->_constructoridx = pBuffer->GetInt();
-
-			Assert( pThis->_constructoridx == -1 || (SQUnsignedInteger)pThis->_constructoridx < pThis->_methods.size() );
-		}
-		else
-		{
-			Assert( !"SquirrelVM::ReadObject: unknown class type" );
-		}
-
-		break;
-	}
-	case OT_INSTANCE:
-	{
-		int marker;
-		if ( readState.CheckCache( &obj, pBuffer, &marker ) )
-			break;
-
-		SQInstance *pThis;
-
-		SQObjectPtr pClass;
-		ReadObject( pClass, pBuffer, readState );
-
-		Assert( pClass._type == OT_CLASS && pClass._unVal.pClass );
-
-		if ( _class(pClass) == _class(regexpClass_) )
-		{
-			SQObjectPtr key = SQString::Create( _ss(vm_), "pattern_" );
-			SQObjectPtr val;
-			ReadObject( val, pBuffer, readState );
-
-			pThis = _class(pClass)->CreateInstance();
-			pThis->Set( key, val );
-			obj._unVal.pInstance = pThis;
-			readState.StoreInCache( marker, obj );
-
-			break;
-		}
-
-		SQUserPointer typetag = _class(pClass)->_typetag;
-
-		// singleton
-		if ( typetag && typetag != TYPETAG_VECTOR )
-		{
-			ScriptClassDesc_t *pDesc = (ScriptClassDesc_t *)typetag;
-			if ( pDesc->m_pszDescription[0] == SCRIPT_SINGLETON[0] )
-			{
-				bool bFoundSingleton = false;
-
-				SQObjectPtr key, val;
-				FOREACH_SQTABLE( vm_->_roottable._unVal.pTable, key, val )
-				{
-					if ( sq_isinstance(val) && _instance(val)->_class == _class(pClass) )
-					{
-						pThis = val._unVal.pInstance;
-						obj._unVal.pInstance = pThis;
-						readState.StoreInCache( marker, obj );
-
-						bFoundSingleton = true;
-						break;
-					}
-				}
-
-				if ( !bFoundSingleton )
-				{
-					Warning( "SquirrelVM::ReadObject: failed to find native singleton of '%s'\n", pDesc->m_pszClassname );
-					Assert(0);
-					obj._type = OT_NULL;
-					obj._unVal.raw = 0;
-				}
-
-				break;
-			}
-		}
-
-		pThis = SQInstance::Create( _ss(vm_), _class(pClass) );
-		obj._unVal.pInstance = pThis;
-		readState.StoreInCache( marker, obj );
-
-		if ( typetag )
-		{
-			if ( typetag == TYPETAG_VECTOR )
-			{
-				float x = pBuffer->GetFloat();
-				float y = pBuffer->GetFloat();
-				float z = pBuffer->GetFloat();
-				new ( pThis->_userpointer ) Vector( x, y, z );
-			}
-			else
-			{
-				ScriptClassDesc_t *pDesc = (ScriptClassDesc_t *)typetag;
-
-				char pszInstanceName[NATIVE_NAME_READBUF_SIZE] = "";
-				pBuffer->GetString( pszInstanceName, sizeof(pszInstanceName) );
-
-				if ( pszInstanceName[0] )
-				{
-					bool allowDestruct = ( pBuffer->GetChar() != 0 );
-
-					HSQOBJECT *hInstance = new HSQOBJECT;
-					hInstance->_type = OT_INSTANCE;
-					hInstance->_unVal.pInstance = pThis;
-
-					Assert( pDesc->pHelper );
-
-					void *pInstance = pDesc->pHelper->BindOnRead( (HSCRIPT)hInstance, NULL, pszInstanceName );
-					if ( pInstance )
-					{
-						sq_addref( vm_, hInstance );
-						new( pThis->_userpointer ) ClassInstanceData( pInstance, pDesc, pszInstanceName, allowDestruct );
-						pThis->_hook = allowDestruct ? &destructor_stub : &destructor_stub_instance;
-					}
-					else
-					{
-						delete hInstance;
-						pThis->_userpointer = NULL;
-					}
-				}
-				else
-				{
-					pThis->_userpointer = NULL;
-				}
-			}
-
-			break;
-		}
-
-		int count = pBuffer->GetInt();
-#ifdef _DEBUG
-		int size = pThis->_class->_defaultvalues.size();
-		if ( count != size )
-		{
-			Warning("SquirrelVM::ReadObject: Non-matching class default value count!\n");
-			Assert(0);
-		}
-#endif
-		for ( int i = 0; i < count; ++i )
-		{
-			ReadObject( pThis->_values[i], pBuffer, readState );
-		}
-
-		break;
-	}
-	case OT_WEAKREF:
-	{
-		SQObject ref;
-		ReadObject( ref, pBuffer, readState );
-		if ( !ref._unVal.pRefCounted )
-		{
-			obj._type = OT_NULL;
-			obj._unVal.raw = 0;
-			break;
-		}
-
-		Assert( ISREFCOUNTED( ref._type ) );
-		Assert( ref._unVal.pRefCounted->_uiRef > 0 );
-		ref._unVal.pRefCounted->_uiRef--;
-
-		SQWeakRef *pThis = ref._unVal.pRefCounted->GetWeakRef( ref._type );
-		obj._unVal.pWeakRef = pThis;
-
-		break;
-	}
-	case OT_OUTER:
-	{
-		int marker;
-		if ( readState.CheckCache( &obj, pBuffer, &marker ) )
-			break;
-
-		SQOuter *pThis = SQOuter::Create( _ss(vm_), NULL );
-		obj._unVal.pOuter = pThis;
-		readState.StoreInCache( marker, obj );
-
-		ReadObject( pThis->_value, pBuffer, readState );
-		pThis->_valptr = &(pThis->_value);
-
-		break;
-	}
-	case OT_THREAD:
-	{
-		int marker;
-		if ( readState.CheckCache( &obj, pBuffer, &marker ) )
-			break;
-
-		SQVM *pThis = sq_newthread( vm_, pBuffer->GetInt() );
-		pThis->_uiRef++;
-		vm_->Pop();
-		pThis->_uiRef--;
-		obj._unVal.pThread = pThis;
-		readState.StoreInCache( marker, obj );
-
-		pThis->_callsstacksize = pBuffer->GetInt();
-
-		if ( pThis->_callsstacksize )
-		{
-			if ( pThis->_callsstacksize >= pThis->_alloccallsstacksize )
-				pThis->GrowCallStack();
-
-			for ( int i = pThis->_callsstacksize; i--; )
-			{
-				SQVM::CallInfo *ci = &pThis->_callsstack[i];
-
-				SQObjectPtr closure;
-				ReadObject( closure, pBuffer, readState );
-				Assert( closure._type == OT_CLOSURE && closure._unVal.pClosure );
-
-				int offset = pBuffer->GetInt();
-				int funcsize = sizeof(SQInstruction) * closure._unVal.pClosure->_function->_ninstructions;
-				int start = (int)(closure._unVal.pClosure->_function->_instructions);
-				int pos = start + offset;
-				ci->_ip = (SQInstruction*)pos;
-
-				Assert( pos < (start + funcsize) );
-
-				// don't read past boundary
-				if ( pos >= (start + funcsize) )
-				{
-					ci->_ip = (SQInstruction*)start;
-				}
-
-				ci->_literals = closure._unVal.pClosure->_function->_literals;
-				ci->_closure = closure;
-				ci->_generator = NULL;
-				ci->_etraps = pBuffer->GetInt();
-				ci->_prevstkbase = pBuffer->GetInt();
-				ci->_prevtop = pBuffer->GetInt();
-				ci->_target = pBuffer->GetInt();
-				ci->_ncalls = pBuffer->GetInt();
-				ci->_root = pBuffer->GetChar();
-
-				pThis->_etraps.resize( ci->_etraps );
-
-				for ( int j = ci->_etraps; j--; )
-				{
-					SQExceptionTrap &et = pThis->_etraps[j];
-					et._extarget = pBuffer->GetInt();
-					et._stackbase = pBuffer->GetInt();
-					et._stacksize = pBuffer->GetInt();
-					et._ip = ci->_ip;
-				}
-			}
-
-			int stackidx = pBuffer->GetInt();
-			Assert( stackidx >= 0 && stackidx < pThis->_callsstacksize );
-			pThis->ci = &pThis->_callsstack[ stackidx ];
-		}
-
-		pThis->_nnativecalls = pBuffer->GetInt();
-		pThis->_nmetamethodscall = pBuffer->GetInt();
-
-		pThis->_suspended = pBuffer->GetChar();
-		pThis->_suspended_root = pBuffer->GetChar();
-		pThis->_suspended_target = pBuffer->GetInt();
-		pThis->_suspended_traps = pBuffer->GetInt();
-
-		ReadVM( pThis, pBuffer, readState );
-
-		break;
-	}
-	case OT_GENERATOR:
-	{
-		int marker;
-		if ( readState.CheckCache( &obj, pBuffer, &marker ) )
-			break;
-
-		int state = pBuffer->GetChar();
-		if ( state == SQGenerator::SQGeneratorState::eDead )
-		{
-			// SQGenerator doesn't allow creating dead generators, write null.
-			// This is much simpler than creating a dummy closure only to tell the user it's dead.
-			obj._type = OT_NULL;
-			obj._unVal.raw = 0;
-			break;
-		}
-
-		SQObjectPtr closure;
-		ReadObject( closure, pBuffer, readState );
-		Assert( closure._type == OT_CLOSURE && closure._unVal.pClosure );
-
-		SQGenerator *pThis = SQGenerator::Create( _ss(vm_), closure._unVal.pClosure );
-		obj._unVal.pGenerator = pThis;
-		readState.StoreInCache( marker, obj );
-
-		pThis->_state = (SQGenerator::SQGeneratorState)state;
-
-		SQVM::CallInfo &ci = pThis->_ci;
-
-		int offset = pBuffer->GetInt();
-		int funcsize = sizeof(SQInstruction) * closure._unVal.pClosure->_function->_ninstructions;
-		int start = (int)(closure._unVal.pClosure->_function->_instructions);
-		int pos = start + offset;
-		ci._ip = (SQInstruction*)pos;
-
-		Assert( pos < (start + funcsize) );
-
-		// don't read past boundary
-		if ( pos >= (start + funcsize) )
-		{
-			ci._ip = (SQInstruction*)start;
-		}
-
-		ci._literals = closure._unVal.pClosure->_function->_literals;
-		ci._closure = closure;
-		ci._generator = NULL;
-		ci._etraps = pBuffer->GetInt();
-		ci._prevstkbase = pBuffer->GetInt();
-		ci._prevtop = pBuffer->GetInt();
-		ci._target = pBuffer->GetInt();
-		ci._ncalls = pBuffer->GetInt();
-		ci._root = pBuffer->GetChar();
-
-		pThis->_etraps.resize( ci._etraps );
-
-		for ( int j = ci._etraps; j--; )
-		{
-			SQExceptionTrap &et = pThis->_etraps[j];
-			et._extarget = pBuffer->GetInt();
-			et._stackbase = pBuffer->GetInt();
-			et._stacksize = pBuffer->GetInt();
-			et._ip = ci._ip;
-		}
-
-		int stacksize = pBuffer->GetInt();
-		pThis->_stack.resize( stacksize );
-		for ( int i = 0; i < stacksize; ++i )
-		{
-			ReadObject( pThis->_stack[i], pBuffer, readState );
-		}
-
-		break;
-	}
-	case OT_USERDATA:
-	case OT_USERPOINTER:
-	{
-		Assert(0);
-		break;
-	}
-	default:
-		AssertMsgAlways( 0, "SquirrelVM::ReadObject: serialisation error" );
-	}
-
-	Assert( !ISREFCOUNTED(obj._type) || obj._unVal.raw != 0xCC );
-
-	pObj = obj;
-}
-
-void SquirrelVM::WriteVM( SQVM *pThis, CUtlBuffer *pBuffer, WriteStateMap &writeState )
-{
-	// Let others access the current VM inside ReadObject
-	SQVM *pPrevVM = vm_;
-	vm_ = pThis;
-
-	Assert( pThis->_roottable._unVal.pTable->_uiRef > 0 );
-
-	WriteObject( pThis->_roottable, pBuffer, writeState );
-
-	Assert( pThis->_roottable._unVal.pTable->_uiRef > 0 );
-
-	pBuffer->PutInt( pThis->_top );
-	pBuffer->PutInt( pThis->_stackbase );
-	pBuffer->PutInt( pThis->_stack.size() );
-	for ( int i = 0; i < pThis->_top; ++i ) // write up to top
-	{
-		WriteObject( pThis->_stack[i], pBuffer, writeState );
-	}
-
-	vm_ = pPrevVM; // restore
-}
-
-void SquirrelVM::ReadVM( SQVM *pThis, CUtlBuffer *pBuffer, ReadStateMap &readState )
-{
-	// Let others access the current VM inside ReadObject
-	SQVM *pPrevVM = vm_;
-	vm_ = pThis;
-
-	ReadObject( pThis->_roottable, pBuffer, readState );
-
-	Assert( pThis->_roottable._unVal.pTable->_uiRef > 0 );
-
-	pThis->_top = pBuffer->GetInt();
-	pThis->_stackbase = pBuffer->GetInt();
-	pThis->_stack.resize( pBuffer->GetInt() );
-	for ( int i = 0; i < pThis->_top; ++i )
-	{
-		ReadObject( pThis->_stack[i], pBuffer, readState );
-	}
-
-	vm_ = pPrevVM; // restore
-}
-
-void SquirrelVM::WriteState( CUtlBuffer* pBuffer )
-{
-	// If the main VM can be suspended, WriteVM/ReadVM would need to include the code inside OT_THREAD r/w
-	Assert( !vm_->ci );
+	SquirrelSafeCheck safeCheck(vm_);
 
 	WriteStateMap writeState;
-	WriteVM( vm_, pBuffer, writeState );
+
+	sq_pushroottable(vm_);
+
+	// Not really a check cache, but adds the root
+	HSQOBJECT obj;
+	sq_resetobject(&obj);
+	sq_getstackobj(vm_, -1, &obj);
+	writeState.CheckCache(pBuffer, _table(obj));
+
+	int count = sq_getsize(vm_, 1);
+	sq_pushnull(vm_);
+	pBuffer->PutInt(count);
+
+	while (SQ_SUCCEEDED(sq_next(vm_, -2)))
+	{
+		WriteObject(pBuffer, writeState, -2);
+		WriteObject(pBuffer, writeState, -1);
+		sq_pop(vm_, 2);
+		--count;
+	}
+	sq_pop(vm_, 2);
+	Assert(count == 0);
 }
 
-void SquirrelVM::ReadState( CUtlBuffer* pBuffer )
+SQInteger closure_read(SQUserPointer file, SQUserPointer buf, SQInteger size)
 {
-	ReadStateMap readState;
-	ReadVM( vm_, pBuffer, readState );
+	CUtlBuffer* pBuffer = (CUtlBuffer*)file;
+	pBuffer->Get(buf, size);
+	return pBuffer->IsValid() ? size : -1;
+}
+
+void SquirrelVM::ReadObject(CUtlBuffer* pBuffer, ReadStateMap& readState)
+{
+	SquirrelSafeCheck safeCheck(vm_, 1);
+
+	int thisType = pBuffer->GetInt();
+
+	switch (thisType)
+	{
+	case OT_NULL:
+	{
+		sq_pushnull(vm_);
+		break;
+	}
+	case OT_INTEGER:
+	{
+		sq_pushinteger(vm_, pBuffer->GetInt64());
+		break;
+	}
+	case OT_FLOAT:
+	{
+		sq_pushfloat(vm_, pBuffer->GetFloat());
+		break;
+	}
+	case OT_BOOL:
+	{
+		sq_pushbool(vm_, pBuffer->GetChar());
+		break;
+	}
+	case OT_STRING:
+	{
+		int size = pBuffer->GetInt();
+		char* buffer = new char[size + 1];
+		pBuffer->Get(buffer, size);
+		buffer[size] = 0;
+		sq_pushstring(vm_, buffer, size);
+		delete[] buffer;
+		break;
+	}
+	case OT_TABLE:
+	{
+		int marker = 0;
+		if (readState.CheckCache(pBuffer, vm_, &marker))
+		{
+			break;
+		}
+
+		ReadObject(pBuffer, readState);
+
+		int count = pBuffer->GetInt();
+		sq_newtableex(vm_, count);
+		readState.StoreTopInCache(marker);
+
+		sq_push(vm_, -2);
+		sq_setdelegate(vm_, -2);
+
+		sq_remove(vm_, -2);
+
+		for (int i = 0; i < count; ++i)
+		{
+			ReadObject(pBuffer, readState);
+			ReadObject(pBuffer, readState);
+			sq_rawset(vm_, -3);
+		}
+
+		break;
+	}
+	case OT_ARRAY:
+	{
+		int marker = 0;
+		if (readState.CheckCache(pBuffer, vm_, &marker))
+		{
+			break;
+		}
+
+		int count = pBuffer->GetInt();
+		sq_newarray(vm_, count);
+		readState.StoreTopInCache(marker);
+
+		for (int i = 0; i < count; ++i)
+		{
+			sq_pushinteger(vm_, i);
+			ReadObject(pBuffer, readState);
+			sq_rawset(vm_, -3);
+		}
+		break;
+	}
+	case OT_CLOSURE:
+	{
+		int marker = 0;
+		if (readState.CheckCache(pBuffer, vm_, &marker))
+		{
+			break;
+		}
+
+		if (pBuffer->GetChar() == 0)
+		{
+			if (SQ_FAILED(sq_readclosure(vm_, closure_read, pBuffer)))
+			{
+				Error("Failed to read closure\n");
+				sq_pushnull(vm_);
+				break;
+			}
+
+			readState.StoreTopInCache(marker);
+		}
+		else
+		{
+			SQObjectPtr ret;
+			if (!SQClosure::Load(vm_, pBuffer, closure_read, ret))
+			{
+				Error("Failed to read closure\n");
+				sq_pushnull(vm_);
+				break;
+			}
+
+			vm_->Push(ret);
+			readState.StoreTopInCache(marker);
+
+			int noutervalues = _closure(ret)->_function->_noutervalues;
+			for (int i = 0; i < noutervalues; ++i)
+			{
+				ReadObject(pBuffer, readState);
+				HSQOBJECT obj;
+				sq_resetobject(&obj);
+				sq_getstackobj(vm_, -1, &obj);
+				_closure(ret)->_outervalues[i] = obj;
+				sq_poptop(vm_);
+			}
+
+			int ndefaultparams = _closure(ret)->_function->_ndefaultparams;
+			for (int i = 0; i < ndefaultparams; ++i)
+			{
+				ReadObject(pBuffer, readState);
+				HSQOBJECT obj;
+				sq_resetobject(&obj);
+				sq_getstackobj(vm_, -1, &obj);
+				_closure(ret)->_defaultparams[i] = obj;
+				sq_poptop(vm_);
+			}
+		}
+
+		ReadObject(pBuffer, readState);
+		HSQOBJECT env;
+		sq_resetobject(&env);
+		sq_getstackobj(vm_, -1, &env);
+		if (!sq_isnull(env))
+		{
+			HSQOBJECT obj;
+			sq_getstackobj(vm_, -2, &obj);
+			if (_closure(obj) == nullptr)
+				Warning("Closure is null\n");
+			else
+				_closure(obj)->_env = _refcounted(env)->GetWeakRef(sq_type(env));
+		}
+		sq_poptop(vm_);
+
+		break;
+	}
+	case OT_NATIVECLOSURE:
+	{
+		char closureName[128] = "";
+		pBuffer->GetString(closureName, sizeof(closureName));
+
+		sq_pushroottable(vm_);
+		sq_pushstring(vm_, closureName, -1);
+		if (SQ_FAILED(sq_get(vm_, -2)))
+		{
+			Warning("SquirrelVM::ReadObject: Failed to find native closure\n");
+			sq_pop(vm_, 1);
+			sq_pushnull(vm_);
+		}
+		sq_remove(vm_, -2);
+
+		break;
+	}
+	case OT_CLASS:
+	{
+		int marker = 0;
+		if (readState.CheckCache(pBuffer, vm_, &marker))
+		{
+			break;
+		}
+
+		ClassType classType = (ClassType)pBuffer->GetInt();
+
+		if (classType == VectorClassType)
+		{
+			sq_pushobject(vm_, vectorClass_);
+			readState.StoreTopInCache(marker);
+		}
+		else if (classType == NativeClassType)
+		{
+			char className[128] = "";
+			pBuffer->GetString(className, sizeof(className));
+
+			sq_pushroottable(vm_);
+			sq_pushstring(vm_, className, -1);
+			if (SQ_FAILED(sq_get(vm_, -2)))
+			{
+				Warning("SquirrelVM::ReadObject: Failed to find native class: %s\n", className);
+				sq_pushnull(vm_);
+			}
+			sq_remove(vm_, -2);
+			readState.StoreTopInCache(marker);
+		}
+		else if (classType == ScriptClassType)
+		{
+			ReadObject(pBuffer, readState);
+			bool hasBase = sq_gettype(vm_, -1) != OT_NULL;
+			if (!hasBase)
+			{
+				sq_poptop(vm_);
+			}
+
+			sq_newclass(vm_, hasBase);
+			readState.StoreTopInCache(marker);
+
+			sq_pushnull(vm_);
+			ReadObject(pBuffer, readState);
+			sq_setattributes(vm_, -3);
+			sq_poptop(vm_); // Returns the old attributes
+
+			while (pBuffer->GetChar())
+			{
+				// TODO: Member Attributes
+				ReadObject(pBuffer, readState);
+				ReadObject(pBuffer, readState);
+				sq_newslot(vm_, -3, false);
+			}
+		}
+		else
+		{
+			Error("SquirrelVM::ReadObject: Unknown class type\n");
+			sq_pushnull(vm_);
+		}
+		break;
+	}
+	case OT_INSTANCE:
+	{
+		int marker = 0;
+		if (readState.CheckCache(pBuffer, vm_, &marker))
+		{
+			break;
+		}
+
+		ReadObject(pBuffer, readState);
+
+		HSQOBJECT klass;
+		sq_resetobject(&klass);
+		sq_getstackobj(vm_, -1, &klass);
+		if (_class(klass) == _class(regexpClass_))
+		{
+			sq_pushnull(vm_);
+			ReadObject(pBuffer, readState);
+			sq_call(vm_, 2, SQTrue, SQFalse);
+
+			readState.StoreTopInCache(marker);
+
+			sq_remove(vm_, -2);
+
+			break;
+		}
+
+		SQUserPointer typetag;
+		sq_gettypetag(vm_, -1, &typetag);
+
+		if (typetag && typetag != TYPETAG_VECTOR &&
+			((ScriptClassDesc_t*)typetag)->m_pszDescription[0] == SCRIPT_SINGLETON[0])
+		{
+			sq_poptop(vm_);
+
+			Assert(sq_isclass(klass));
+
+			// singleton, lets find an equivlent in the root
+			bool foundSingleton = false;
+			sq_pushroottable(vm_);
+			sq_pushnull(vm_);
+			HSQOBJECT singleton;
+			sq_resetobject(&singleton);
+			while (SQ_SUCCEEDED(sq_next(vm_, -2)))
+			{
+				sq_getstackobj(vm_, -1, &singleton);
+				if (sq_isinstance(singleton) && _instance(singleton)->_class == _class(klass))
+				{
+					foundSingleton = true;
+
+					readState.StoreInCache(marker, singleton);
+					sq_addref(vm_, &singleton);
+					sq_pop(vm_, 2);
+					break;
+				}
+				sq_pop(vm_, 2);
+			}
+			sq_pop(vm_, 2);
+
+			if (!foundSingleton)
+			{
+				Warning("SquirrelVM::ReadObject: Failed to find singleton for %s\n",
+					((ScriptClassDesc_t*)typetag)->m_pszScriptName);
+			}
+
+			sq_pushobject(vm_, singleton);
+			break;
+		}
+
+
+		HSQOBJECT obj;
+		sq_createinstance(vm_, -1);
+		sq_getstackobj(vm_, -1, &obj);
+		sq_addref(vm_, &obj);
+		readState.StoreInCache(marker, obj);
+
+		sq_remove(vm_, -2);
+
+		{
+			// HACK: No way to get the default values part from accessing the class directly
+			SQUnsignedInteger nvalues = _instance(obj)->_class->_defaultvalues.size();
+			for (SQUnsignedInteger n = 0; n < nvalues; n++) {
+				ReadObject(pBuffer, readState);
+				HSQOBJECT val;
+				sq_resetobject(&val);
+				sq_getstackobj(vm_, -1, &val);
+				_instance(obj)->_values[n] = val;
+				sq_pop(vm_, 1);
+			}
+		}
+
+		if (typetag == TYPETAG_VECTOR)
+		{
+			float x = pBuffer->GetFloat();
+			float y = pBuffer->GetFloat();
+			float z = pBuffer->GetFloat();
+			SQUserPointer p;
+			sq_getinstanceup(vm_, -1, &p, 0);
+			new(p) Vector(x, y, z);
+		}
+		else if (typetag)
+		{
+			ScriptClassDesc_t* pClassDesc = (ScriptClassDesc_t*)typetag;
+
+			char instanceName[128] = "";
+			pBuffer->GetString(instanceName, sizeof(instanceName));
+
+			HSQOBJECT* hinstance = new HSQOBJECT;
+			sq_resetobject(hinstance);
+			sq_getstackobj(vm_, -1, hinstance);
+			sq_addref(vm_, hinstance);
+
+			if (*instanceName)
+			{
+				bool allowDestruct = (pBuffer->GetChar() == 1);
+
+				auto instance = pClassDesc->pHelper->BindOnRead((HSCRIPT)hinstance, nullptr, instanceName);
+				if (instance == nullptr)
+				{
+					sq_release(vm_, hinstance);
+					delete hinstance;
+					sq_poptop(vm_);
+					sq_pushnull(vm_);
+					break;
+				}
+
+				{
+					SQUserPointer p;
+					sq_getinstanceup(vm_, -1, &p, 0);
+					new(p) ClassInstanceData(instance, pClassDesc, instanceName, allowDestruct);
+				}
+				sq_setreleasehook(vm_, -1, allowDestruct ? &destructor_stub : &destructor_stub_instance);
+			}
+			else
+			{
+				sq_setinstanceup(vm_, -1, nullptr);
+			}
+		}
+
+		break;
+	}
+	case OT_WEAKREF:
+	{
+		ReadObject(pBuffer, readState);
+		sq_weakref(vm_, -1);
+		break;
+	}
+	case OT_FUNCPROTO: //internal usage only
+	{
+		int marker = 0;
+		if (readState.CheckCache(pBuffer, vm_, &marker))
+		{
+			break;
+		}
+
+		SQObjectPtr ret;
+		if (!SQFunctionProto::Load(vm_, pBuffer, closure_read, ret))
+		{
+			Error("Failed to deserialize OT_FUNCPROTO\n");
+			sq_pushnull(vm_);
+			break;
+		}
+
+		vm_->Push(ret);
+		readState.StoreTopInCache(marker);
+	}
+	case OT_OUTER: //internal usage only
+	{
+		int marker = 0;
+		if (readState.CheckCache(pBuffer, vm_, &marker))
+		{
+			break;
+		}
+
+		SQOuter* outer = SQOuter::Create(_ss(vm_), nullptr);
+		vm_->Push(outer);
+		readState.StoreTopInCache(marker);
+
+		ReadObject(pBuffer, readState);
+		HSQOBJECT inner;
+		sq_resetobject(&inner);
+		sq_getstackobj(vm_, -1, &inner);
+		outer->_value = inner;
+		outer->_valptr = &(outer->_value);
+		sq_poptop(vm_);
+
+		break;
+	}
+	// case OT_USERDATA:
+	// case OT_GENERATOR:
+	// case OT_USERPOINTER:
+	// case OT_THREAD:
+	// 
+	default:
+		Error("SquirrelVM::ReadObject: Unexpected type %d", thisType);
+	}
+}
+
+void SquirrelVM::ReadState(CUtlBuffer* pBuffer)
+{
+	SquirrelSafeCheck safeCheck(vm_);
+
+	ReadStateMap readState(vm_);
+
+	sq_pushroottable(vm_);
+
+	HSQOBJECT obj;
+	int marker = 0;
+	readState.CheckCache(pBuffer, vm_, &marker);
+	sq_getstackobj(vm_, -1, &obj);
+	sq_addref(vm_, &obj);
+	readState.StoreInCache(marker, obj);
+
+	int count = pBuffer->GetInt();
+
+	for (int i = 0; i < count; ++i)
+	{
+		ReadObject(pBuffer, readState);
+		ReadObject(pBuffer, readState);
+
+		sq_rawset(vm_, -3);
+	}
+
+	sq_pop(vm_, 1);
 }
 
 void SquirrelVM::RemoveOrphanInstances()

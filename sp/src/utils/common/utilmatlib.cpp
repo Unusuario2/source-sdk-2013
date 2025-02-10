@@ -31,7 +31,7 @@ void LoadMaterialSystemInterface( CreateInterfaceFn fileSystemFactory )
 	materialSystemDLLHInst = g_pFullFileSystem->LoadModule( pDllName );
 	if( !materialSystemDLLHInst )
 	{
-		Error("\tCan't load MaterialSystem.dll\n" );
+		Error( "Can't load MaterialSystem.dll\n" );
 	}
 
 	CreateInterfaceFn clientFactory = Sys_GetFactory( materialSystemDLLHInst );
@@ -40,17 +40,17 @@ void LoadMaterialSystemInterface( CreateInterfaceFn fileSystemFactory )
 		g_pMaterialSystem = (IMaterialSystem *)clientFactory( MATERIAL_SYSTEM_INTERFACE_VERSION, NULL );
 		if ( !g_pMaterialSystem )
 		{
-			Error("\tCould not get the material system interface from materialsystem.dll (" __FILE__ ")" );
+			Error( "Could not get the material system interface from materialsystem.dll (" __FILE__ ")" );
 		}
 	}
 	else
 	{
-		Error("\tCould not find factory interface in library MaterialSystem.dll" );
+		Error( "Could not find factory interface in library MaterialSystem.dll" );
 	}
 
 	if (!g_pMaterialSystem->Init( "shaderapiempty.dll", 0, fileSystemFactory ))
 	{
-		Error("\tCould not start the empty shader (shaderapiempty.dll)!" );
+		Error( "Could not start the empty shader (shaderapiempty.dll)!" );
 	}
 }
 
@@ -98,7 +98,7 @@ void GetMaterialDimensions( MaterialSystemMaterial_t materialHandle, int *width,
 #if 0
 		if (retVal == MATERIAL_PREVIEW_IMAGE_BAD ) 
 		{
-			Error("\tproblem getting preview image for %s", 
+			Error( "problem getting preview image for %s", 
 				g_pMaterialSystem->GetMaterialName( materialInfo[matID].materialHandle ) );
 		}
 #else

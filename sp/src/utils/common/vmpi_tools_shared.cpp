@@ -66,7 +66,7 @@ bool SharedDispatch( MessageBuffer *pBuf, int iSource, int iPacketID )
 			switch ( chCrashInfoType )
 			{
 			case 't':
-				Warning("\t\nWorker '%s' dead: %s\n", VMPI_GetMachineName( iSource ), pInPos );
+				Warning( "\nWorker '%s' dead: %s\n", VMPI_GetMachineName( iSource ), pInPos );
 				break;
 			case 'f':
 				{
@@ -116,12 +116,12 @@ bool SharedDispatch( MessageBuffer *pBuf, int iSource, int iPacketID )
 						fwrite( pInPos, 1, iFileSize, fDump );
 						fclose( fDump );
 
-						Warning("\t\nSaved worker crash minidump '%s', size %d byte(s).\n",
+						Warning( "\nSaved worker crash minidump '%s', size %d byte(s).\n",
 							chSaveFileName, iFileSize );
 					}
 					else
 					{
-						Warning("\t\nReceived worker crash minidump size %d byte(s), failed to save.\n", iFileSize );
+						Warning( "\nReceived worker crash minidump size %d byte(s), failed to save.\n", iFileSize );
 					}
 				}
 				break;
@@ -348,24 +348,24 @@ void HandleMPIDisconnect( int procID, const char *pReason )
 	bool bOldSuppress = g_bSuppressPrintfOutput;
 	g_bSuppressPrintfOutput = ( Q_stristr( pReason, "invalid packet size" ) == 0 );
 
-		Warning("\t\n\n--- WARNING: lost connection to '%s' (%s).\n", VMPI_GetMachineName( procID ), pReason );
+		Warning( "\n\n--- WARNING: lost connection to '%s' (%s).\n", VMPI_GetMachineName( procID ), pReason );
 		
 		if ( g_bMPIMaster )
 		{
-			Warning("\t%d workers remain.\n\n", nLiveWorkers );
+			Warning( "%d workers remain.\n\n", nLiveWorkers );
 
 			++g_nDisconnects;
 			/*
 			if ( VMPI_GetCurrentNumberOfConnections() - g_nDisconnects <= 1 )
 			{
-				Error("\tAll machines disconnected!" );
+				Error( "All machines disconnected!" );
 			}
 			*/
 		}
 		else
 		{
 			VMPI_HandleAutoRestart();
-			Error("\tWorker quitting." );
+			Error( "Worker quitting." );
 		}
 	
 	g_bSuppressPrintfOutput = bOldSuppress;

@@ -239,7 +239,7 @@ bool CScratchPad3D::LoadCommandsFromFile( )
 
 		if( !pCmd )
 		{
-			Assert( !"\tLoadCommandsFromFile: invalid file" );
+			Assert( !"LoadCommandsFromFile: invalid file" );
 			m_pFileSystem->Close( fp );
 			return false;
 		}
