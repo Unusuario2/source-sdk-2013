@@ -376,8 +376,7 @@ END_SCRIPTDESC();
 
 CPlaneTInstanceHelper g_PlaneTInstanceHelper;
 
-BEGIN_SCRIPTDESC_ROOT( cplane_t, "" )
-	DEFINE_SCRIPT_INSTANCE_HELPER( &g_PlaneTInstanceHelper )
+BEGIN_SCRIPTDESC_ROOT_WITH_HELPER( cplane_t, "", &g_PlaneTInstanceHelper )
 END_SCRIPTDESC();
 
 static HSCRIPT ScriptTraceLineComplex( const Vector &vecStart, const Vector &vecEnd, HSCRIPT entIgnore, int iMask, int iCollisionGroup )
@@ -509,9 +508,7 @@ static void DestroyFireBulletsInfo( HSCRIPT hBulletsInfo )
 //-----------------------------------------------------------------------------
 CAnimEventTInstanceHelper g_AnimEventTInstanceHelper;
 
-BEGIN_SCRIPTDESC_ROOT( scriptanimevent_t, "" )
-	DEFINE_SCRIPT_INSTANCE_HELPER( &g_AnimEventTInstanceHelper )
-
+BEGIN_SCRIPTDESC_ROOT_WITH_HELPER( scriptanimevent_t, "", &g_AnimEventTInstanceHelper )
 	DEFINE_SCRIPTFUNC( GetEvent, "" )
 	DEFINE_SCRIPTFUNC( SetEvent, "" )
 
@@ -1071,10 +1068,10 @@ void RegisterSharedScriptFunctions()
 	// 
 	// Precaching
 	// 
-	ScriptRegisterFunctionNamed( g_pScriptVM, ScriptPrecacheModel, "PrecacheModel", "Precaches a model for later usage." );
+	ScriptRegisterFunctionNamed( g_pScriptVM, ScriptPrecacheModel, "DoPrecacheModel", SCRIPT_ALIAS( "PrecacheModel", "Precaches a model for later usage." ) );
 	ScriptRegisterFunction( g_pScriptVM, PrecacheMaterial, "Precaches a material for later usage." );
 	ScriptRegisterFunction( g_pScriptVM, PrecacheParticleSystem, "Precaches a particle system for later usage." );
-	ScriptRegisterFunctionNamed( g_pScriptVM, ScriptPrecacheOther, "PrecacheOther", "Precaches an entity class for later usage." );
+	ScriptRegisterFunctionNamed( g_pScriptVM, ScriptPrecacheOther, "DoPrecacheOther", SCRIPT_ALIAS( "PrecacheOther", "Precaches an entity class for later usage." ) );
 
 	// 
 	// NPCs
