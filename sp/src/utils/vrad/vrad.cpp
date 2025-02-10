@@ -2790,20 +2790,6 @@ int ParseCommandLine( int argc, char **argv, bool *onlydetail )
 				return 1;
 			}
 		}
-<<<<<<< HEAD
-//		else if (!Q_stricmp(argv[i],"-sky")) //not used.
-//		{
-//			if ( ++i < argc )
-//			{
-//				indirect_sun = (float)atof (argv[i]);
-//			}
-//			else
-//			{
-//				Warning("Error: expected a value after '-sky'\n" );
-//				return 1;
-//			}
-//		}
-=======
 		else if (!Q_stricmp(argv[i],"-sky"))
 		{
 			if ( ++i < argc )
@@ -2816,7 +2802,6 @@ int ParseCommandLine( int argc, char **argv, bool *onlydetail )
 				return 1;
 			}
 		}
->>>>>>> parent of 186e88f5 (cleanup)
 		else if (!Q_stricmp(argv[i],"-notexscale"))
 		{
 			texscale = false;
