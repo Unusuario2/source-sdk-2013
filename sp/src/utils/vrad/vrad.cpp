@@ -20,7 +20,7 @@
 #include "loadcmdline.h"
 #include "byteswap.h"
 
-#define ALLOWDEBUGOPTIONS (1 || _DEBUG)
+//#define ALLOWDEBUGOPTIONS (0 || _DEBUG)
 
 static FileHandle_t pFpTrans = NULL;
 
@@ -2663,7 +2663,7 @@ int ParseCommandLine( int argc, char **argv, bool *onlydetail )
 			}
 		}
 
-#if ALLOWDEBUGOPTIONS
+#ifdef MAPBASE
 		else if (!Q_stricmp(argv[i],"-scale"))
 		{
 			if ( ++i < argc )
@@ -2731,6 +2731,7 @@ int ParseCommandLine( int argc, char **argv, bool *onlydetail )
 			}
 		}
 #endif
+
 		// NOTE: the -mpi checks must come last here because they allow the previous argument 
 		// to be -mpi as well. If it game before something else like -game, then if the previous
 		// argument was -mpi and the current argument was something valid like -game, it would skip it.
