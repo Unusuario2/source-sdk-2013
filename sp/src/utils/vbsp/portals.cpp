@@ -912,7 +912,7 @@ void FindAreas_r (node_t *node)
 }
 
 #ifdef MAPBASE
-extern qboolean	noleaktest;
+extern bool		noleaktest;
 #endif
 
 void ReportAreaportalLeak( tree_t *tree, node_t *node )
@@ -1624,8 +1624,8 @@ MarkVisibleSides
 void MarkVisibleSides (tree_t *tree, int startbrush, int endbrush, int detailScreen)
 {
 	mapbrush_t	*mb;
-	int		numsides;
-	qboolean detail;
+	int			numsides;
+	bool		detail;
 
 	qprintf ("--- MarkVisibleSides ---\n");
 
@@ -1636,7 +1636,7 @@ void MarkVisibleSides (tree_t *tree, int startbrush, int endbrush, int detailScr
 
 		if ( detailScreen != FULL_DETAIL )
 		{
-			qboolean onlyDetail = (detailScreen==ONLY_DETAIL)?true:false;
+			bool onlyDetail = (detailScreen==ONLY_DETAIL)?true:false;
 			// true for detail brushes
 			detail = (mb->contents & CONTENTS_DETAIL) ? true : false;
 			if ( onlyDetail ^ detail )

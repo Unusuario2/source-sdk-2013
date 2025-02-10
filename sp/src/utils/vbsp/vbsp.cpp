@@ -24,14 +24,6 @@
 #include "../common/StandartColorFormat.h" //this control the color of the console.
 #endif 
 
-/*
-#ifdef MAPBASE
-#ifdef _WIN32 //This is for having ANSI colors in the console on Windows.
-#include <windows.h> 
-#endif 
-#endif 
-*/
-
 #ifdef MAPBASE_VSCRIPT
 #include "vscript/ivscript.h"
 #include "vscript_vbsp.h"
@@ -45,31 +37,29 @@ char		name[1024];
 char		materialPath[1024];
 
 vec_t		microvolume = 1.0;
-qboolean	noprune;
-qboolean	glview;
-qboolean	nodetail;
-qboolean	fulldetail;
-qboolean	onlyents;
+
+bool		noprune;
+bool		glview;
+bool		nodetail;
+bool		fulldetail;
+bool		onlyents;
 bool		onlyprops;
-qboolean	nomerge;
-qboolean	nomergewater = false;
-qboolean	nowater;
-qboolean	nocsg;
-qboolean	noweld;
-qboolean	noshare;
-qboolean	nosubdiv;
-qboolean	notjunc;
-qboolean	noopt;
-#ifdef MAPBASE
-qboolean	noleaktest;
-#else
-qboolean	leaktest;
-#endif
-qboolean	verboseentities;
-qboolean	dumpcollide = false;
-qboolean	g_bLowPriority = false;
-qboolean	g_DumpStaticProps = false;
-qboolean	g_bSkyVis = false;			// skybox vis is off by default, toggle this to enable it
+bool		nomerge;
+bool		nomergewater = false;
+bool		nowater;
+bool		nocsg;
+bool		noweld;
+bool		noshare;
+bool		nosubdiv;
+bool		notjunc;
+bool		noopt;
+bool		verboseentities;
+bool		dumpcollide = false;
+bool		g_bLowPriority = false;
+bool		g_DumpStaticProps = false;
+bool		g_bSkyVis = false; // skybox vis is off by default, toggle this to enable it
+bool		noleaktest;
+
 bool		g_bLightIfMissing = false;
 bool		g_snapAxialPlanes = false;
 bool		g_bKeepStaleZip = false;

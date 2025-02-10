@@ -24,7 +24,7 @@ textureref_t	textureref[MAX_MAP_TEXTURES];
 
 bool g_bHasWater = false;
 
-extern qboolean onlyents;
+extern bool		 onlyents;
 
 dtexdata_t *GetTexData( int index )
 {

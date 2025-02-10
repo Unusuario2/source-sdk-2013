@@ -152,7 +152,7 @@ void	SafeCreatePath( char *path );
 extern	qboolean		archive;
 extern	char			archivedir[1024];
 
-extern	qboolean verbose;
+extern	bool	 verbose;
 
 void qprintf( PRINTF_FORMAT_STRING const char *format, ... );
 

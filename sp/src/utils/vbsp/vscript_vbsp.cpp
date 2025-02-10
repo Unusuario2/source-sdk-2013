@@ -253,12 +253,12 @@ bool DoIncludeScript( const char *pszScript, HSCRIPT hScope )
 	return true;
 }
 
-extern qboolean	glview;
-extern qboolean	onlyents;
+extern bool		glview;
+extern bool		onlyents;
 extern bool		onlyprops;
-extern qboolean	noleaktest;
-extern qboolean	verboseentities;
-extern qboolean	g_bLowPriority;
+extern bool		noleaktest;
+extern bool		verboseentities;
+extern bool		g_bLowPriority;
 extern bool		g_bKeepStaleZip;
 extern bool		g_bNoDefaultCubemaps;
 extern bool		g_bSkyboxCubemaps;

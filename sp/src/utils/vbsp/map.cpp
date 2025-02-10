@@ -55,7 +55,7 @@ struct LoadSide_t
 };
 
 
-extern qboolean onlyents;
+extern bool		 onlyents;
 
 #ifdef MAPBASE
 extern entity_t *g_ManifestWorldSpawn;
