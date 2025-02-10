@@ -20,7 +20,7 @@
 #include "loadcmdline.h"
 #include "byteswap.h"
 
-#define ALLOWDEBUGOPTIONS (0 || _DEBUG)
+#define ALLOWDEBUGOPTIONS (1 || _DEBUG)
 
 static FileHandle_t pFpTrans = NULL;
 
