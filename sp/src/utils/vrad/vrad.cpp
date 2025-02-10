@@ -2702,18 +2702,18 @@ int ParseCommandLine( int argc, char **argv, bool *onlydetail )
 				return 1;
 			}
 		}
-		else if (!Q_stricmp(argv[i],"-sky"))
-		{
-			if ( ++i < argc )
-			{
-				indirect_sun = (float)atof (argv[i]);
-			}
-			else
-			{
-				Warning("Error: expected a value after '-sky'\n" );
-				return 1;
-			}
-		}
+//		else if (!Q_stricmp(argv[i],"-sky"))
+//		{
+//			if ( ++i < argc )
+//			{
+//				indirect_sun = (float)atof (argv[i]);
+//			}
+//			else
+//			{
+//				Warning("Error: expected a value after '-sky'\n" );
+//				return 1;
+//			}
+//		}
 		else if (!Q_stricmp(argv[i],"-notexscale"))
 		{
 			texscale = false;
@@ -2801,6 +2801,13 @@ void PrintUsage( int argc, char **argv )
 		"                    supersampling.\n"
 		"  -smooth #       : Set the threshold for smoothing groups, in degrees\n"
 		"                    (default 45).\n"
+#ifdef MAPBASE
+		"  -coring #	   : Scale the light threshold before a luxel is completely unlit, used to save lightmap data. (default 1.0)\n"	
+		"  -ambient # # #  : Sets the ambient term. Can be used to tweak lightmap color. Mixes the color into all lightmaps.\n"
+		"  -scale #        : Scales all the lights by a # factor. (default 1.0) \n"
+		"  -dlight #       : Set the dlight_threshold constant. (default 0.1)"
+		"  -notexscale     : Disables calculation of the texture and lightmap scaling factors for a patch.\n"
+#endif
 		"  -dlightmap      : Force direct lighting into different lightmap than\n"
 		"                    radiosity.\n"
 		"  -stoponexit	   : Wait for a keypress on exit.\n"

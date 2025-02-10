@@ -337,7 +337,7 @@ extern bool g_bMPIProps;
 
 extern	byte	nodehit[MAX_MAP_NODES];
 extern  float	gamma_value;
-extern	float	indirect_sun;
+//extern	float	indirect_sun; //not used.
 extern	float	smoothing_threshold;
 extern	int		dlight_map;
 
