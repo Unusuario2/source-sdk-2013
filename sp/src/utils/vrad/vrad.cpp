@@ -20,12 +20,11 @@
 #include "loadcmdline.h"
 #include "byteswap.h"
 
+//#define ALLOWDEBUGOPTIONS (0 || _DEBUG)
+
 #ifdef MAPBASE
 #include "../common/StandartColorFormat.h" //this control the color of the console.
 #endif 
-
-
-#define ALLOWDEBUGOPTIONS (0 || _DEBUG)
 
 static FileHandle_t pFpTrans = NULL;
 
@@ -2805,7 +2804,7 @@ int ParseCommandLine( int argc, char **argv, bool *onlydetail )
 			}
 		}
 
-#if ALLOWDEBUGOPTIONS
+#ifdef MAPBASE
 		else if (!Q_stricmp(argv[i],"-scale"))
 		{
 			if ( ++i < argc )
@@ -2844,18 +2843,18 @@ int ParseCommandLine( int argc, char **argv, bool *onlydetail )
 				return 1;
 			}
 		}
-		else if (!Q_stricmp(argv[i],"-sky"))
-		{
-			if ( ++i < argc )
-			{
-				indirect_sun = (float)atof (argv[i]);
-			}
-			else
-			{
-				Warning("\tError: expected a value after '-sky'\n" );
-				return 1;
-			}
-		}
+//		else if (!Q_stricmp(argv[i],"-sky"))
+//		{
+//			if ( ++i < argc )
+//			{
+//				indirect_sun = (float)atof (argv[i]);
+//			}
+//			else
+//			{
+//				Warning("Error: expected a value after '-sky'\n" );
+//				return 1;
+//			}
+//		}
 		else if (!Q_stricmp(argv[i],"-notexscale"))
 		{
 			texscale = false;
@@ -2873,6 +2872,7 @@ int ParseCommandLine( int argc, char **argv, bool *onlydetail )
 			}
 		}
 #endif
+
 		// NOTE: the -mpi checks must come last here because they allow the previous argument 
 		// to be -mpi as well. If it game before something else like -game, then if the previous
 		// argument was -mpi and the current argument was something valid like -game, it would skip it.
