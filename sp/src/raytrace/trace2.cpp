@@ -1,4 +1,4 @@
-//========= Copyright Valve Corporation, All rights reserved. ============//
+//============= Copyright Valve Corporation, All rights reserved. =============//
 // $Id$
 #include "raytrace.h"
 #include <mathlib/halton.h>
@@ -117,7 +117,7 @@ void RayTracingEnvironment::RenderScene(
 				// set up colors
 				FourVectors surf_colors;
 				surf_colors.DuplicateVector(Vector(0,0,0));
-				for(int i=0;i<4;i++)
+				for(int i = 0;i<4;i++)
 				{
 					if (rslt.HitIds[i]>=0)
 					{

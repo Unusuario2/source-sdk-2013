@@ -1,4 +1,4 @@
-//========= Copyright Valve Corporation, All rights reserved. ============//
+//============= Copyright Valve Corporation, All rights reserved. =============//
 //
 // Purpose: 
 //
@@ -59,7 +59,7 @@ float		maxchop = 4; // coarsest allowed number of luxel widths for a patch
 float		minchop = 4; // "-chop" tightest number of luxel widths for a patch, used on edges
 float		dispchop = 8.0f;	// number of luxel widths for a patch
 float		g_MaxDispPatchRadius = 1500.0f;			// Maximum radius allowed for displacement patches
-qboolean	g_bDumpPatches;
+bool		g_bDumpPatches;
 bool	    bDumpNormals = false;
 bool		g_bDumpRtEnv = false;
 bool		bRed2Black = true;
@@ -101,22 +101,23 @@ bool g_bShowStaticPropNormals = false;
 float		gamma_value = 0.5;
 float		indirect_sun = 1.0;
 float		reflectivityScale = 1.0;
-qboolean	do_extra = true;
+bool		do_extra = true;
 bool		debug_extra = false;
-qboolean	do_fast = false;
-qboolean	do_centersamples = false;
+bool		do_fast = false;
+bool		do_centersamples = false;
 int			extrapasses = 4;
 float		smoothing_threshold = 0.7071067; // cos(45.0*(M_PI/180)) 
+
 // Cosine of smoothing angle(in radians)
 float		coring = 1.0;	// Light threshold to force to blackness(minimizes lightmaps)
-qboolean	texscale = true;
+bool		texscale = true;
 int			dlight_map = 0; // Setting to 1 forces direct lighting into different lightmap than radiosity
 
 float		luxeldensity = 1.0;
 unsigned	num_degenerate_faces;
 
-qboolean	g_bLowPriority = false;
-qboolean	g_bLogHashData = false;
+bool		g_bLowPriority = false;
+bool		g_bLogHashData = false;
 bool		g_bNoDetailLighting = false;
 double		g_flStartTime;
 bool		g_bStaticPropLighting = false;
@@ -149,13 +150,13 @@ int		nodeparents[MAX_MAP_NODES];
 
 void MakeParents (int nodenum, int parent)
 {
-	int		i, j;
+	int		j;
 	dnode_t	*node;
 
 	nodeparents[nodenum] = parent;
 	node = &dnodes[nodenum];
 
-	for (i=0 ; i<2 ; i++)
+	for (int i=0 ; i<2 ; i++)
 	{
 		j = node->children[i];
 		if (j < 0)
@@ -303,8 +304,6 @@ LightForTexture
 */
 void LightForTexture( const char *name, Vector& result )
 {
-	int		i;
-
 	result[ 0 ] = result[ 1 ] = result[ 2 ] = 0;
 
 	char baseFilename[ MAX_PATH ];
@@ -323,7 +322,7 @@ void LightForTexture( const char *name, Vector& result )
 				// 'originalName_%d_%d_%d'.
 				strcpy( baseFilename, base );
 				bool foundSeparators = true;
-				for ( int i=0; i<3; ++i )
+				for ( int i = 0; i<3; ++i )
 				{
 					char *underscore = Q_strrchr( baseFilename, '_' );
 					if ( underscore && *underscore )
@@ -344,7 +343,7 @@ void LightForTexture( const char *name, Vector& result )
 		}
 	}
 
-	for (i=0 ; i<num_texlights ; i++)
+	for (int i=0 ; i<num_texlights ; i++)
 	{
 		if (!Q_strcasecmp (name, texlights[i].name))
 		{
@@ -369,7 +368,6 @@ WindingFromFace
 */
 winding_t	*WindingFromFace (dface_t *f, Vector& origin )
 {
-	int			i;
 	int			se;
 	dvertex_t	*dv;
 	int			v;
@@ -378,7 +376,7 @@ winding_t	*WindingFromFace (dface_t *f, Vector& origin )
 	w = AllocWinding (f->numedges);
 	w->numpoints = f->numedges;
 
-	for (i=0 ; i<f->numedges ; i++)
+	for (int i=0 ; i<f->numedges ; i++)
 	{
 		se = dsurfedges[f->firstedge + i];
 		if (se < 0)
@@ -457,14 +455,13 @@ qboolean IsFog( dface_t *f )
 
 void ProcessSkyCameras()
 {
-	int i;
 	num_sky_cameras = 0;
-	for (i = 0; i < numareas; ++i)
+	for (int i = 0; i < numareas; ++i)
 	{
 		area_sky_cameras[i] = -1;
 	}
 
-	for (i = 0; i < num_entities; ++i)
+	for (int i = 0; i < num_entities; ++i)
 	{
 		entity_t *e = &entities[i];
 		const char *name = ValueForKey (e, "classname");
@@ -509,7 +506,6 @@ void MakePatchForFace (int fn, winding_t *w)
 	float	    area;
 	CPatch		*patch;
 	Vector		centroid(0,0,0);
-	int			i, j;
 	texinfo_t	*tx;
 
     // get texture info
@@ -560,11 +556,11 @@ void MakePatchForFace (int fn, winding_t *w)
     if ( texscale )
     {
         // Compute the texture "scale" in s,t
-        for( i=0; i<2; i++ )
+        for(int i = 0; i<2; i++ )
         {
             patch->scale[i] = 0.0f;
 			chopscale[i] = 0.0f;
-            for( j=0; j<3; j++ )
+            for(int j = 0; j<3; j++ )
 			{
                 patch->scale[i] += 
 					tx->textureVecsTexelsPerWorldUnits[i][j] * 
@@ -670,13 +666,12 @@ void MakePatchForFace (int fn, winding_t *w)
 
 entity_t *EntityForModel (int modnum)
 {
-	int		i;
 	char	*s;
 	char	name[16];
 
 	sprintf (name, "*%i", modnum);
 	// search the entities for one using modnum
-	for (i=0 ; i<num_entities ; i++)
+	for (int i=0 ; i<num_entities ; i++)
 	{
 		s = ValueForKey (&entities[i], "model");
 		if (!strcmp (s, name))
@@ -829,7 +824,7 @@ int CreateChildPatch( int nParentIndex, winding_t *pWinding, float flArea, const
 	VectorScale( total, child->luxscale, total );
 	if ( child->chop > minchop && (total[0] < child->chop) && (total[1] < child->chop) && (total[2] < child->chop) )
 	{
-		for ( int i=0; i<3; ++i )
+		for ( int i = 0; i<3; ++i )
 		{
 			if ( (child->face_maxs[i] == child->maxs[i] || child->face_mins[i] == child->mins[i] )
 			  && total[i] > minchop )
@@ -915,7 +910,7 @@ void SubdividePatch( int ndxPatch )
 
 	if( area1 == 0 || area2 == 0 )
 	{
-		Msg( "zero area child patch\n" );
+		Warning( "\tZero area child patch\n" );
 		return;
 	}
 
@@ -1225,7 +1220,6 @@ void MakeTransfer( int ndxPatch1, int ndxPatch2, transfer_t *all_transfers )
 
 void MakeScales ( int ndxPatch, transfer_t *all_transfers )
 {
-	int		j;
 	float	total;
 	transfer_t	*t, *t2;
 	total = 0;
@@ -1251,7 +1245,7 @@ void MakeScales ( int ndxPatch, transfer_t *all_transfers )
 		t2 = all_transfers;
 
 		// overflow check!
-		for (j=0 ; j<patch->numtransfers ; j++, t2++)
+		for (int j=0 ; j<patch->numtransfers ; j++, t2++)
 		{
 			total += t2->transfer;
 		}
@@ -1264,7 +1258,7 @@ void MakeScales ( int ndxPatch, transfer_t *all_transfers )
 
 		t = patch->transfers;
 		t2 = all_transfers;
-		for (j=0 ; j<patch->numtransfers ; j++, t++, t2++)
+		for (int j=0 ; j<patch->numtransfers ; j++, t++, t2++)
 		{
 			t->transfer = t2->transfer*total;
 			t->patch = t2->patch;
@@ -1292,7 +1286,6 @@ WriteWorld
 */
 void WriteWorld (char *name, int iBump)
 {
-	unsigned	j;
 	FileHandle_t out;
 	CPatch		*patch;
 
@@ -1301,7 +1294,7 @@ void WriteWorld (char *name, int iBump)
 		Error ("\tCouldn't open %s", name);
 
 	unsigned int uiPatchCount = g_Patches.Size();
-	for (j=0; j<uiPatchCount; j++)
+	for (unsigned int j = 0; j<uiPatchCount; j++)
 	{
 		patch = &g_Patches.Element( j );
 
@@ -1360,10 +1353,8 @@ void WriteRTEnv (char *name)
 
 void WriteWinding (FileHandle_t out, winding_t *w, Vector& color )
 {
-	int			i;
-
 	CmdLib_FPrintf (out, "%i\n", w->numpoints);
-	for (i=0 ; i<w->numpoints ; i++)
+	for (int i=0 ; i<w->numpoints ; i++)
 	{
 		CmdLib_FPrintf (out, "%5.2f %5.2f %5.2f %5.3f %5.3f %5.3f\n",
 			w->p[i][0],
@@ -1436,14 +1427,13 @@ CollectLight
 // pull received light from children.
 void CollectLight( Vector& total )
 {
-	int i, j;
 	CPatch	*patch;
 
 	VectorFill( total, 0 );
 
 	// process patches in reverse order so that children are processed before their parents
 	unsigned int uiPatchCount = g_Patches.Size();
-	for( i = uiPatchCount - 1; i >= 0; i-- )
+	for(int i = uiPatchCount - 1; i >= 0; i-- )
 	{
 		patch = &g_Patches.Element( i );
 		int normalCount = patch->needsBumpmap ? NUM_BUMP_VECTS+1 : 1;
@@ -1455,7 +1445,7 @@ void CollectLight( Vector& total )
 		else if ( patch->child1 == g_Patches.InvalidIndex() )
 		{
 			// This is a leaf node.
-			for ( j = 0; j < normalCount; j++ )
+			for (int j = 0; j < normalCount; j++ )
 			{
 				VectorAdd( patch->totallight.light[j], addlight[i].light[j], patch->totallight.light[j] );
 			}
@@ -1481,7 +1471,7 @@ void CollectLight( Vector& total )
 			s2 = child2->area / (child1->area + child2->area);
 
 			// patch->totallight = s1 * child1->totallight + s2 * child2->totallight
-			for ( j = 0; j < normalCount; j++ )
+			for (int j = 0; j < normalCount; j++ )
 			{
 				VectorScale( child1->totallight.light[j], s1, patch->totallight.light[j] );
 				VectorMA( patch->totallight.light[j], s2, child2->totallight.light[j], patch->totallight.light[j] );
@@ -1491,7 +1481,7 @@ void CollectLight( Vector& total )
 			VectorScale( emitlight[patch->child1], s1, emitlight[i] );
 			VectorMA( emitlight[i], s2, emitlight[patch->child2], emitlight[i] );
 		}
-		for ( j = 0; j < NUM_BUMP_VECTS+1; j++ )
+		for (int j = 0; j < NUM_BUMP_VECTS+1; j++ )
 		{
 			VectorFill( addlight[ i ].light[j], 0 );
 		}
@@ -1621,7 +1611,7 @@ void GatherLight (int threadnum, void *pUserData)
 				VectorSubtract (patch2->origin, patch->origin, delta);
 				VectorNormalize (delta);
 				// find light emitted from other patch
-				for(i=0; i<3; i++)
+				for(i = 0; i<3; i++)
 				{
 					v[i] = emitlight[trans->patch][i] * patch2->reflectivity[i];
 				}
@@ -1652,7 +1642,7 @@ void GatherLight (int threadnum, void *pUserData)
 			VectorFill( sum, 0 );
 			for (k=0 ; k<num ; k++, trans++)
 			{
-				for(i=0; i<3; i++)
+				for(i = 0; i<3; i++)
 				{
 					v[i] = emitlight[trans->patch][i] * g_Patches[trans->patch].reflectivity[i];
 				}
@@ -1702,7 +1692,7 @@ void BounceLight (void)
 
 	g_pFileSystem->Close( dFp );
 
-	for (i=0; i<num_patches ; i++)
+	for (i = 0; i<num_patches ; i++)
 	{
 		Vector total;
 
@@ -1786,15 +1776,13 @@ RadWorld
 */
 void RadWorld_Start()
 {
-	unsigned	i;
-
 	if (luxeldensity < 1.0)
 	{
 		// Remember the old lightmap vectors.
 		float oldLightmapVecs[MAX_MAP_TEXINFO][2][4];
-		for (i = 0; i < texinfo.Count(); i++)
+		for (unsigned int i = 0; i < texinfo.Count(); i++)
 		{
-			for( int j=0; j < 2; j++ )
+			for( int j = 0; j < 2; j++ )
 			{
 				for( int k=0; k < 3; k++ )
 				{
@@ -1804,7 +1792,7 @@ void RadWorld_Start()
 		}
 
 		// rescale luxels to be no denser than "luxeldensity"
-		for (i = 0; i < texinfo.Count(); i++)
+		for (unsigned int i = 0; i < texinfo.Count(); i++)
 		{
 			texinfo_t	*tx = &texinfo[i];
 
@@ -1946,7 +1934,7 @@ void BuildFacesVisibleToLights( bool bAllVisible )
 
 	// For stats.. figure out how many faces it's going to touch.
 	int nFacesToProcess = 0;
-	for( int i=0; i < numfaces; i++ )
+	for( int i = 0; i < numfaces; i++ )
 	{
 		if( g_FacesVisibleToLights[i>>3] & (1 << (i & 7)) )
 			++nFacesToProcess;
@@ -1992,7 +1980,7 @@ void MakeAllScales (void)
 		IScratchPad3D *pPad = ScratchPad3D_Create();
 		pPad->SetAutoFlush( false );
 
-		for ( int i=0; i < numfaces; i++ )
+		for ( int i = 0; i < numfaces; i++ )
 		{
 			dface_t *f = &g_pFaces[i];
 

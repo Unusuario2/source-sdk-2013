@@ -1,4 +1,4 @@
-//========= Copyright Valve Corporation, All rights reserved. ============//
+//============= Copyright Valve Corporation, All rights reserved. =============//
 //
 // Purpose: 
 //
@@ -217,7 +217,7 @@ char* FormatStringForSQL( const char *pText )
 
 	pCur = pText;
 	char *pRetVal = new char[nChars+1];
-	for ( int i=0; i < nChars; )
+	for ( int i = 0; i < nChars; )
 	{
 		if ( *pCur == '\"' || *pCur == '\\' )
 			pRetVal[i++] = '\\';
@@ -680,7 +680,7 @@ void VMPI_Stats_Term()
 
 static bool ReadStringFromFile( FILE *fp, char *pStr, int strSize )
 {
-	int i=0;
+	int i = 0;
 	for ( i; i < strSize-2; i++ )
 	{
 		if ( fread( &pStr[i], 1, 1, fp ) != 1 ||

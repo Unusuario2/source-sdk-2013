@@ -1,4 +1,4 @@
-//========= Copyright Valve Corporation, All rights reserved. ============//
+//============= Copyright Valve Corporation, All rights reserved. =============//
 //
 // Purpose: 
 //
@@ -459,7 +459,7 @@ char* CBitRead::ReadAndAllocateString( bool *pOverflow )
 
 	// Now copy into the output and return it;
 	char *pRet = new char[ nChars + 1 ];
-	for ( int i=0; i <= nChars; i++ )
+	for ( int i = 0; i <= nChars; i++ )
 		pRet[i] = str[i];
 
 	return pRet;

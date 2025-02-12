@@ -1,4 +1,4 @@
-//========= Copyright Valve Corporation, All rights reserved. ============//
+//============= Copyright Valve Corporation, All rights reserved. =============//
 //
 // Purpose: 
 //
@@ -11,20 +11,18 @@
 
 void SaveVertexNormals( void )
 {
-	int i, j;
 	dface_t *f;
 	texinfo_t	*tex;
-
 
 	g_numvertnormalindices = 0;
 	g_numvertnormals = 0;
 
-	for( i = 0 ;i<numfaces ; i++ )
+	for(int i = 0 ;i<numfaces ; i++ )
 	{
 		f = &dfaces[i];
 		tex = &texinfo[f->texinfo];
 
-		for( j = 0; j < f->numedges; j++ )
+		for(int j = 0; j < f->numedges; j++ )
 		{
 			if( g_numvertnormalindices == MAX_MAP_VERTNORMALINDICES )
 			{

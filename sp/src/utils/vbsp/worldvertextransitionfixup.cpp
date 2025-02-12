@@ -1,4 +1,4 @@
-//========= Copyright Valve Corporation, All rights reserved. ============//
+//============= Copyright Valve Corporation, All rights reserved. =============//
 //
 // Purpose: 
 //
@@ -165,19 +165,19 @@ void WorldVertexTransitionFixup( void )
 {
 	CUtlVector<entitySideList_t> sideList;
 	sideList.SetCount( g_MainMap->num_entities );
-	int i;
-	for ( i = 0; i < g_MainMap->num_entities; i++ )
+
+	for (int i = 0; i < g_MainMap->num_entities; i++ )
 	{
 		sideList[i].firstBrushSide = 0;
 		sideList[i].brushSideCount = 0;
 	}
 
-	for ( i = 0; i < g_MainMap->nummapbrushes; i++ )
+	for (int i = 0; i < g_MainMap->nummapbrushes; i++ )
 	{
 		sideList[g_MainMap->mapbrushes[i].entitynum].brushSideCount += g_MainMap->mapbrushes[i].numsides;
 	}
 	int curSide = 0;
-	for ( i = 0; i < g_MainMap->num_entities; i++ )
+	for (int i = 0; i < g_MainMap->num_entities; i++ )
 	{
 		sideList[i].firstBrushSide = curSide;
 		curSide += sideList[i].brushSideCount;

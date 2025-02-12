@@ -1,4 +1,4 @@
-//========= Copyright Valve Corporation, All rights reserved. ============//
+//============= Copyright Valve Corporation, All rights reserved. =============//
 //
 // Purpose: 
 //
@@ -3205,7 +3205,7 @@ void TriStripToTriList(
 	*pTriListIndices = new unsigned short[ nMaxTriListIndices ];
 	*pnTriListIndices = 0;
 
-	for( int i=0; i < nTriStripIndices - 2; i++ )
+	for( int i = 0; i < nTriStripIndices - 2; i++ )
 	{
 		if( pTriStripIndices[i]   == pTriStripIndices[i+1] || 
 			pTriStripIndices[i]   == pTriStripIndices[i+2] ||
@@ -3239,7 +3239,7 @@ void CalcTextureCoordsAtPoints(
 	int const nPoints,
 	Vector2D *pCoords )
 {
-	for( int i=0; i < nPoints; i++ )
+	for( int i = 0; i < nPoints; i++ )
 	{
 		for( int iCoord=0; iCoord < 2; iCoord++ )
 		{
@@ -3329,7 +3329,7 @@ void CalcFaceExtents(dface_t *s, int lightmapTextureMinsInLuxels[2], int lightma
 
 void UpdateAllFaceLightmapExtents()
 {
-	for( int i=0; i < numfaces; i++ )
+	for( int i = 0; i < numfaces; i++ )
 	{
 		dface_t *pFace = &dfaces[i];
 
@@ -4011,7 +4011,7 @@ void ConvertPakFileContents( const char *pInFilename )
 	}
 
 	// strip ldr version of hdr files
-	for ( int i=0; i<hdrFiles.Count(); i++ )
+	for ( int i = 0; i<hdrFiles.Count(); i++ )
 	{
 		char ldrFileName[MAX_PATH];
 
@@ -4929,7 +4929,7 @@ bool SetPakFileLump( const char *pBSPFilename, const char *pNewFilename, void *p
 	// lumps must be reserialized in same relative offset order
 	// build sorted order table
 	int readOrder[HEADER_LUMPS];
-	for ( int i=0; i<HEADER_LUMPS; i++ )
+	for ( int i = 0; i<HEADER_LUMPS; i++ )
 	{
 		readOrder[i] = i;
 	}
@@ -5013,7 +5013,7 @@ bool GetBSPDependants( const char *pBSPFilename, CUtlVector< CUtlString > *pList
 	}
 
 	// get all the world materials
-	for ( int i=0; i<numtexdata; i++ )
+	for ( int i = 0; i<numtexdata; i++ )
 	{
 		const char *pName = TexDataStringTable_GetString( dtexdata[i].nameStringTableID );
 		V_ComposeFileName( "materials", pName, szFilename, sizeof( szFilename ) );
@@ -5032,7 +5032,7 @@ bool GetBSPDependants( const char *pBSPFilename, CUtlVector< CUtlString > *pList
 			pGameLumpData += sizeof( int );
 
 			StaticPropDictLump_t *pStaticPropDictLump = (StaticPropDictLump_t *)pGameLumpData;
-			for ( int i=0; i<count; i++ )
+			for ( int i = 0; i<count; i++ )
 			{
 				pList->AddToTail( pStaticPropDictLump[i].m_Name );
 			}
@@ -5050,7 +5050,7 @@ bool GetBSPDependants( const char *pBSPFilename, CUtlVector< CUtlString > *pList
 			pGameLumpData += sizeof( int );
 
 			DetailObjectDictLump_t *pDetailObjectDictLump = (DetailObjectDictLump_t *)pGameLumpData;
-			for ( int i=0; i<count; i++ )
+			for ( int i = 0; i<count; i++ )
 			{
 				pList->AddToTail( pDetailObjectDictLump[i].m_Name );
 			}

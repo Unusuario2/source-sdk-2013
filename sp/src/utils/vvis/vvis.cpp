@@ -1,4 +1,4 @@
-//========= Copyright Valve Corporation, All rights reserved. ============//
+//============= Copyright Valve Corporation, All rights reserved. =============//
 //
 // Purpose: 
 //
@@ -121,19 +121,17 @@ winding_t *NewWinding (int points)
 
 void pw(winding_t *w)
 {
-	int		i;
-	for (i=0 ; i<w->numpoints ; i++)
+	for (int i=0 ; i<w->numpoints ; i++)
 		Msg ("(%5.1f, %5.1f, %5.1f)\n",w->points[i][0], w->points[i][1],w->points[i][2]);
 }
 
 void prl(leaf_t *l)
 {
-	int			i;
 	portal_t	*p;
 	plane_t		pl;
 	
 	int count = l->portals.Count();
-	for (i=0 ; i<count ; i++)
+	for (int i=0 ; i<count ; i++)
 	{
 		p = l->portals[i];
 		pl = p->plane;
@@ -173,14 +171,13 @@ void BuildTracePortals( int clusterStart )
 }
 
 void SortPortals (void)
-{
-	int		i;
-	
-	for (i=0 ; i<g_numportals*2 ; i++)
+{	
+	for (int i=0 ; i<g_numportals*2 ; i++)
 		sorted_portals[i] = &portals[i];
 
 	if (nosort)
 		return;
+
 	qsort (sorted_portals, g_numportals*2, sizeof(sorted_portals[0]), PComp);
 }
 
@@ -192,14 +189,12 @@ LeafVectorFromPortalVector
 */
 int LeafVectorFromPortalVector (byte *portalbits, byte *leafbits)
 {
-	int			i;
 	portal_t	*p;
 	int			c_leafs;
 
-
 	memset (leafbits, 0, leafbytes);
 
-	for (i=0 ; i<g_numportals*2 ; i++)
+	for (int i=0 ; i<g_numportals*2 ; i++)
 	{
 		if ( CheckBit( portalbits, i ) )
 		{
@@ -227,7 +222,6 @@ void ClusterMerge (int clusternum)
 //	byte		portalvector[MAX_PORTALS/8];
 	byte		portalvector[MAX_PORTALS/4];      // 4 because portal bytes is * 2
 	byte		uncompressed[MAX_MAP_LEAFS/8];
-	int			i, j;
 	int			numvis;
 	portal_t	*p;
 	int			pnum;
@@ -236,12 +230,12 @@ void ClusterMerge (int clusternum)
 
 	memset (portalvector, 0, portalbytes);
 	leaf = &leafs[clusternum];
-	for (i=0 ; i < leaf->portals.Count(); i++)
+	for (int i=0 ; i < leaf->portals.Count(); i++)
 	{
 		p = leaf->portals[i];
 		if (p->status != stat_done)
 			Error ("\tportal not done %d %p %p\n", i, p, portals);
-		for (j=0 ; j<portallongs ; j++)
+		for (int j=0 ; j<portallongs ; j++)
 			((long *)portalvector)[j] |= ((long *)p->portalvis)[j];
 		pnum = p - portals;
 		SetBit( portalvector, pnum );
@@ -316,20 +310,16 @@ CalcPortalVis
 */
 void CalcPortalVis (void)
 {
-	int		i;
-
 	// fastvis just uses mightsee for a very loose bound
 	if( fastvis )
 	{
-		for (i=0 ; i<g_numportals*2 ; i++)
+		for (int i=0 ; i<g_numportals*2 ; i++)
 		{
 			portals[i].portalvis = portals[i].portalflood;
 			portals[i].status = stat_done;
 		}
 		return;
 	}
-
-
     if (g_bUseMPI) 
 	{
  		RunMPIPortalFlow();
@@ -357,8 +347,6 @@ CalcVis
 */
 void CalcVis (void)
 {
-	int		i;
-
 	if (g_bUseMPI) 
 	{
 		RunMPIBasePortalVis();
@@ -375,14 +363,14 @@ void CalcVis (void)
 	//
 	// assemble the leaf vis lists by oring the portal lists
 	//
-	for ( i = 0; i < portalclusters; i++ )
+	for (int i = 0; i < portalclusters; i++ )
 	{
 		ClusterMerge( i );
 	}
 
 	int count = 0;
 	// Now crosscheck each leaf's vis and compress
-	for ( i = 0; i < portalclusters; i++ )
+	for (int i = 0; i < portalclusters; i++ )
 	{
 		count += CompressAndCrosscheckClusterVis( i );
 	}
@@ -407,29 +395,28 @@ void CalcVis (void)
 
 void SetPortalSphere (portal_t *p)
 {
-	int		i;
 	Vector	total, dist;
 	winding_t	*w;
 	float	r, bestr;
 
 	w = p->winding;
 	VectorCopy (vec3_origin, total);
-	for (i=0 ; i<w->numpoints ; i++)
-	{
+
+	for (int i=0 ; i<w->numpoints ; i++)
 		VectorAdd (total, w->points[i], total);
-	}
 	
-	for (i=0 ; i<3 ; i++)
+	for (int i=0 ; i<3 ; i++)
 		total[i] /= w->numpoints;
 
 	bestr = 0;		
-	for (i=0 ; i<w->numpoints ; i++)
+	for (int i=0 ; i<w->numpoints ; i++)
 	{
 		VectorSubtract (w->points[i], total, dist);
 		r = VectorLength (dist);
 		if (r > bestr)
 			bestr = r;
 	}
+
 	VectorCopy (total, p->origin);
 	p->radius = bestr;
 }
@@ -710,8 +697,7 @@ static void GetBoundsForFace( int faceID, Vector &faceMin, Vector &faceMax )
 {
 	ClearBounds( faceMin, faceMax );
 	dface_t *pFace = &dfaces[faceID];
-	int i;
-	for( i = pFace->firstedge; i < pFace->firstedge + pFace->numedges; i++ )
+	for(int i = pFace->firstedge; i < pFace->firstedge + pFace->numedges; i++ )
 	{
 		int edgeID = dsurfedges[i];
 		if( edgeID < 0 )
@@ -727,17 +713,14 @@ static void GetBoundsForFace( int faceID, Vector &faceMin, Vector &faceMax )
 }
 
 // FIXME: should stick this in mathlib
-static float GetMinDistanceBetweenBoundingBoxes( const Vector &min1, const Vector &max1, 
-												 const Vector &min2, const Vector &max2 )
+static float GetMinDistanceBetweenBoundingBoxes( const Vector &min1, const Vector &max1, const Vector &min2, const Vector &max2 )
 {
 	if( IsBoxIntersectingBox( min1, max1, min2, max2 ) )
-	{
 		return 0.0f;
-	}
 
 	Vector axisDist;
-	int i;
-	for( i = 0; i < 3; i++ )
+
+	for(int i = 0; i < 3; i++ )
 	{
 		if( min1[i] <= max2[i] && max1[i] >= min2[i] )
 		{
@@ -762,8 +745,6 @@ static float GetMinDistanceBetweenBoundingBoxes( const Vector &min1, const Vecto
 static float CalcDistanceFromLeafToWater( int leafNum )
 {
 	byte	uncompressed[MAX_MAP_LEAFS/8];
-
-	int j, k;
 
 	// If we know that this one doesn't see a water surface then don't bother doing anything.
 	if( ((dleafs[leafNum].contents & CONTENTS_TESTFOGVOLUME) == 0) && ( dleafs[leafNum].leafWaterDataID == -1 ) )
@@ -807,7 +788,7 @@ static float CalcDistanceFromLeafToWater( int leafNum )
 */
 
 	// Iterate over all potentially visible clusters from this leaf
-	for (j = 0; j < dvis->numclusters; ++j)
+	for (int j = 0; j < dvis->numclusters; ++j)
 	{
 		// Don't need to bother if this is the same as the current cluster
 		if (j == cluster)
@@ -819,7 +800,7 @@ static float CalcDistanceFromLeafToWater( int leafNum )
 		
 		// Found a visible cluster, now iterate over all leaves
 		// inside that cluster
-		for (k = 0; k < g_ClusterLeaves[j].leafCount; ++k)
+		for (int k = 0; k < g_ClusterLeaves[j].leafCount; ++k)
 		{
 			int nClusterLeaf = g_ClusterLeaves[j].leafs[k];
 			
@@ -864,11 +845,8 @@ static float CalcDistanceFromLeafToWater( int leafNum )
 
 static void CalcDistanceFromLeavesToWater( void )
 {
-	int i;
-	for( i = 0; i < numleafs; i++ )
-	{
+	for(int i = 0; i < numleafs; i++ )
 		g_LeafMinDistToWater[i] = ( unsigned short )CalcDistanceFromLeafToWater( i );
-	}
 }
 
 //-----------------------------------------------------------------------------
@@ -878,16 +856,14 @@ static void CalcVisibleFogVolumes()
 {
 	byte	uncompressed[MAX_MAP_LEAFS/8];
 
-	int i, j, k;
-
 	// Clear the contents flags for water testing
-	for (i = 0; i < numleafs; ++i)
+	for (int i = 0; i < numleafs; ++i)
 	{
 		dleafs[i].contents &= ~CONTENTS_TESTFOGVOLUME;
 		g_LeafMinDistToWater[i] = 65535;
 	}
 
-	for (i = 0; i < numleafs; ++i)
+	for (int i = 0; i < numleafs; ++i)
 	{
 		// If we've already discovered that this leaf needs testing,
 		// no need to go through the work again...
@@ -918,7 +894,7 @@ static void CalcVisibleFogVolumes()
 		DecompressVis( &dvisdata[dvis->bitofs[cluster][DVIS_PVS]], uncompressed );
 
 		// Iterate over all potentially visible clusters from this leaf
-		for (j = 0; j < dvis->numclusters; ++j)
+		for (int j = 0; j < dvis->numclusters; ++j)
 		{
 			// Don't need to bother if this is the same as the current cluster
 			if (j == cluster)
@@ -929,7 +905,7 @@ static void CalcVisibleFogVolumes()
 
 			// Found a visible cluster, now iterate over all leaves
 			// inside that cluster
-			for (k = 0; k < g_ClusterLeaves[j].leafCount; ++k)
+			for (int k = 0; k < g_ClusterLeaves[j].leafCount; ++k)
 			{
 				int nClusterLeaf = g_ClusterLeaves[j].leafs[k];
 

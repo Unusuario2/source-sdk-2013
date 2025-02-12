@@ -1,4 +1,4 @@
-//========= Copyright Valve Corporation, All rights reserved. ============//
+//============= Copyright Valve Corporation, All rights reserved. =============//
 //
 // Purpose: 
 //
@@ -55,7 +55,7 @@ struct LoadSide_t
 };
 
 
-extern qboolean onlyents;
+extern bool		 onlyents;
 
 #ifdef MAPBASE
 extern entity_t *g_ManifestWorldSpawn;
@@ -274,9 +274,7 @@ SnapVector
 */
 bool SnapVector (Vector& normal)
 {
-	int		i;
-
-	for (i=0 ; i<3 ; i++)
+	for (int i=0 ; i<3 ; i++)
 	{
 		if ( fabs(normal[i] - 1) < RENDER_NORMAL_EPSILON )
 		{
@@ -370,8 +368,6 @@ int CMapFile::FindFloatPlane (Vector& normal, vec_t dist)
 #else
 int	CMapFile::FindFloatPlane (Vector& normal, vec_t dist)
 {
-	int		i;
-	plane_t	*p;
 	int		hash, h;
 
 	SnapPlane(normal, dist);
@@ -379,10 +375,10 @@ int	CMapFile::FindFloatPlane (Vector& normal, vec_t dist)
 	hash &= (PLANE_HASHES-1);
 
 	// search the border bins as well
-	for (i=-1 ; i<=1 ; i++)
+	for (int i=-1 ; i<=1 ; i++)
 	{
 		h = (hash+i)&(PLANE_HASHES-1);
-		for (p = planehash[h] ; p ; p=p->hash_chain)
+		for (plane_t* p = planehash[h] ; p ; p=p->hash_chain)
 		{
 			if (PlaneEqual (p, normal, dist, RENDER_NORMAL_EPSILON, RENDER_DIST_EPSILON))
 				return p-mapplanes;
@@ -429,12 +425,11 @@ int	BrushContents (mapbrush_t *b)
 	int			contents;
 	int			unionContents = 0;
 	side_t		*s;
-	int			i;
 
 	s = &b->original_sides[0];
 	contents = s->contents;
 	unionContents = contents;
-	for (i=1 ; i<b->numsides ; i++, s++)
+	for (int i=1 ; i<b->numsides ; i++, s++)
 	{
 		s = &b->original_sides[i];
 
@@ -746,9 +741,8 @@ void CMapFile::MoveBrushesToWorldGeneral( entity_t *mapent )
 	int			newbrushes;
 	int			worldbrushes;
 	mapbrush_t	*temp;
-	int			i;
 
-	for( i = 0; i < nummapdispinfo; i++ )
+	for(int i = 0; i < nummapdispinfo; i++ )
 	{
 		if ( mapdispinfo[ i ].entitynum == ( mapent - entities ) )
 		{
@@ -774,15 +768,12 @@ void CMapFile::MoveBrushesToWorldGeneral( entity_t *mapent )
 		mapbrushes + worldbrushes,
 		sizeof(mapbrush_t) * (mapent->firstbrush - worldbrushes) );
 
-
-	// wwwxxxmmyyy
-
 	// copy the new brushes down
 	memcpy (mapbrushes + worldbrushes, temp, sizeof(mapbrush_t) * newbrushes);
 
 	// fix up indexes
 	entities[0].numbrushes += newbrushes;
-	for (i=1 ; i<num_entities ; i++)
+	for (int i = 1; i<num_entities ; i++)
 	{
 		if ( entities[ i ].firstbrush < mapent->firstbrush ) // if we use <=, then we'll remap the passed in ent, which we don't want to
 		{
@@ -802,19 +793,16 @@ void RemoveContentsDetailFromBrush( mapbrush_t *brush )
 {
 	// Only valid on non-world brushes
 	Assert( brush->entitynum != 0 );
+	
+	side_t		*s = &brush->original_sides[0];
 
-	side_t		*s;
-	int			i;
-
-	s = &brush->original_sides[0];
-	for ( i=0 ; i<brush->numsides ; i++, s++ )
+	for (int i=0 ; i<brush->numsides ; i++, s++ )
 	{
 		if ( s->contents & CONTENTS_DETAIL )
 		{
 			s->contents &= ~CONTENTS_DETAIL;
 		}
 	}
-
 }
 
 //-----------------------------------------------------------------------------
@@ -823,8 +811,7 @@ void RemoveContentsDetailFromBrush( mapbrush_t *brush )
 //-----------------------------------------------------------------------------
 void CMapFile::RemoveContentsDetailFromEntity( entity_t *mapent )
 {
-	int i;
-	for ( i = 0; i < mapent->numbrushes; i++ )
+	for (int i = 0; i < mapent->numbrushes; i++ )
 	{
 		int brushnum = mapent->firstbrush + i;
 
@@ -1246,8 +1233,7 @@ ChunkFileResult_t LoadDispTriangleTagsKeyCallback(const char *szKey, const char 
 //-----------------------------------------------------------------------------
 int CMapFile::SideIDToIndex( int brushSideID )
 {
-	int i;
-	for ( i = 0; i < nummapbrushsides; i++ )
+	for (int i = 0; i < nummapbrushsides; i++ )
 	{
 		if ( brushsides[i].id == brushSideID )
 		{
@@ -1466,8 +1452,7 @@ void CMapFile::AddLadderKeys( entity_t *mapent )
 	Vector mins, maxs;
 	ClearBounds( mins, maxs );
 
-	int i;
-	for ( i = 0; i < mapent->numbrushes; i++ )
+	for (int i = 0; i < mapent->numbrushes; i++ )
 	{
 		int brushnum = mapent->firstbrush + i;
 		mapbrush_t *brush = &mapbrushes[ brushnum ];
@@ -1907,7 +1892,7 @@ entity_t* EntityByName( char const *pTestName )
 	if( !pTestName )
 		return 0;
 
-	for( int i=0; i < g_MainMap->num_entities; i++ )
+	for( int i = 0; i < g_MainMap->num_entities; i++ )
 	{
 		entity_t *e = &g_MainMap->entities[i];
 
@@ -1927,7 +1912,7 @@ void CMapFile::ForceFuncAreaPortalWindowContents()
 	char *targets[] = {"target", "BackgroundBModel"};
 	int nTargets = sizeof(targets) / sizeof(targets[0]);
 
-	for( int i=0; i < num_entities; i++ )
+	for( int i = 0; i < num_entities; i++ )
 	{
 		entity_t *e = &entities[i];
 
@@ -3624,7 +3609,6 @@ void CMapFile::TestExpandBrushes (void)
 //-----------------------------------------------------------------------------
 mapdispinfo_t *ParseDispInfoChunk( void )
 {
-    int             i, j;
     int             vertCount;
     mapdispinfo_t   *pMapDispInfo;
 
@@ -3656,13 +3640,13 @@ mapdispinfo_t *ParseDispInfoChunk( void )
     pMapDispInfo->power = atoi( token );
 
     // u and v mapping axes
-    for( i = 0; i < 2; i++ )
+    for(int i = 0; i < 2; i++ )
     {
         GetToken( false );
         if( strcmp( token, "[" ) )
             g_MapError.ReportError("\tParseDispInfoChunk: Illegal Chunk! - [" );
 
-        for( j = 0; j < 3; j++ )
+        for(int j = 0; j < 3; j++ )
         {
             GetToken( false );
 
@@ -3707,7 +3691,7 @@ mapdispinfo_t *ParseDispInfoChunk( void )
     pMapDispInfo->vectorDisps[0][2] = atof( token );
 
     vertCount = ( ( ( 1 << pMapDispInfo->power ) + 1 ) * ( ( 1 << pMapDispInfo->power ) + 1 ) );
-    for( i = 1; i < vertCount; i++ )
+    for(int i = 1; i < vertCount; i++ )
     {
         GetToken( false );
         pMapDispInfo->vectorDisps[i][0] = atof( token );
@@ -3723,7 +3707,7 @@ mapdispinfo_t *ParseDispInfoChunk( void )
     GetToken( true );
     pMapDispInfo->dispDists[0] = atof( token );
 
-    for( i = 1; i < vertCount; i++ )
+    for(int i = 1; i < vertCount; i++ )
     {
         GetToken( false );
         pMapDispInfo->dispDists[i] = atof( token );

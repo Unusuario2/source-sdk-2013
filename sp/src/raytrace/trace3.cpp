@@ -1,4 +1,4 @@
-//========= Copyright Valve Corporation, All rights reserved. ============//
+//============= Copyright Valve Corporation, All rights reserved. =============//
 
 #include "raytrace.h"
 #include <bspfile.h>
@@ -47,7 +47,7 @@ void RayTracingEnvironment::AddBSPFace(int id,dface_t const &face)
 	}
 	printf("\n");
 	int ntris=face.numedges-2;
-	for(int tri=0;tri<ntris;tri++)
+	for(int tri = 0;tri<ntris;tri++)
 	{
 		
 		AddTriangle(id,VertCoord(face,0),VertCoord(face,(tri+1)%face.numedges),
@@ -89,7 +89,7 @@ void RayTracingEnvironment::InitializeFromLoadedBSP(void)
 // 	OrigFaceVisited.EnsureCapacity(numorigfaces);
 // 	int n_added=0;
 
-// 	for(int i=0;i<numorigfaces;i++)
+// 	for(int i = 0;i<numorigfaces;i++)
 // 		OrigFaceVisited.AddToTail(0);
 
 // 	for(int l=0;l<numleafs;l++)

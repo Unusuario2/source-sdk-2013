@@ -1,4 +1,4 @@
-//========= Copyright Valve Corporation, All rights reserved. ============//
+//============= Copyright Valve Corporation, All rights reserved. =============//
 //
 // Purpose: 
 //
@@ -67,9 +67,7 @@ strongest visible content present
 */
 int VisibleContents (int contents)
 {
-	int		i;
-
-	for (i=1 ; i<=LAST_VISIBLE_CONTENTS ; i<<=1)
+	for (int i=1 ; i<=LAST_VISIBLE_CONTENTS ; i<<=1)
 	{
 		if (contents & i )
 		{
@@ -251,13 +249,10 @@ void RemovePortalFromNode (portal_t *portal, node_t *l)
 
 void PrintPortal (portal_t *p)
 {
-	int			i;
-	winding_t	*w;
-	
-	w = p->winding;
-	for (i=0 ; i<w->numpoints ; i++)
-		Msg ("(%5.0f,%5.0f,%5.0f)\n",w->p[i][0]
-		, w->p[i][1], w->p[i][2]);
+	winding_t	*w = p->winding;
+
+	for (int i=0 ; i<w->numpoints ; i++)
+		Msg ("(%5.0f,%5.0f,%5.0f)\n",w->p[i][0], w->p[i][1], w->p[i][2]);
 }
 
 // because of water areaportals support, the areaportal may not be the only brush on this node
@@ -284,7 +279,7 @@ The created portals will face the global outside_node
 void MakeHeadnodePortals (tree_t *tree)
 {
 	Vector		bounds[2];
-	int			i, j, n;
+	int			n;
 	portal_t	*p, *portals[6];
 	plane_t		bplanes[6], *pl;
 	node_t *node;
@@ -292,7 +287,7 @@ void MakeHeadnodePortals (tree_t *tree)
 	node = tree->headnode;
 
 // pad with some space so there will never be null volume leafs
-	for (i=0 ; i<3 ; i++)
+	for (int i=0 ; i<3 ; i++)
 	{
 		bounds[0][i] = tree->mins[i] - SIDESPACE;
 		bounds[1][i] = tree->maxs[i] + SIDESPACE;
@@ -303,8 +298,8 @@ void MakeHeadnodePortals (tree_t *tree)
 	tree->outside_node.portals = NULL;
 	tree->outside_node.contents = 0;
 
-	for (i=0 ; i<3 ; i++)
-		for (j=0 ; j<2 ; j++)
+	for (int i=0 ; i<3 ; i++)
+		for (int j=0 ; j<2 ; j++)
 		{
 			n = j*3 + i;
 
@@ -329,9 +324,9 @@ void MakeHeadnodePortals (tree_t *tree)
 		}
 		
 // clip the basewindings by all the other planes
-	for (i=0 ; i<6 ; i++)
+	for (int i=0 ; i<6 ; i++)
 	{
-		for (j=0 ; j<6 ; j++)
+		for (int j=0 ; j<6 ; j++)
 		{
 			if (j == i)
 				continue;
@@ -354,7 +349,6 @@ BaseWindingForNode
 winding_t	*BaseWindingForNode (node_t *node)
 {
 	winding_t	*w;
-	node_t		*n;
 	plane_t		*plane;
 	Vector		normal;
 	vec_t		dist;
@@ -362,7 +356,7 @@ winding_t	*BaseWindingForNode (node_t *node)
 	w = BaseWindingForPlane (g_MainMap->mapplanes[node->planenum].normal, g_MainMap->mapplanes[node->planenum].dist);
 
 	// clip by all the parents
-	for (n=node->parent ; n && w ; )
+	for (node_t* n=node->parent ; n && w ; )
 	{
 		plane = &g_MainMap->mapplanes[n->planenum];
 
@@ -556,16 +550,14 @@ CalcNodeBounds
 */
 void CalcNodeBounds (node_t *node)
 {
-	portal_t	*p;
-	int			s;
-	int			i;
+	int s;
 
 	// calc mins/maxs for both leafs and nodes
 	ClearBounds (node->mins, node->maxs);
-	for (p = node->portals ; p ; p = p->next[s])	
+	for (portal_t* p = node->portals ; p ; p = p->next[s])
 	{
 		s = (p->nodes[1] == node);
-		for (i=0 ; i<p->winding->numpoints ; i++)
+		for (int i=0 ; i<p->winding->numpoints ; i++)
 			AddPointToBounds (p->winding->p[i], node->mins, node->maxs);
 	}
 }
@@ -578,15 +570,13 @@ MakeTreePortals_r
 */
 void MakeTreePortals_r (node_t *node)
 {
-	int		i;
-
 	CalcNodeBounds (node);
 	if (node->mins[0] >= node->maxs[0])
 	{
 		Warning("\tWARNING: node without a volume\n");
 	}
 
-	for (i=0 ; i<3 ; i++)
+	for (int i=0 ; i<3 ; i++)
 	{
 		if (node->mins[i] < (MIN_COORD_INTEGER-SIDESPACE) || node->maxs[i] > (MAX_COORD_INTEGER+SIDESPACE))
 		{
@@ -641,12 +631,11 @@ FLOOD ENTITIES
 //-----------------------------------------------------------------------------
 void FloodPortals_r (node_t *node, int dist)
 {
-	portal_t	*p;
 	int			s;
 
 	node->occupied = dist;
 
-	for (p=node->portals ; p ; p = p->next[s])
+	for (portal_t *p=node->portals ; p ; p = p->next[s])
 	{
 		s = (p->nodes[1] == node);
 
@@ -664,12 +653,11 @@ void FloodPortals_r (node_t *node, int dist)
 
 void FloodAreaLeak_r( node_t *node, int dist )
 {
-	portal_t	*p;
 	int			s;
 
 	node->occupied = dist;
 
-	for (p=node->portals ; p ; p = p->next[s])
+	for (portal_t* p=node->portals ; p ; p = p->next[s])
 	{
 		s = (p->nodes[1] == node);
 
@@ -747,7 +735,6 @@ Marks all nodes that can be reached by entites
 */
 qboolean FloodEntities (tree_t *tree)
 {
-	int		i;
 	Vector	origin;
 	char	*cl;
 	qboolean	inside;
@@ -758,7 +745,7 @@ qboolean FloodEntities (tree_t *tree)
 	inside = false;
 	tree->outside_node.occupied = 0;
 
-	for (i=1 ; i<num_entities ; i++)
+	for (int i=1 ; i<num_entities ; i++)
 	{
 		GetVectorForKey (&entities[i], "origin", origin);
 		if (VectorCompare(origin, vec3_origin))
@@ -925,7 +912,7 @@ void FindAreas_r (node_t *node)
 }
 
 #ifdef MAPBASE
-extern qboolean	noleaktest;
+extern bool		noleaktest;
 #endif
 
 void ReportAreaportalLeak( tree_t *tree, node_t *node )
@@ -1041,10 +1028,10 @@ int FindUniquePoints( const Vector2D *pPoints, int nPoints, int *indexMap, int n
 
 	// This could be slightly more efficient.
 	int nUniquePoints = 0;
-	for ( int i=0; i < nPoints; i++ )
+	for ( int i = 0; i < nPoints; i++ )
 	{
 		int j;
-		for ( j=0; j < nUniquePoints; j++ )
+		for ( j = 0; j < nUniquePoints; j++ )
 		{
 			if ( pPoints[i].DistToSqr( pPoints[indexMap[j]] ) < flToleranceSqr )
 				break;
@@ -1079,9 +1066,8 @@ int Convex2D( Vector2D const *pPoints, int nPoints, int *indices, int nMaxIndice
 	memset( touched, 0, nPoints*sizeof(touched[0]) );
 
 	// Find the (lower) left side.
-	int i;
 	int iBest = 0;
-	for( i=1; i < nPoints; i++ )
+	for(int i = 1; i < nPoints; i++ )
 	{
 		if( pPoints[indexMap[i]].x < pPoints[indexMap[iBest]].x ||
 			(pPoints[indexMap[i]].x == pPoints[indexMap[iBest]].x && pPoints[indexMap[i]].y < pPoints[indexMap[iBest]].y) )
@@ -1106,7 +1092,7 @@ int Convex2D( Vector2D const *pPoints, int nPoints, int *indices, int nMaxIndice
 		int iMinAngle = -1;
 		float flMinAngle = 5000;
 
-		for( i=0; i < nPoints; i++ )
+		for(int i = 0; i < nPoints; i++ )
 		{
 			Vector2D vTo = pPoints[indexMap[i]] - *pStartPoint;
 			float flDistToSqr = vTo.LengthSqr();
@@ -1218,27 +1204,21 @@ void EmitClipPortalGeometry( node_t *pHeadNode, portal_t *pPortal, int iSrcArea,
 {
 	// Build a list of all the points in portals from the same original face.
 	CUtlVector<portal_t*> portals;
-	FindPortalsLeadingToArea_R( 
-		pHeadNode, 
-		iSrcArea, 
-		dp->otherarea, 
-		&pPortal->plane,
-		portals );
+	FindPortalsLeadingToArea_R( pHeadNode, iSrcArea, dp->otherarea, &pPortal->plane,portals );
 
 	CUtlVector<Vector> points;
 	for( int iPortal=0; iPortal < portals.Size(); iPortal++ )
 	{
 		portal_t *pPointPortal = portals[iPortal];
 		winding_t *pWinding = pPointPortal->winding;
-		for( int i=0; i < pWinding->numpoints; i++ )
+		for(int i = 0; i < pWinding->numpoints; i++ )
 		{
 			points.AddToTail( pWinding->p[i] );
 		}
 	}
 
 	// Get the 2D convex hull.
-
-	//// First transform them into a plane.
+	// First transform them into a plane.
 	QAngle vAngles;
 	Vector vecs[3];
 
@@ -1249,9 +1229,8 @@ void EmitClipPortalGeometry( node_t *pHeadNode, portal_t *pPortal, int iSrcArea,
 	mTransform.SetBasisVectors( vecs[0], vecs[1], vecs[2] );
 	VMatrix mInvTransform = mTransform.Transpose();
 
-	int i;
 	CUtlVector<Vector2D> points2D;
-	for( i=0; i < points.Size(); i++ )
+	for(int i = 0; i < points.Size(); i++ )
 	{
 		Vector vTest = mTransform * points[i];
 		points2D.AddToTail( Vector2D( vTest.y, vTest.z ) );
@@ -1276,7 +1255,7 @@ void EmitClipPortalGeometry( node_t *pHeadNode, portal_t *pPortal, int iSrcArea,
 		Error("\tMAX_MAP_PORTALVERTS (probably a broken areaportal near %.1f %.1f %.1f ", p->x, p->y, p->z );
 	}
 	
-	for( i=0; i < nIndices; i++ )
+	for(int i = 0; i < nIndices; i++ )
 	{
 		g_ClipPortalVerts[g_nClipPortalVerts] = points[ indices[i] ];
 		++g_nClipPortalVerts;
@@ -1521,7 +1500,6 @@ void FindPortalSide (portal_t *p)
 	bspbrush_t	*bb;
 	mapbrush_t	*brush;
 	node_t		*n;
-	int			i,j;
 	int			planenum;
 	side_t		*side, *bestside;
 	float		bestdist;
@@ -1539,7 +1517,7 @@ void FindPortalSide (portal_t *p)
 	bestside = NULL;
 	bestdist = 1000000;
 
-	for (j=0 ; j<2 ; j++)
+	for (int j=0 ; j<2 ; j++)
 	{
 		n = p->nodes[j];
 		p1 = &g_MainMap->mapplanes[p->onnode->planenum];
@@ -1550,7 +1528,7 @@ void FindPortalSide (portal_t *p)
 			if ( !(brush->contents & viscontents) )
 				continue;
 
-			for (i=0 ; i<brush->numsides ; i++)
+			for (int i=0 ; i<brush->numsides ; i++)
 			{
 				side = &brush->original_sides[i];
 				if (side->bevel)
@@ -1645,21 +1623,20 @@ MarkVisibleSides
 // UNDONE: Put detail brushes in a separate list (not mapbrushes) ?
 void MarkVisibleSides (tree_t *tree, int startbrush, int endbrush, int detailScreen)
 {
-	int		i, j;
 	mapbrush_t	*mb;
-	int		numsides;
-	qboolean detail;
+	int			numsides;
+	bool		detail;
 
 	qprintf ("--- MarkVisibleSides ---\n");
 
 	// clear all the visible flags
-	for (i=startbrush ; i<endbrush ; i++)
+	for (int i=startbrush ; i<endbrush ; i++)
 	{
 		mb = &g_MainMap->mapbrushes[i];
 
 		if ( detailScreen != FULL_DETAIL )
 		{
-			qboolean onlyDetail = (detailScreen==ONLY_DETAIL)?true:false;
+			bool onlyDetail = (detailScreen==ONLY_DETAIL)?true:false;
 			// true for detail brushes
 			detail = (mb->contents & CONTENTS_DETAIL) ? true : false;
 			if ( onlyDetail ^ detail )
@@ -1670,7 +1647,7 @@ void MarkVisibleSides (tree_t *tree, int startbrush, int endbrush, int detailScr
 		}
 
 		numsides = mb->numsides;
-		for (j=0 ; j<numsides ; j++)
+		for (int j=0 ; j<numsides ; j++)
 			mb->original_sides[j].visible = false;
 	}
 
@@ -1687,12 +1664,11 @@ void MarkVisibleSides (tree_t *tree, mapbrush_t **ppBrushes, int nCount )
 	qprintf ("--- MarkVisibleSides ---\n");
 
 	// clear all the visible flags
-	int	i, j;
-	for ( i=0; i < nCount; ++i )
+	for (int i = 0; i < nCount; ++i )
 	{
 		mapbrush_t *mb = ppBrushes[i];
 		int numsides = mb->numsides;
-		for (j=0 ; j<numsides ; j++)
+		for (int j=0 ; j<numsides ; j++)
 		{
 			mb->original_sides[j].visible = false;
 		}

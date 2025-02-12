@@ -1,4 +1,4 @@
-//========= Copyright Valve Corporation, All rights reserved. ============//
+//============= Copyright Valve Corporation, All rights reserved. =============//
 //
 // Purpose: 
 //
@@ -380,22 +380,22 @@ extern CUtlVector< CMapFile * > g_Maps;
 
 extern	int			g_nMapFileVersion;
 
-extern	qboolean	noprune;
-extern	qboolean	nodetail;
-extern	qboolean	fulldetail;
-extern	qboolean	nomerge;
-extern	qboolean	nomergewater;
-extern	qboolean	nosubdiv;
-extern	qboolean	nowater;
-extern	qboolean	noweld;
-extern	qboolean	noshare;
-extern	qboolean	notjunc;
-extern	qboolean	nocsg;
-extern	qboolean	noopt;
-extern  qboolean	dumpcollide;
-extern	qboolean	nodetailcuts;
-extern  qboolean	g_DumpStaticProps;
-extern	qboolean	g_bSkyVis;
+extern	bool		noprune;
+extern	bool		nodetail;
+extern	bool		fulldetail;
+extern	bool		nomerge;
+extern	bool		nomergewater;
+extern	bool		nosubdiv;
+extern	bool		nowater;
+extern	bool		noweld;
+extern	bool		noshare;
+extern	bool		notjunc;
+extern	bool		nocsg;
+extern	bool		noopt;
+extern  bool		dumpcollide;
+extern	bool		nodetailcuts;
+extern  bool		g_DumpStaticProps;
+extern	bool		g_bSkyVis;
 extern	vec_t		microvolume;
 extern	bool		g_snapAxialPlanes;
 extern	bool		g_NodrawTriggers;
@@ -403,10 +403,12 @@ extern	bool		g_DisableWaterLighting;
 extern	bool		g_bAllowDetailCracks;
 extern	bool		g_bNoVirtualMesh;
 extern	bool		g_bNoHiddenManifestMaps;
+
 #ifdef MAPBASE
 extern bool			g_bPropperInsertAllAsStatic;
 extern bool			g_bPropperStripEntities;
 #endif
+
 extern	char		outbase[32];
 
 extern	char	source[1024];

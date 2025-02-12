@@ -1,4 +1,4 @@
-//========= Copyright Valve Corporation, All rights reserved. ============//
+//============= Copyright Valve Corporation, All rights reserved. =============//
 //
 // Purpose: 
 //
@@ -1124,7 +1124,7 @@ void CScriptLib::DeleteTemporaryFiles( const char *pFileMask )
 
 		CUtlVector<fileList_t> fileList;
 		FindFiles( tempPath, false, fileList );
-		for ( int i=0; i<fileList.Count(); i++ )
+		for ( int i = 0; i<fileList.Count(); i++ )
 		{
 			_unlink( fileList[i].fileName.String() );
 		}
@@ -1287,7 +1287,7 @@ void CScriptLib::RecurseFileTree_r( const char* pDirPath, int depth, CUtlVector<
 		return;
 	}
 
-	for ( int i=0; i<dirCount; i++ )
+	for ( int i = 0; i<dirCount; i++ )
 	{
 		// form new path name, recurse into
 		RecurseFileTree_r( fileList[i].fileName.String(), depth+1, dirList );
@@ -1329,7 +1329,7 @@ int CScriptLib::FindFiles( char* pFileMask, bool bRecurse, CUtlVector<fileList_t
 		CUtlVector< fileList_t > tempList;
 		CUtlVector< CUtlString > dirList;
 		RecurseFileTree_r( dirPath, 0, dirList );
-		for ( int i=0; i<dirList.Count(); i++ )
+		for ( int i = 0; i<dirList.Count(); i++ )
 		{
 			// iterate each directory found
 			tempList.Purge();
@@ -1338,7 +1338,7 @@ int CScriptLib::FindFiles( char* pFileMask, bool bRecurse, CUtlVector<fileList_t
 			GetFileList( dirList[i].String(), pattern, tempList );
 
 			int start = fileList.AddMultipleToTail( tempList.Count() );
-			for ( int j=0; j<tempList.Count(); j++ )
+			for ( int j = 0; j<tempList.Count(); j++ )
 			{
 				fileList[start+j] = tempList[j];
 			}

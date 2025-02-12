@@ -1,4 +1,4 @@
-//========= Copyright Valve Corporation, All rights reserved. ============//
+//============= Copyright Valve Corporation, All rights reserved. =============//
 //
 // Purpose: 
 //
@@ -300,7 +300,7 @@ inline void CCoreDispSurface::SetLuxelCoords( int bumpIndex, Vector2D const luxe
 {
 	Assert( bumpIndex >= 0 );
 	Assert( bumpIndex < NUM_BUMP_VECTS + 1 );
-	for( int i=0; i < 4; i++ )
+	for( int i = 0; i < 4; i++ )
 		Vector2DCopy( luxelCoords[i], m_LuxelCoords[bumpIndex][i] );
 }
 
@@ -311,7 +311,7 @@ inline void CCoreDispSurface::GetLuxelCoords( int bumpIndex, Vector2D luxelCoord
 {
 	Assert( bumpIndex >= 0 );
 	Assert( bumpIndex < NUM_BUMP_VECTS + 1 );
-	for( int i=0; i < 4; i++ )
+	for( int i = 0; i < 4; i++ )
 		Vector2DCopy( m_LuxelCoords[bumpIndex][i], luxelCoords[i] );
 }
 

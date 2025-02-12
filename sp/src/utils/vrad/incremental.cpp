@@ -1,4 +1,4 @@
-//========= Copyright Valve Corporation, All rights reserved. ============//
+//============= Copyright Valve Corporation, All rights reserved. =============//
 //
 // Purpose: 
 //
@@ -239,7 +239,7 @@ bool CIncremental::WriteIncrementalHeader( long fp )
 	CIncrementalHeader hdr;
 	hdr.m_FaceLightmapSizes.SetSize( nFaces );
 
-	for( int i=0; i < nFaces; i++ )
+	for( int i = 0; i < nFaces; i++ )
 	{
 		hdr.m_FaceLightmapSizes[i].m_Width = g_pFaces[i].m_LightmapTextureSizeInLuxels[0];
 		hdr.m_FaceLightmapSizes[i].m_Height = g_pFaces[i].m_LightmapTextureSizeInLuxels[1];
@@ -266,7 +266,7 @@ bool CIncremental::IsIncrementalFileValid()
 		if( hdr.m_FaceLightmapSizes.Count() == numfaces )
 		{
 			int i;
-			for( i=0; i < numfaces; i++ )
+			for( i = 0; i < numfaces; i++ )
 			{
 				if( hdr.m_FaceLightmapSizes[i].m_Width  != g_pFaces[i].m_LightmapTextureSizeInLuxels[0] ||							
 					hdr.m_FaceLightmapSizes[i].m_Height != g_pFaces[i].m_LightmapTextureSizeInLuxels[1] )
@@ -385,7 +385,7 @@ void CompressLightData(
 	unsigned char runLength=0;
 	unsigned short flLastValue;
 
-	for( int i=0; i < nValues; i++ )
+	for( int i = 0; i < nValues; i++ )
 	{
 		unsigned short flCurValue = (unsigned short)pValues[i].m_Dot;
 
@@ -422,7 +422,7 @@ void CompressLightData(
 
 void MultiplyValues( CUtlVector<CLightValue> &values, float scale )
 {
-	for( int i=0; i < values.Count(); i++ )
+	for( int i = 0; i < values.Count(); i++ )
 		values[i].m_Dot *= scale;
 }
 

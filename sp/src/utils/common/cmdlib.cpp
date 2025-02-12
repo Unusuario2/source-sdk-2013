@@ -1,4 +1,4 @@
-//========= Copyright Valve Corporation, All rights reserved. ============//
+//============= Copyright Valve Corporation, All rights reserved. =============//
 //
 // Purpose: 
 //
@@ -485,7 +485,7 @@ void ExpandWildcards (int *argc, char ***argv)
 
 
 // only printf if in verbose mode
-qboolean verbose = false;
+bool verbose = false;
 void qprintf (const char *format, ...)
 {
 	if (!verbose)

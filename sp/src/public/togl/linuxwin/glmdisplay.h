@@ -1,4 +1,4 @@
-//========= Copyright Valve Corporation, All rights reserved. ============//
+//============= Copyright Valve Corporation, All rights reserved. =============//
 //
 // glmdisplay.h
 // display related stuff - used by both GLMgr and the CocoaMgr

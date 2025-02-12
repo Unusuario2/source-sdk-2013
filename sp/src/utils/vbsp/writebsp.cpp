@@ -1,4 +1,4 @@
-//========= Copyright Valve Corporation, All rights reserved. ============//
+//============= Copyright Valve Corporation, All rights reserved. =============//
 //
 // Purpose: 
 //
@@ -49,13 +49,11 @@ brushes will be saved in the map.
 */
 void EmitPlanes (void)
 {
-	int			i;
 	dplane_t	*dp;
-	plane_t		*mp;
+	plane_t* mp = g_MainMap->mapplanes;
 	int		planetranslate[MAX_MAP_PLANES];
 
-	mp = g_MainMap->mapplanes;
-	for (i=0 ; i<g_MainMap->nummapplanes ; i++, mp++)
+	for (int i=0 ; i<g_MainMap->nummapplanes ; i++, mp++)
 	{
 		dp = &dplanes[numplanes];
 		planetranslate[i] = numplanes;
@@ -214,7 +212,7 @@ side_t *pOrigFaceSideList[MAX_MAP_PLANES];
 //-----------------------------------------------------------------------------
 int CreateOrigFace( face_t *f )
 {
-    int         i, j;
+    int         j;
     dface_t     *of;
     side_t      *side;
     int         vIndices[128];
@@ -279,7 +277,7 @@ int CreateOrigFace( face_t *f )
     //
     // save the vertices
     //
-    for( i = 0; i < pWinding->numpoints; i++ )
+    for(int i = 0; i < pWinding->numpoints; i++ )
     {
         //
         // compare vertices
@@ -290,7 +288,7 @@ int CreateOrigFace( face_t *f )
     //
     // save off points -- as edges
     //
-    for( i = 0; i < pWinding->numpoints; i++ )
+    for(int i = 0; i < pWinding->numpoints; i++ )
 	{
         //
         // look for matching edges first
@@ -352,26 +350,20 @@ int CreateOrigFace( face_t *f )
 //-----------------------------------------------------------------------------
 int FindOrigFace( face_t *f )
 {
-    int         i;
     static int  bClear = 0;
-    side_t      *pSide;
 
-    //
     // initially clear the face side lists (per face plane)
-    //
     if( !bClear )
     {
-        for( i = 0; i < MAX_MAP_PLANES; i++ )
+        for(int i = 0; i < MAX_MAP_PLANES; i++ )
         {
             pOrigFaceSideList[i] = NULL;
         }
         bClear = 1;
     }
 
-    //
     // compare the sides
-    //
-    for( pSide = pOrigFaceSideList[f->planenum]; pSide; pSide = pSide->next )
+    for(side_t* pSide = pOrigFaceSideList[f->planenum]; pSide; pSide = pSide->next )
     {
         if( pSide == f->originalface )
             return pSide->origIndex;
@@ -418,7 +410,6 @@ EmitFace
 void EmitFace( face_t *f, qboolean onNode )
 {
 	dface_t	*df;
-	int		i;
 	int		e;
 
 //	void SubdivideFaceBySubdivSize( face_t *f ); // garymcthack
@@ -503,10 +494,8 @@ void EmitFace( face_t *f, qboolean onNode )
 	df->SetNumPrims( f->numPrims );
 	df->SetDynamicShadowsEnabled( f->originalface->m_bDynamicShadowsEnabled );
 
-    //
     // save off points -- as edges
-    //
-	for( i = 0; i < f->numpoints; i++ )
+	for(int i = 0; i < f->numpoints; i++ )
 	{
 		//e = GetEdge (f->pts[i], f->pts[(i+1)%f->numpoints], f);
 		e = GetEdge2 (f->vertexnums[i], f->vertexnums[(i+1)%f->numpoints], f);
@@ -577,7 +566,6 @@ int EmitDrawNode_r (node_t *node)
 {
 	dnode_t	*n;
 	face_t	*f;
-	int		i;
 
 	if (node->planenum == PLANENUM_LEAF)
 	{
@@ -616,7 +604,7 @@ int EmitDrawNode_r (node_t *node)
 	//
 	// recursively output the other nodes
 	//	
-	for (i=0 ; i<2 ; i++)
+	for (int i=0 ; i<2 ; i++)
 	{
 		if (node->children[i]->planenum == PLANENUM_LEAF)
 		{
@@ -684,6 +672,7 @@ int FindMatchingBrushSideTexinfo( int sideIndex, const texinfomap_t *pMap )
 	int sideTexFlags = texinfo[side.texinfo].flags;
 	int sideTexData = texinfo[side.texinfo].texdata;
 	int sideSurfaceProp = g_SurfaceProperties[sideTexData];
+
 	for ( int j = 0; j < texinfo.Count(); j++ )
 	{
 		if ( pMap[j].refCount > 0 && 
@@ -707,6 +696,7 @@ void ComapctTexinfoArray( texinfomap_t *pMap )
 	texinfo.RemoveAll();
 	int firstSky = -1;
 	int first2DSky = -1;
+
 	for ( int i = 0; i < old.Count(); i++ )
 	{
 		if ( !pMap[i].refCount )
@@ -749,6 +739,7 @@ void CompactTexdataArray( texdatamap_t *pMap )
 	oldTexData.CopyArray( dtexdata, numtexdata );
 	// clear current table and rebuild
 	numtexdata = 0;
+
 	for ( int i = 0; i < oldTexData.Count(); i++ )
 	{
 		// unreferenced, note in map and skip
@@ -777,6 +768,7 @@ void CompactTexinfos()
 	memset( texinfoMap, 0, sizeof(texinfoMap[0])*texinfo.Count() );
 	memset( texdataMap, 0, sizeof(texdataMap[0])*numtexdata );
 	int i;
+
 	// get texinfos referenced by faces
 	for ( i = 0; i < numfaces; i++ )
 	{
@@ -915,7 +907,6 @@ WriteBSP
 */
 void WriteBSP (node_t *headnode, face_t *pLeafFaceList )
 {
-	int		i;
 	int		oldfaces;
     int     oldorigfaces;
 
@@ -940,7 +931,7 @@ void WriteBSP (node_t *headnode, face_t *pLeafFaceList )
 	//
 	// add all displacement faces for the particular model
 	//
-	for( i = 0; i < nummapdispinfo; i++ )
+	for(int i = 0; i < nummapdispinfo; i++ )
 	{
 		int entityIndex = GetDispInfoEntityNum( &mapdispinfo[i] );
 		if( entityIndex == entity_num )
@@ -1169,8 +1160,7 @@ void BeginBSPFile (void)
 // to zero everywhere by default.
 static void ClearDistToClosestWater( void )
 {
-	int i;
-	for( i = 0; i < numleafs; i++ )
+	for(int i = 0; i < numleafs; i++ )
 	{
 		g_LeafMinDistToWater[i] = 0;
 	}
@@ -1222,7 +1212,7 @@ void EnsurePresenceOfWaterLODControlEntity( void )
 		// Don't bother if there isn't any water in the map.
 		return;
 	}
-	for( int i=0; i < num_entities; i++ )
+	for( int i = 0; i < num_entities; i++ )
 	{
 		entity_t *e = &entities[i];
 
@@ -1329,7 +1319,6 @@ void BeginModel (void)
 	dmodel_t	*mod;
 	int			start, end;
 	mapbrush_t	*b;
-	int			j;
 	entity_t	*e;
 	Vector		mins, maxs;
 
@@ -1352,7 +1341,7 @@ void BeginModel (void)
 	end = start + e->numbrushes;
 	ClearBounds (mins, maxs);
 
-	for (j=start ; j<end ; j++)
+	for (int j=start ; j<end ; j++)
 	{
 		b = &g_MainMap->mapbrushes[j];
 		if (!b->numsides)
@@ -1434,15 +1423,14 @@ static void AddNodeToBounds(int node, CUtlVector<int>& skipAreas, Vector& mins, 
 			return;
 
 		// Skip 3D skybox
-		int i;
-		for ( i = skipAreas.Count(); --i >= 0; )
+		for (int i = skipAreas.Count(); --i >= 0; )
 		{
 			if (dleafs[leaf].area == skipAreas[i])
 				return;
 		}
 
 		unsigned int firstface = dleafs[leaf].firstleafface;
-		for ( i = 0; i < dleafs[leaf].numleaffaces; ++i )
+		for (int i = 0; i < dleafs[leaf].numleaffaces; ++i )
 		{
 			unsigned int face = dleaffaces[ firstface + i ];
 
@@ -1488,8 +1476,7 @@ bool IsBoxInsideWorld( int node, CUtlVector<int> &skipAreas, const Vector &vecMi
 				return false;
 
 			// Skip 3D skybox
-			int i;
-			for ( i = skipAreas.Count(); --i >= 0; )
+			for (int i = skipAreas.Count(); --i >= 0; )
 			{
 				if ( dleafs[leaf].area == skipAreas[i] )
 					return false;
@@ -1536,8 +1523,7 @@ void AddDispsToBounds( int nHeadNode, CUtlVector<int>& skipAreas, Vector &vecMin
 	Vector vecDispMins, vecDispMaxs;
 
 	// first determine how many displacement surfaces there will be per leaf
-	int i;
-	for ( i = 0; i < g_dispinfo.Count(); ++i )
+	for (int i = 0; i < g_dispinfo.Count(); ++i )
 	{
 		ComputeDispInfoBounds( i, vecDispMins, vecDispMaxs );
 		if ( IsBoxInsideWorld( nHeadNode, skipAreas, vecDispMins, vecDispMaxs ) )

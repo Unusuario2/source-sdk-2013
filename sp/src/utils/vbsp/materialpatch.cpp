@@ -1,4 +1,4 @@
-//========= Copyright Valve Corporation, All rights reserved. ============//
+//============= Copyright Valve Corporation, All rights reserved. =============//
 //
 // Purpose: 
 //
@@ -68,8 +68,7 @@ const char *GetOriginalMaterialNameForPatchedMaterial( const char *pPatchMateria
 
 void CreateMaterialPatchRecursive( KeyValues *pOriginalKeyValues, KeyValues *pPatchKeyValues, int nKeys, const MaterialPatchInfo_t *pInfo )
 {
-	int i;
-	for( i = 0; i < nKeys; i++ )
+	for(int i = 0; i < nKeys; i++ )
 	{
 		const char *pVal = pOriginalKeyValues->GetString( pInfo[i].m_pKey, NULL );
 		if( !pVal )
@@ -78,8 +77,7 @@ void CreateMaterialPatchRecursive( KeyValues *pOriginalKeyValues, KeyValues *pPa
 			continue;
 		pPatchKeyValues->SetString( pInfo[i].m_pKey, pInfo[i].m_pValue );
 	}
-	KeyValues *pScan;
-	for( pScan = pOriginalKeyValues->GetFirstTrueSubKey(); pScan; pScan = pScan->GetNextTrueSubKey() )
+	for(KeyValues* pScan = pOriginalKeyValues->GetFirstTrueSubKey(); pScan; pScan = pScan->GetNextTrueSubKey() )
 	{
 		CreateMaterialPatchRecursive( pScan, pPatchKeyValues->FindKey( pScan->GetName(), true ), nKeys, pInfo );
 	}

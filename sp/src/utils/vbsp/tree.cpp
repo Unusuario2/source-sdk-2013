@@ -1,4 +1,4 @@
-//========= Copyright Valve Corporation, All rights reserved. ============//
+//============= Copyright Valve Corporation, All rights reserved. =============//
 //
 // Purpose: 
 //
@@ -115,11 +115,10 @@ void FreeTree (tree_t *tree)
 
 void PrintTree_r (node_t *node, int depth)
 {
-	int		i;
 	plane_t	*plane;
 	bspbrush_t	*bb;
 
-	for (i=0 ; i<depth ; i++)
+	for (int i=0 ; i<depth ; i++)
 		Msg ("  ");
 	if (node->planenum == PLANENUM_LEAF)
 	{

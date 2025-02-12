@@ -1,10 +1,11 @@
-//========= Copyright Valve Corporation, All rights reserved. ============//
+//============= Copyright Valve Corporation, All rights reserved. =============//
 //
 // Purpose: 
 //
 //=====================================================================================//
 
 #include <halton.h>
+
 
 HaltonSequenceGenerator_t::HaltonSequenceGenerator_t(int b)
 {
@@ -13,6 +14,7 @@ HaltonSequenceGenerator_t::HaltonSequenceGenerator_t(int b)
 	seed=1;
 
 }
+
 
 float HaltonSequenceGenerator_t::GetElement(int elem)
 {

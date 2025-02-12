@@ -1,4 +1,4 @@
-//========= Copyright Valve Corporation, All rights reserved. ============//
+//============= Copyright Valve Corporation, All rights reserved. =============//
 //
 // Purpose: 
 //
@@ -126,8 +126,6 @@ template<class T> int ReadValues( MessageBuffer *pmb, T *pDest, int nNumValues)
 // Serialize face data
 void SerializeFace( MessageBuffer * pmb, int facenum )
 {
-	int i, n;
-
 	dface_t     * f  = &g_pFaces[facenum];
 	facelight_t * fl = &facelight[facenum];
 
@@ -136,11 +134,9 @@ void SerializeFace( MessageBuffer * pmb, int facenum )
 
 	WriteValues( pmb, fl->sample, fl->numsamples);
 
-	//
-	// Write the light information
-	// 
-	for (i=0; i<MAXLIGHTMAPS; ++i) {
-		for (n=0; n<NUM_BUMP_VECTS+1; ++n) {
+	// Write the light information 
+	for (int i = 0; i<MAXLIGHTMAPS; ++i) {
+		for (int n=0; n<NUM_BUMP_VECTS+1; ++n) {
 			if (fl->light[i][n])
 			{
 				WriteValues( pmb, fl->light[i][n], fl->numsamples);
@@ -160,8 +156,6 @@ void SerializeFace( MessageBuffer * pmb, int facenum )
 //
 void UnSerializeFace( MessageBuffer * pmb, int facenum, int iSource )
 {
-	int i, n;
-
 	dface_t     * f  = &g_pFaces[facenum];
 	facelight_t * fl = &facelight[facenum];
 
@@ -175,11 +169,10 @@ void UnSerializeFace( MessageBuffer * pmb, int facenum, int iSource )
 	if (pmb->read(fl->sample, sizeof(sample_t) * fl->numsamples) < 0) 
 		Error("\tUnSerializeFace - invalid sample_t from %s (mb len: %d, offset: %d, fl->numsamples: %d)", VMPI_GetMachineName( iSource ), pmb->getLen(), pmb->getOffset(), fl->numsamples );
 
-	//
+
 	// Read the light information
-	// 
-	for (i=0; i<MAXLIGHTMAPS; ++i) {
-		for (n=0; n<NUM_BUMP_VECTS+1; ++n) {
+	for (int i = 0; i<MAXLIGHTMAPS; ++i) {
+		for (int n=0; n<NUM_BUMP_VECTS+1; ++n) {
 			if (fl->light[i][n])
 			{
 				fl->light[i][n] = (LightingValue_t *) calloc( fl->numsamples, sizeof(LightingValue_t ) );
@@ -257,7 +250,7 @@ void RunMPIBuildFacelights()
 		// is idling in the above loop. Wouldn't want to slow down the
 		// handing out of work - maybe another thread?
 		//
-		for ( int i=0; i < numfaces; ++i )
+		for ( int i = 0; i < numfaces; ++i )
 		{
 			BuildPatchLights(i);
 		}
@@ -382,7 +375,7 @@ void RunMPIBuildVisLeafs()
 	if ( !g_bMPIMaster || VMPI_GetActiveWorkUnitDistributor() == k_eWorkUnitDistributor_SDK )
 	{
 		// Allocate space for the transfers for each thread.
-		for ( int i=0; i < numthreads; i++ )
+		for ( int i = 0; i < numthreads; i++ )
 		{
 			g_VMPIVisLeafsData[i].m_pBuildVisLeafsTransfers = BuildVisLeafs_Start();
 		}
@@ -401,7 +394,7 @@ void RunMPIBuildVisLeafs()
 		MPI_ReceiveVisLeafsResults );
 
 	// Free the transfers from each thread.
-	for ( int i=0; i < numthreads; i++ )
+	for ( int i = 0; i < numthreads; i++ )
 	{
 		if ( g_VMPIVisLeafsData[i].m_pBuildVisLeafsTransfers )
 			BuildVisLeafs_End( g_VMPIVisLeafsData[i].m_pBuildVisLeafsTransfers );

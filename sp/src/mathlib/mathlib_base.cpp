@@ -1,4 +1,4 @@
-//========= Copyright Valve Corporation, All rights reserved. ============//
+//============= Copyright Valve Corporation, All rights reserved. =============//
 //
 // Purpose: Math primitives.
 //
@@ -12,7 +12,6 @@
 #include "tier0/basetypes.h"
 #include <memory.h>
 #include "tier0/dbg.h"
-
 #include "tier0/vprof.h"
 //#define _VPROF_MATHLIB
 
@@ -35,6 +34,7 @@
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
+
 bool s_bMathlibInitialized = false;
 
 #ifdef PARANOID
@@ -42,10 +42,12 @@ bool s_bMathlibInitialized = false;
 void Sys_Error (char *error, ...);
 #endif
 
+
 const Vector vec3_origin(0,0,0);
 const QAngle vec3_angle(0,0,0);
 const Vector vec3_invalid( FLT_MAX, FLT_MAX, FLT_MAX );
 const int nanmask = 255<<23;
+
 
 //-----------------------------------------------------------------------------
 // Standard C implementations of optimized routines:
@@ -56,12 +58,14 @@ float _sqrtf(float _X)
 	return sqrtf(_X); 
 }
 
+
 float _rsqrtf(float x)
 {
 	Assert( s_bMathlibInitialized );
 
 	return 1.f / _sqrtf( x );
 }
+
 
 float FASTCALL _VectorNormalize (Vector& vec)
 {
@@ -81,6 +85,7 @@ float FASTCALL _VectorNormalize (Vector& vec)
 	return radius;
 }
 
+
 // TODO: Add fast C VectorNormalizeFast.
 // Perhaps use approximate rsqrt trick, if the accuracy isn't too bad.
 void FASTCALL _VectorNormalizeFast (Vector& vec)
@@ -96,12 +101,14 @@ void FASTCALL _VectorNormalizeFast (Vector& vec)
 	
 }
 
+
 float _InvRSquared(const float* v)
 {
 	Assert( s_bMathlibInitialized );
 	float	r2 = DotProduct(v, v);
 	return r2 < 1.f ? 1.f : 1/r2;
 }
+
 
 //-----------------------------------------------------------------------------
 // Function pointers selecting the appropriate implementation
@@ -115,6 +122,7 @@ float (*pfInvRSquared)(const float* v) = _InvRSquared;
 void  (*pfFastSinCos)(float x, float* s, float* c) = SinCos;
 float (*pfFastCos)(float x) = cosf;
 
+
 float SinCosTable[SIN_TABLE_SIZE];
 void InitSinCosTable()
 {
@@ -123,6 +131,7 @@ void InitSinCosTable()
 		SinCosTable[i] = sin(i * 2.0 * M_PI / SIN_TABLE_SIZE);
 	}
 }
+
 
 qboolean VectorsEqual( const float *v1, const float *v2 )
 {
@@ -133,6 +142,7 @@ qboolean VectorsEqual( const float *v1, const float *v2 )
 }
 
 
+
 //-----------------------------------------------------------------------------
 // Purpose: Generates Euler angles given a left-handed orientation matrix. The
 //			columns of the matrix contain the forward, left, and up vectors.
@@ -140,12 +150,12 @@ qboolean VectorsEqual( const float *v1, const float *v2 )
 //			angles[PITCH, YAW, ROLL]. Receives right-handed counterclockwise
 //				rotations in degrees around Y, Z, and X respectively.
 //-----------------------------------------------------------------------------
-
 void MatrixAngles( const matrix3x4_t& matrix, RadianEuler &angles, Vector &position )
 {
 	MatrixGetColumn( matrix, 3, position );
 	MatrixAngles( matrix, angles );
 }
+
 
 void MatrixAngles( const matrix3x4_t &matrix, Quaternion &q, Vector &pos )
 {
@@ -204,6 +214,7 @@ void MatrixAngles( const matrix3x4_t &matrix, Quaternion &q, Vector &pos )
 
 	MatrixGetColumn( matrix, 3, pos );
 }
+
 
 void MatrixAngles( const matrix3x4_t& matrix, float *angles )
 { 
@@ -319,6 +330,7 @@ void VectorIRotate( const float *in1, const matrix3x4_t& in2, float *out )
 	out[2] = in1[0]*in2[0][2] + in1[1]*in2[1][2] + in1[2]*in2[2][2];
 }
 
+
 #ifndef VECTOR_NO_SLOW_OPERATIONS
 // transform a set of angles in the output space of parentMatrix to the input space
 QAngle TransformAnglesToLocalSpace( const QAngle &angles, const matrix3x4_t &parentMatrix )
@@ -333,6 +345,7 @@ QAngle TransformAnglesToLocalSpace( const QAngle &angles, const matrix3x4_t &par
 	return out;
 }
 
+
 // transform a set of angles in the input space of parentMatrix to the output space
 QAngle TransformAnglesToWorldSpace( const QAngle &angles, const matrix3x4_t &parentMatrix )
 {
@@ -343,8 +356,8 @@ QAngle TransformAnglesToWorldSpace( const QAngle &angles, const matrix3x4_t &par
 	MatrixAngles( angToWorld, out );
 	return out;
 }
-
 #endif // VECTOR_NO_SLOW_OPERATIONS
+
 
 void MatrixInitialize( matrix3x4_t &mat, const Vector &vecOrigin, const Vector &vecXAxis, const Vector &vecYAxis, const Vector &vecZAxis )
 {
@@ -354,11 +367,13 @@ void MatrixInitialize( matrix3x4_t &mat, const Vector &vecOrigin, const Vector &
 	MatrixSetColumn( vecOrigin, 3, mat );
 }
 
+
 void MatrixCopy( const matrix3x4_t& in, matrix3x4_t& out )
 {
 	Assert( s_bMathlibInitialized );
 	memcpy( out.Base(), in.Base(), sizeof( float ) * 3 * 4 );
 }
+
 
 //-----------------------------------------------------------------------------
 // Matrix equality test
@@ -375,6 +390,7 @@ bool MatricesAreEqual( const matrix3x4_t &src1, const matrix3x4_t &src2, float f
 	}
 	return true;
 }
+
 
 // NOTE: This is just the transpose not a general inverse
 void MatrixInvert( const matrix3x4_t& in, matrix3x4_t& out )
@@ -413,6 +429,7 @@ void MatrixInvert( const matrix3x4_t& in, matrix3x4_t& out )
 	out[2][3] = -DotProduct( tmp, out[2] );
 }
 
+
 void MatrixGetColumn( const matrix3x4_t& in, int column, Vector &out )
 {
 	out.x = in[0][column];
@@ -420,12 +437,14 @@ void MatrixGetColumn( const matrix3x4_t& in, int column, Vector &out )
 	out.z = in[2][column];
 }
 
+
 void MatrixSetColumn( const Vector &in, int column, matrix3x4_t& out )
 {
 	out[0][column] = in.x;
 	out[1][column] = in.y;
 	out[2][column] = in.z;
 }
+
 
 void MatrixScaleBy ( const float flScale, matrix3x4_t &out )
 {
@@ -439,6 +458,7 @@ void MatrixScaleBy ( const float flScale, matrix3x4_t &out )
 	out[1][2] *= flScale;
 	out[2][2] *= flScale;
 }
+
 
 void MatrixScaleByZero ( matrix3x4_t &out )
 {
@@ -454,7 +474,6 @@ void MatrixScaleByZero ( matrix3x4_t &out )
 }
 
 
-
 int VectorCompare (const float *v1, const float *v2)
 {
 	Assert( s_bMathlibInitialized );
@@ -467,6 +486,7 @@ int VectorCompare (const float *v1, const float *v2)
 	return 1;
 }
 
+
 void CrossProduct (const float* v1, const float* v2, float* cross)
 {
 	Assert( s_bMathlibInitialized );
@@ -477,6 +497,7 @@ void CrossProduct (const float* v1, const float* v2, float* cross)
 	cross[2] = v1[0]*v2[1] - v1[1]*v2[0];
 }
 
+
 int Q_log2(int val)
 {
 	int answer=0;
@@ -484,6 +505,7 @@ int Q_log2(int val)
 		answer++;
 	return answer;
 }
+
 
 // Matrix is right-handed x=forward, y=left, z=up.  We a left-handed convention for vectors in the game code (forward, right, up)
 void MatrixVectors( const matrix3x4_t &matrix, Vector* pForward, Vector *pRight, Vector *pUp )
@@ -519,6 +541,7 @@ void VectorVectors( const Vector &forward, Vector &right, Vector &up )
 		VectorNormalize( up );
 	}
 }
+
 
 void VectorMatrix( const Vector &forward, matrix3x4_t& matrix)
 {
@@ -563,6 +586,7 @@ void VectorAngles( const float *forward, float *angles )
 }
 
 
+
 /*
 ================
 R_ConcatRotations
@@ -592,6 +616,7 @@ void ConcatRotations (const float in1[3][3], const float in2[3][3], float out[3]
 	out[2][2] = in1[2][0] * in2[0][2] + in1[2][1] * in2[1][2] +
 				in1[2][2] * in2[2][2];
 }
+
 
 void ConcatTransforms_Aligned( const matrix3x4_t &m0, const matrix3x4_t &m1, matrix3x4_t &out )
 {
@@ -649,12 +674,12 @@ void ConcatTransforms_Aligned( const matrix3x4_t &m0, const matrix3x4_t &m1, mat
 	StoreAlignedSIMD( out.m_flMatVal[2], out2 );
 }
 
+
 /*
 ================
 R_ConcatTransforms
 ================
 */
-
 void ConcatTransforms (const matrix3x4_t& in1, const matrix3x4_t& in2, matrix3x4_t& out)
 {
 #if 0
@@ -727,7 +752,6 @@ numer and denom, both of which should contain no fractional part. The
 quotient must fit in 32 bits.
 ====================
 */
-
 void FloorDivMod (double numer, double denom, int *quotient,
 		int *rem)
 {
@@ -803,6 +827,7 @@ bool IsDenormal( const float &val )
 	return  ( biased_exponent == 0 && abs_mantissa != 0 );
 }
 
+
 int SignbitsForPlane (cplane_t *out)
 {
 	Assert( s_bMathlibInitialized );
@@ -818,6 +843,7 @@ int SignbitsForPlane (cplane_t *out)
 	}
 	return bits;
 }
+
 
 /*
 ==================
@@ -894,10 +920,10 @@ int __cdecl BoxOnPlaneSide (const float *emins, const float *emaxs, const cplane
 	return sides;
 }
 
+
 //-----------------------------------------------------------------------------
 // Euler QAngle -> Basis Vectors
 //-----------------------------------------------------------------------------
-
 void AngleVectors (const QAngle &angles, Vector *forward)
 {
 	Assert( s_bMathlibInitialized );
@@ -912,6 +938,7 @@ void AngleVectors (const QAngle &angles, Vector *forward)
 	forward->y = cp*sy;
 	forward->z = -sp;
 }
+
 
 //-----------------------------------------------------------------------------
 // Euler QAngle -> Basis Vectors.  Each vector is optional
@@ -958,10 +985,10 @@ void AngleVectors( const QAngle &angles, Vector *forward, Vector *right, Vector 
 	}
 }
 
+
 //-----------------------------------------------------------------------------
 // Euler QAngle -> Basis Vectors transposed
 //-----------------------------------------------------------------------------
-
 void AngleVectorsTranspose (const QAngle &angles, Vector *forward, Vector *right, Vector *up)
 {
 	Assert( s_bMathlibInitialized );
@@ -996,7 +1023,6 @@ void AngleVectorsTranspose (const QAngle &angles, Vector *forward, Vector *right
 //-----------------------------------------------------------------------------
 // Forward direction vector -> Euler angles
 //-----------------------------------------------------------------------------
-
 void VectorAngles( const Vector& forward, QAngle &angles )
 {
 	Assert( s_bMathlibInitialized );
@@ -1027,10 +1053,10 @@ void VectorAngles( const Vector& forward, QAngle &angles )
 	angles[2] = 0;
 }
 
+
 //-----------------------------------------------------------------------------
 // Forward direction vector with a reference up vector -> Euler angles
 //-----------------------------------------------------------------------------
-
 void VectorAngles( const Vector &forward, const Vector &pseudoup, QAngle &angles )
 {
 	Assert( s_bMathlibInitialized );
@@ -1072,6 +1098,7 @@ void VectorAngles( const Vector &forward, const Vector &pseudoup, QAngle &angles
 		angles[2] = 0;
 	}	
 }
+
 
 void SetIdentityMatrix( matrix3x4_t& matrix )
 {
@@ -1154,6 +1181,7 @@ void MatrixTranspose( matrix3x4_t& mat )
 	tmp = mat[1][2]; mat[1][2] = mat[2][1]; mat[2][1] = tmp;
 }
 
+
 void MatrixTranspose( const matrix3x4_t& src, matrix3x4_t& dst )
 {
 	dst[0][0] = src[0][0]; dst[0][1] = src[1][0]; dst[0][2] = src[2][0]; dst[0][3] = 0.0f;
@@ -1177,6 +1205,7 @@ void AngleMatrix( RadianEuler const &angles, const Vector &position, matrix3x4_t
 	MatrixSetColumn( position, 3, matrix );
 }
 
+
 void AngleMatrix( const RadianEuler& angles, matrix3x4_t& matrix )
 {
 	QAngle quakeEuler( RAD2DEG( angles.y ), RAD2DEG( angles.z ), RAD2DEG( angles.x ) );
@@ -1190,6 +1219,7 @@ void AngleMatrix( const QAngle &angles, const Vector &position, matrix3x4_t& mat
 	AngleMatrix( angles, matrix );
 	MatrixSetColumn( position, 3, matrix );
 }
+
 
 void AngleMatrix( const QAngle &angles, matrix3x4_t& matrix )
 {
@@ -1237,12 +1267,14 @@ void AngleMatrix( const QAngle &angles, matrix3x4_t& matrix )
 	matrix[2][3] = 0.0f;
 }
 
+
 void AngleIMatrix( const RadianEuler& angles, matrix3x4_t& matrix )
 {
 	QAngle quakeEuler( RAD2DEG( angles.y ), RAD2DEG( angles.z ), RAD2DEG( angles.x ) );
 
 	AngleIMatrix( quakeEuler, matrix );
 }
+
 
 void AngleIMatrix (const QAngle& angles, matrix3x4_t& matrix )
 {
@@ -1268,6 +1300,7 @@ void AngleIMatrix (const QAngle& angles, matrix3x4_t& matrix )
 	matrix[2][3] = 0.f;
 }
 
+
 void AngleIMatrix (const QAngle &angles, const Vector &position, matrix3x4_t &mat )
 {
 	AngleIMatrix( angles, mat );
@@ -1290,6 +1323,7 @@ void ClearBounds (Vector& mins, Vector& maxs)
 	maxs[0] = maxs[1] = maxs[2] = -99999;
 }
 
+
 void AddPointToBounds (const Vector& v, Vector& mins, Vector& maxs)
 {
 	Assert( s_bMathlibInitialized );
@@ -1305,6 +1339,7 @@ void AddPointToBounds (const Vector& v, Vector& mins, Vector& maxs)
 			maxs[i] = val;
 	}
 }
+
 
 // solve a x^2 + b x + c = 0
 bool SolveQuadratic( float a, float b, float c, float &root1, float &root2 )
@@ -1341,6 +1376,7 @@ bool SolveQuadratic( float a, float b, float c, float &root1, float &root2 )
 	return true;
 }
 
+
 // solves for "a, b, c" where "a x^2 + b x + c = y", return true if solution exists
 bool SolveInverseQuadratic( float x1, float y1, float x2, float y2, float x3, float y3, float &a, float &b, float &c )
 {
@@ -1358,6 +1394,7 @@ bool SolveInverseQuadratic( float x1, float y1, float x2, float y2, float x3, fl
 
 	return true;
 }
+
 
 bool SolveInverseQuadraticMonotonic( float x1, float y1, float x2, float y2, float x3, float y3, 
 									 float &a, float &b, float &c )
@@ -1498,10 +1535,10 @@ float SmoothCurve_Tweak( float x, float flPeakPos, float flPeakSharpness )
 	return SmoothCurve( flSharpened );
 }
 
+
 //-----------------------------------------------------------------------------
 // make sure quaternions are within 180 degrees of one another, if not, reverse q
 //-----------------------------------------------------------------------------
-
 void QuaternionAlign( const Quaternion &p, const Quaternion &q, Quaternion &qt )
 {
 	Assert( s_bMathlibInitialized );
@@ -1570,7 +1607,6 @@ void QuaternionBlendNoAlign( const Quaternion &p, const Quaternion &q, float t, 
 	}
 	QuaternionNormalize( qt );
 }
-
 
 
 void QuaternionIdentityBlend( const Quaternion &p, float t, Quaternion &qt )
@@ -1695,6 +1731,7 @@ float QuaternionAngleDiff( const Quaternion &p, const Quaternion &q )
 #endif
 }
 
+
 void QuaternionConjugate( const Quaternion &p, Quaternion &q )
 {
 	Assert( s_bMathlibInitialized );
@@ -1705,6 +1742,7 @@ void QuaternionConjugate( const Quaternion &p, Quaternion &q )
 	q.z = -p.z;
 	q.w = p.w;
 }
+
 
 void QuaternionInvert( const Quaternion &p, Quaternion &q )
 {
@@ -1724,6 +1762,7 @@ void QuaternionInvert( const Quaternion &p, Quaternion &q )
 		q.w *= inv;
 	}
 }
+
 
 //-----------------------------------------------------------------------------
 // Make sure the quaternion is of unit length
@@ -1965,6 +2004,7 @@ void QuaternionAngles( const Quaternion &q, QAngle &angles )
 	Assert( angles.IsValid() );
 }
 
+
 //-----------------------------------------------------------------------------
 // Purpose: Converts a quaternion to an axis / angle in degrees
 //			(exponential map)
@@ -1981,6 +2021,7 @@ void QuaternionAxisAngle( const Quaternion &q, Vector &axis, float &angle )
 	axis.z = q.z;
 	VectorNormalize( axis );
 }
+
 
 //-----------------------------------------------------------------------------
 // Purpose: Converts an exponential map (ang/axis) to a quaternion
@@ -2226,11 +2267,11 @@ void Spline_Normalize(
 	}
 }
 
+
 //-----------------------------------------------------------------------------
 // Purpose: 
 // Input  : 
 //-----------------------------------------------------------------------------
-
 void Catmull_Rom_Spline(
 	const Vector &p1,
 	const Vector &p2,
@@ -2286,6 +2327,7 @@ void Catmull_Rom_Spline(
 	VectorAdd( p2, output, output );	// p2
 }
 
+
 void Catmull_Rom_Spline_Tangent(
 	const Vector &p1,
 	const Vector &p2,
@@ -2337,6 +2379,7 @@ void Catmull_Rom_Spline_Tangent(
 	VectorAdd( a, output, output );
 	VectorAdd( b, output, output );
 }
+
 
 // area under the curve [0..t]
 void Catmull_Rom_Spline_Integral( 
@@ -2435,7 +2478,6 @@ void Catmull_Rom_Spline_NormalizeX(
 //			d1 and d2 are used to entry and exit slope of curve
 // Input  : 
 //-----------------------------------------------------------------------------
-
 void Hermite_Spline(
 	const Vector &p1,
 	const Vector &p2,
@@ -2501,6 +2543,7 @@ void Hermite_SplineBasis( float t, float basis[4] )
 	basis[3] = tCube-tSqr;
 }
 
+
 //-----------------------------------------------------------------------------
 // Purpose: simple three data point hermite spline.  
 //			t = 0 returns p1, t = 1 returns p2, 
@@ -2512,6 +2555,7 @@ void Hermite_SplineBasis( float t, float basis[4] )
 // BUG: the VectorSubtract()'s calls go away if the global optimizer is enabled
 #pragma optimize( "g", off )
 
+
 void Hermite_Spline( const Vector &p0, const Vector &p1, const Vector &p2, float t, Vector& output )
 {
 	Vector e10, e21;
@@ -2520,7 +2564,9 @@ void Hermite_Spline( const Vector &p0, const Vector &p1, const Vector &p2, float
 	Hermite_Spline( p1, p2, e10, e21, t, output );
 }
 
+
 #pragma optimize( "", on )
+
 
 float Hermite_Spline( float p0, float p1, float p2,	float t )
 {
@@ -2544,6 +2590,7 @@ void Hermite_Spline( const Quaternion &q0, const Quaternion &q1, const Quaternio
 
 	QuaternionNormalize( output );
 }
+
 
 // See http://en.wikipedia.org/wiki/Kochanek-Bartels_curves
 // 
@@ -2630,6 +2677,7 @@ void Kochanek_Bartels_Spline(
 	VectorAdd( p2, output, output );
 }
 
+
 void Kochanek_Bartels_Spline_NormalizeX(
 	float tension, 
 	float bias, 
@@ -2645,6 +2693,7 @@ void Kochanek_Bartels_Spline_NormalizeX(
 	Spline_Normalize( p1, p2, p3, p4, p1n, p4n );
 	Kochanek_Bartels_Spline( tension, bias, continuity, p1n, p2, p3, p4n, t, output );
 }
+
 
 void Cubic_Spline(
 	const Vector &p1,
@@ -2691,6 +2740,7 @@ void Cubic_Spline(
 	VectorAdd( p2, output, output );
 }
 
+
 void Cubic_Spline_NormalizeX(
 	const Vector &p1,
 	const Vector &p2,
@@ -2703,6 +2753,7 @@ void Cubic_Spline_NormalizeX(
 	Spline_Normalize( p1, p2, p3, p4, p1n, p4n );
 	Cubic_Spline( p1n, p2, p3, p4n, t, output );
 }
+
 
 void BSpline(
 	const Vector &p1,
@@ -2767,6 +2818,7 @@ void BSpline(
 	VectorAdd( b, output, output );
 	VectorAdd( c, output, output );
 }
+
 
 void BSpline_NormalizeX(
 	const Vector &p1,

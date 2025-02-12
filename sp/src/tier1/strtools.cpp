@@ -1,4 +1,4 @@
-//========= Copyright Valve Corporation, All rights reserved. ============//
+//============= Copyright Valve Corporation, All rights reserved. =============//
 //
 // Purpose: String Tools
 //
@@ -2419,7 +2419,7 @@ void V_SplitString2( const char *pString, const char **pSeparators, int nSeparat
 	{
 		int iFirstSeparator = -1;
 		const char *pFirstSeparator = 0;
-		for ( int i=0; i < nSeparators; i++ )
+		for ( int i = 0; i < nSeparators; i++ )
 		{
 			const char *pTest = V_stristr( pCurPos, pSeparators[i] );
 			if ( pTest && (!pFirstSeparator || pTest < pFirstSeparator) )
@@ -2715,7 +2715,7 @@ void Q_URLEncodeInternal( char *pchDest, int nDestLen, const char *pchSource, in
 	}
 
 	int iDestPos = 0;
-	for ( int i=0; i < nSourceLen; ++i )
+	for ( int i = 0; i < nSourceLen; ++i )
 	{
 		// We allow only a-z, A-Z, 0-9, period, underscore, and hyphen to pass through unescaped.
 		// These are the characters allowed by both the original RFC 1738 and the latest RFC 3986.
@@ -2773,7 +2773,7 @@ size_t Q_URLDecodeInternal( char *pchDecodeDest, int nDecodeDestLen, const char 
 	}
 
 	int iDestPos = 0;
-	for( int i=0; i < nEncodedSourceLen; ++i )
+	for( int i = 0; i < nEncodedSourceLen; ++i )
 	{
 		if ( bUsePlusForSpace && pchEncodedSource[i] == '+' )
 		{

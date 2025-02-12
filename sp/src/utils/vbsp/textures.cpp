@@ -1,4 +1,4 @@
-//========= Copyright Valve Corporation, All rights reserved. ============//
+//============= Copyright Valve Corporation, All rights reserved. =============//
 //
 // Purpose: 
 //
@@ -24,7 +24,7 @@ textureref_t	textureref[MAX_MAP_TEXTURES];
 
 bool g_bHasWater = false;
 
-extern qboolean onlyents;
+extern bool		 onlyents;
 
 dtexdata_t *GetTexData( int index )
 {
@@ -411,12 +411,12 @@ int FindAliasedTexData( const char *pName_, dtexdata_t *sourceTexture )
 	char *pName = ( char * )_alloca( strlen( pName_ ) + 1 );
 	strcpy( pName, pName_ );
 	strlwr( pName );
-	int i, output;
+	int output;
 	bool found;
 	dtexdata_t *pTexData;
 	MaterialSystemMaterial_t matID;
 
-	for ( i = 0; i < numtexdata; i++ )
+	for (int i = 0; i < numtexdata; i++ )
 	{
 		if ( !strcmp( pName, TexDataStringTable_GetString( GetTexData( i )->nameStringTableID ) ) )
 			return i;

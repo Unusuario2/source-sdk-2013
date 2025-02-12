@@ -1,4 +1,4 @@
-//========= Copyright Valve Corporation, All rights reserved. ============//
+//============= Copyright Valve Corporation, All rights reserved. =============//
 //
 // Purpose: 
 //
@@ -204,8 +204,8 @@ static bool LoadSrcVTFFiles( IVTFTexture *pSrcVTFTextures[6], const char *pSkybo
 							int *pUnionTextureFlags, bool bHDR )
 {
 	const char *facingName[6] = { "rt", "lf", "bk", "ft", "up", "dn" };
-	int i;
-	for( i = 0; i < 6; i++ )
+
+	for(int i = 0; i < 6; i++ )
 	{
 		char srcMaterialName[1024];
 		sprintf( srcMaterialName, "%s%s", pSkyboxMaterialBaseName, facingName[i] );
@@ -489,8 +489,7 @@ void CreateDefaultCubemaps( bool bHDR )
 	AddBufferToPak( pak, dstVTFFileName, outputBuf.Base(), outputBuf.TellPut(), false );
 
 	// spit out all of the ones that are attached to world geometry.
-	int i;
-	for( i = 0; i < s_DefaultCubemapNames.Count(); i++ )
+	for(int i = 0; i < s_DefaultCubemapNames.Count(); i++ )
 	{
 		char vtfName[MAX_PATH];
 		VTFNameToHDRVTFName( s_DefaultCubemapNames[i], vtfName, MAX_PATH, bHDR );
@@ -502,7 +501,7 @@ void CreateDefaultCubemaps( bool bHDR )
 	}
 
 	// Clean up the textures
-	for( i = 0; i < 6; i++ )
+	for(int i = 0; i < 6; i++ )
 	{
 		DestroyVTFTexture( pSrcVTFTextures[i] );
 	}
@@ -782,8 +781,7 @@ static int Cubemap_CreateTexInfo( int originalTexInfo, int origin[3] )
 
 static int SideIDToIndex( int brushSideID )
 {
-	int i;
-	for( i = 0; i < g_MainMap->nummapbrushsides; i++ )
+	for(int i = 0; i < g_MainMap->nummapbrushsides; i++ )
 	{
 		if( g_MainMap->brushsides[i].id == brushSideID )
 		{
@@ -803,12 +801,11 @@ void Cubemap_FixupBrushSidesMaterials( void )
 	Msg( "Fixing up env_cubemap materials on brush sides..." );
 	Assert( s_EnvCubemapToBrushSides.Count() == g_nCubemapSamples );
 
-	int cubemapID;
-	for( cubemapID = 0; cubemapID < g_nCubemapSamples; cubemapID++ )
+	for(int cubemapID = 0; cubemapID < g_nCubemapSamples; cubemapID++ )
 	{
 		IntVector_t &brushSidesVector = s_EnvCubemapToBrushSides[cubemapID];
-		int i;
-		for( i = 0; i < brushSidesVector.Count(); i++ )
+	
+		for(int i = 0; i < brushSidesVector.Count(); i++ )
 		{
 			int brushSideID = brushSidesVector[i];
 			int sideIndex = SideIDToIndex( brushSideID );
@@ -1019,13 +1016,13 @@ void Cubemap_AttachDefaultCubemapToSpecularSides( void )
 	// build a mapping from side to entity id so that we can get the entity origin
 	CUtlVector<int> sideToEntityIndex;
 	sideToEntityIndex.SetCount(g_MainMap->nummapbrushsides);
-	int i;
-	for ( i = 0; i < g_MainMap->nummapbrushsides; i++ )
+
+	for (int i = 0; i < g_MainMap->nummapbrushsides; i++ )
 	{
 		sideToEntityIndex[i] = -1;
 	}
 
-	for ( i = 0; i < g_MainMap->nummapbrushes; i++ )
+	for (int i = 0; i < g_MainMap->nummapbrushes; i++ )
 	{
 		int entityIndex = g_MainMap->mapbrushes[i].entitynum;
 		for ( int j = 0; j < g_MainMap->mapbrushes[i].numsides; j++ )
@@ -1070,13 +1067,13 @@ void Cubemap_AttachDefaultCubemapToSpecularSides( void )
 // Populate with cubemaps that were skipped
 void Cubemap_AddUnreferencedCubemaps()
 {
+	int					j;
 	char				pTextureName[1024];
 	char				pFileName[1024];
 	PatchInfo_t			info;
 	dcubemapsample_t	*pSample;
-	int					i,j;
 
-	for ( i=0; i<g_nCubemapSamples; ++i )
+	for (int i = 0; i<g_nCubemapSamples; ++i )
 	{
 		pSample = &g_CubemapSamples[i];	
 
@@ -1088,7 +1085,7 @@ void Cubemap_AddUnreferencedCubemaps()
 		GeneratePatchedName( "c", info, false, pTextureName, 1024 );
 		
 		// find or add
-		for ( j=0; j<s_DefaultCubemapNames.Count(); ++j )
+		for (j = 0; j<s_DefaultCubemapNames.Count(); ++j )
 		{
 			if ( !stricmp( s_DefaultCubemapNames[j], pTextureName ) )
 			{

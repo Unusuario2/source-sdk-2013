@@ -1,4 +1,4 @@
-//========= Copyright Valve Corporation, All rights reserved. ============//
+//============= Copyright Valve Corporation, All rights reserved. =============//
 //
 // Purpose: 
 //
@@ -33,8 +33,7 @@ static void Pause( void )
 
 static bool ImageRGBA8888HasAlpha( unsigned char *pImage, int numTexels )
 {
-	int i;
-	for( i = 0; i < numTexels; i++ )
+	for (int i = 0; i < numTexels; i++)
 	{
 		if( pImage[i*4+3] != 255 )
 		{
@@ -171,9 +170,8 @@ void ProcessFiles( const char *pNormalFileNameWithoutExtension,
 	static char buf[1024];
 	bool animated = !( startFrame == -1 || endFrame == -1 );
 	int numFrames = endFrame - startFrame + 1;
-	int frameID;
 
-	for( frameID = 0; frameID < numFrames; frameID++ )
+	for(int frameID = 0; frameID < numFrames; frameID++ )
 	{
 		if( animated )
 		{
@@ -335,9 +333,7 @@ int main( int argc, char **argv )
 		}
 		
 		Q_StripExtension( pFileName, normalFileNameWithoutExtension, sizeof( normalFileNameWithoutExtension ) );
-		ProcessFiles( normalFileNameWithoutExtension,
-					  startFrame, endFrame,
-					  bumpScale );
+		ProcessFiles( normalFileNameWithoutExtension, startFrame, endFrame,bumpScale );
 	}
 	return 0;
 }

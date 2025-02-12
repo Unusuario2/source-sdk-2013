@@ -1,4 +1,4 @@
-//========= Copyright Valve Corporation, All rights reserved. ============//
+//============= Copyright Valve Corporation, All rights reserved. =============//
 //
 // Purpose: 
 //
@@ -277,12 +277,12 @@ bool MatrixInverseGeneral(const VMatrix& src, VMatrix& dst)
 	// I = identity
 
 	// Setup AI
-	for(i=0; i < 4; i++)
+	for(i = 0; i < 4; i++)
 	{
 		const vec_t *pIn = src[i];
 		pOut = mat[i];
 
-		for(j=0; j < 4; j++)
+		for(j = 0; j < 4; j++)
 		{
 			pOut[j] = pIn[j];
 		}
@@ -331,13 +331,13 @@ bool MatrixInverseGeneral(const VMatrix& src, VMatrix& dst)
 
 		// Divide this row by the element.
 		mul = 1.0f / pRow[iRow];
-		for(j=0; j < 8; j++)
+		for(j = 0; j < 8; j++)
 			pRow[j] *= mul;
 
 		pRow[iRow] = 1.0f; // Preserve accuracy...
 		
 		// Eliminate this element from the other rows using operation 2.
-		for(i=0; i < 4; i++)
+		for(i = 0; i < 4; i++)
 		{
 			if(i == iRow)
 				continue;
@@ -346,7 +346,7 @@ bool MatrixInverseGeneral(const VMatrix& src, VMatrix& dst)
 		
 			// Multiply this row by -(iRow*the element).
 			mul = -pScaleRow[iRow];
-			for(j=0; j < 8; j++)
+			for(j = 0; j < 8; j++)
 			{
 				pScaleRow[j] += pRow[j] * mul;
 			}
@@ -356,12 +356,12 @@ bool MatrixInverseGeneral(const VMatrix& src, VMatrix& dst)
 	}
 
 	// The inverse is on the right side of AX now (the identity is on the left).
-	for(i=0; i < 4; i++)
+	for(i = 0; i < 4; i++)
 	{
 		const vec_t *pIn = mat[rowMap[i]] + 4;
 		pOut = dst.m[i];
 
-		for(j=0; j < 4; j++)
+		for(j = 0; j < 4; j++)
 		{
 			pOut[j] = pIn[j];
 		}

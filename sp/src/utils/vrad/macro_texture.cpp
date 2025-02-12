@@ -1,4 +1,4 @@
-//========= Copyright Valve Corporation, All rights reserved. ============//
+//============= Copyright Valve Corporation, All rights reserved. =============//
 //
 // Purpose: 
 //
@@ -101,14 +101,12 @@ void InitMacroTexture( const char *pBSPFilename )
 		return;
 	}
 
-
 	// Load the macro texture that is mapped onto everything.
 	char mapName[512], vtfFilename[512];
 	Q_FileBase( pBSPFilename, mapName, sizeof( mapName ) );
 	Q_snprintf( vtfFilename, sizeof( vtfFilename ), "materials/macro/%s/base.vtf", mapName );
 	g_pGlobalMacroTextureData = LoadMacroTextureFile( vtfFilename );
 
-	
 	// Now load the macro texture for each face.
 	g_FaceMacroTextures.SetSize( numfaces );
 	for ( int iFace=0; iFace < numfaces; iFace++ )
