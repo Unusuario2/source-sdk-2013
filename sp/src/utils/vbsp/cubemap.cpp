@@ -1,4 +1,4 @@
-//========= Copyright Valve Corporation, All rights reserved. ============//
+//============= Copyright Valve Corporation, All rights reserved. =============//
 //
 // Purpose: 
 //
@@ -18,6 +18,11 @@
 #include "materialsystem/imaterialsystem.h"
 #include "materialsystem/imaterial.h"
 #include "materialsystem/imaterialvar.h"
+
+
+#ifdef MAPBASE
+#include "../common/StandartColorFormat.h" //this control the color of the console.
+#endif 
 
 
 /*
@@ -164,7 +169,7 @@ static const char *FindDependentMaterial( const char *pMaterialName, const char 
 
 		if ( !Q_stricmp( pDependentMaterialName, pMaterialName ) )
 		{
-			Warning( "Material %s is depending on itself through materialvar %s! Ignoring...\n", pMaterialName, s_pDependentMaterialVar[i] );
+			Warning("\tMaterial %s is depending on itself through materialvar %s! Ignoring...\n", pMaterialName, s_pDependentMaterialVar[i] );
 				continue;
 		}
 
@@ -199,8 +204,8 @@ static bool LoadSrcVTFFiles( IVTFTexture *pSrcVTFTextures[6], const char *pSkybo
 							int *pUnionTextureFlags, bool bHDR )
 {
 	const char *facingName[6] = { "rt", "lf", "bk", "ft", "up", "dn" };
-	int i;
-	for( i = 0; i < 6; i++ )
+
+	for(int i = 0; i < 6; i++ )
 	{
 		char srcMaterialName[1024];
 		sprintf( srcMaterialName, "%s%s", pSkyboxMaterialBaseName, facingName[i] );
@@ -240,7 +245,7 @@ static bool LoadSrcVTFFiles( IVTFTexture *pSrcVTFTextures[6], const char *pSkybo
 		pSrcVTFTextures[i] = CreateVTFTexture();
 		if (!pSrcVTFTextures[i]->Unserialize(buf))
 		{
-			Warning("*** Error unserializing skybox texture: %s\n", pSkyboxMaterialBaseName );
+			Warning("\t*** Error unserializing skybox texture: %s\n", pSkyboxMaterialBaseName );
 			return false;
 		}
 
@@ -253,7 +258,7 @@ static bool LoadSrcVTFFiles( IVTFTexture *pSrcVTFTextures[6], const char *pSkybo
 			 ( ( pSrcVTFTextures[i]->Height() != pSrcVTFTextures[0]->Height() ) && ( pSrcVTFTextures[i]->Height() != pSrcVTFTextures[0]->Height()*2 )  && ( pSrcVTFTextures[i]->Height() != 4 ) ) ||
 			 ( flagsNoAlpha != flagsFirstNoAlpha ) )
 		{
-			Warning("*** Error: Skybox vtf files for %s weren't compiled with the same size texture and/or same flags!\n", pSkyboxMaterialBaseName );
+			Warning("\t*** Error: Skybox vtf files for %s weren't compiled with the same size texture and/or same flags!\n", pSkyboxMaterialBaseName );
 			return false;
 		}
 
@@ -305,7 +310,7 @@ void CreateDefaultCubemaps( bool bHDR )
 	{
 		if( s_DefaultCubemapNames.Count() )
 		{
-			Warning( "This map uses env_cubemap, and you don't have a skybox, so no default env_cubemaps will be generated.\n" );
+			Warning("\tThis map uses env_cubemap, and you don't have a skybox, so no default env_cubemaps will be generated.\n" );
 		}
 		return;
 	}
@@ -318,7 +323,7 @@ void CreateDefaultCubemaps( bool bHDR )
 	int unionTextureFlags = 0;
 	if( !LoadSrcVTFFiles( pSrcVTFTextures, skyboxMaterialName, &unionTextureFlags, bHDR ) )
 	{
-		Warning( "Can't load skybox file %s to build the default cubemap!\n", skyboxMaterialName );
+		Warning("\tCan't load skybox file %s to build the default cubemap!\n", skyboxMaterialName );
 		return;
 	}
 	Msg( "Creating default %scubemaps for env_cubemap using skybox materials:\n   %s*.vmt\n"
@@ -383,7 +388,7 @@ void CreateDefaultCubemaps( bool bHDR )
 				{
 					if ( iSrcMipSize != iSize )
 					{
-						Warning( "%s - ERROR! Cannot copy square face for default cubemap! iSrcMipSize(%d) != iSize(%d)\n", skyboxMaterialName, iSrcMipSize, iSize );
+						Warning("\t%s - ERROR! Cannot copy square face for default cubemap! iSrcMipSize(%d) != iSize(%d)\n", skyboxMaterialName, iSrcMipSize, iSize );
 						memset( pDstBits, 0, iSize );
 					}
 					else
@@ -398,7 +403,7 @@ void CreateDefaultCubemaps( bool bHDR )
 					pDstCubemap->ComputeMipLevelDimensions( iMip, &iMipWidth, &iMipHeight, &iMipDepth );
 					if ( ( iMipHeight > 1 ) && ( iSrcMipSize*2 != iSize ) )
 					{
-						Warning( "%s - ERROR building default cube map! %d*2 != %d\n", skyboxMaterialName, iSrcMipSize, iSize );
+						Warning("\t%s - ERROR building default cube map! %d*2 != %d\n", skyboxMaterialName, iSrcMipSize, iSize );
 						memset( pDstBits, 0, iSize );
 					}
 					else
@@ -410,7 +415,7 @@ void CreateDefaultCubemaps( bool bHDR )
 						int nDstRowSize = pDstCubemap->RowSizeInBytes( iMip );
 						if ( nSrcRowSize != nDstRowSize )
 						{
-							Warning( "%s - ERROR building default cube map! nSrcRowSize(%d) != nDstRowSize(%d)!\n", skyboxMaterialName, nSrcRowSize, nDstRowSize );
+							Warning("\t%s - ERROR building default cube map! nSrcRowSize(%d) != nDstRowSize(%d)!\n", skyboxMaterialName, nSrcRowSize, nDstRowSize );
 							memset( pDstBits, 0, iSize );
 						}
 						else
@@ -425,7 +430,7 @@ void CreateDefaultCubemaps( bool bHDR )
 				else
 				{
 					// ERROR! This code only supports square and rectangluar 2x wide
-					Warning( "%s - Couldn't create default cubemap because texture res is %dx%d\n", skyboxMaterialName, pSrcVTFTextures[iFace]->Width(), pSrcVTFTextures[iFace]->Height() );
+					Warning("\t%s - Couldn't create default cubemap because texture res is %dx%d\n", skyboxMaterialName, pSrcVTFTextures[iFace]->Width(), pSrcVTFTextures[iFace]->Height() );
 					memset( pDstBits, 0, iSize );
 					return;
 				}
@@ -474,7 +479,7 @@ void CreateDefaultCubemaps( bool bHDR )
 	CUtlBuffer outputBuf;
 	if (!pDstCubemap->Serialize( outputBuf ))
 	{
-		Warning( "Error serializing default cubemap %s\n", dstVTFFileName );
+		Warning("\tError serializing default cubemap %s\n", dstVTFFileName );
 		return;
 	}
 
@@ -484,8 +489,7 @@ void CreateDefaultCubemaps( bool bHDR )
 	AddBufferToPak( pak, dstVTFFileName, outputBuf.Base(), outputBuf.TellPut(), false );
 
 	// spit out all of the ones that are attached to world geometry.
-	int i;
-	for( i = 0; i < s_DefaultCubemapNames.Count(); i++ )
+	for(int i = 0; i < s_DefaultCubemapNames.Count(); i++ )
 	{
 		char vtfName[MAX_PATH];
 		VTFNameToHDRVTFName( s_DefaultCubemapNames[i], vtfName, MAX_PATH, bHDR );
@@ -497,7 +501,7 @@ void CreateDefaultCubemaps( bool bHDR )
 	}
 
 	// Clean up the textures
-	for( i = 0; i < 6; i++ )
+	for(int i = 0; i < 6; i++ )
 	{
 		DestroyVTFTexture( pSrcVTFTextures[i] );
 	}
@@ -547,7 +551,7 @@ static void GeneratePatchedName( const char *pMaterialName, const PatchInfo_t &i
 		Assert( nLen < TEXTURE_NAME_LENGTH - 1 );
 		if ( nLen >= TEXTURE_NAME_LENGTH - 1 )
 		{
-			Error( "Generated env_cubemap patch name : %s too long! (max = %d)\n", pBuffer, TEXTURE_NAME_LENGTH );
+			Error("\tGenerated env_cubemap patch name : %s too long! (max = %d)\n", pBuffer, TEXTURE_NAME_LENGTH );
 		}
 	}
 
@@ -689,7 +693,7 @@ static int Cubemap_CreateTexInfo( int originalTexInfo, int origin[3] )
 	const char *pMaterialName = TexDataStringTable_GetString( pTexData->nameStringTableID );
 	if ( g_IsCubemapTexData[pTexInfo->texdata] )
 	{
-		Warning("Multiple references for cubemap on texture %s!!!\n", pMaterialName );
+		Warning("\tMultiple references for cubemap on texture %s!!!\n", pMaterialName );
 		return originalTexInfo;
 	}
 
@@ -777,8 +781,7 @@ static int Cubemap_CreateTexInfo( int originalTexInfo, int origin[3] )
 
 static int SideIDToIndex( int brushSideID )
 {
-	int i;
-	for( i = 0; i < g_MainMap->nummapbrushsides; i++ )
+	for(int i = 0; i < g_MainMap->nummapbrushsides; i++ )
 	{
 		if( g_MainMap->brushsides[i].id == brushSideID )
 		{
@@ -795,21 +798,20 @@ static int SideIDToIndex( int brushSideID )
 //-----------------------------------------------------------------------------
 void Cubemap_FixupBrushSidesMaterials( void )
 {
-	Msg( "fixing up env_cubemap materials on brush sides...\n" );
+	Msg( "Fixing up env_cubemap materials on brush sides..." );
 	Assert( s_EnvCubemapToBrushSides.Count() == g_nCubemapSamples );
 
-	int cubemapID;
-	for( cubemapID = 0; cubemapID < g_nCubemapSamples; cubemapID++ )
+	for(int cubemapID = 0; cubemapID < g_nCubemapSamples; cubemapID++ )
 	{
 		IntVector_t &brushSidesVector = s_EnvCubemapToBrushSides[cubemapID];
-		int i;
-		for( i = 0; i < brushSidesVector.Count(); i++ )
+	
+		for(int i = 0; i < brushSidesVector.Count(); i++ )
 		{
 			int brushSideID = brushSidesVector[i];
 			int sideIndex = SideIDToIndex( brushSideID );
 			if( sideIndex < 0 )
 			{
-				Warning("env_cubemap pointing at deleted brushside near (%d, %d, %d)\n", 
+				Warning("\tenv_cubemap pointing at deleted brushside near (%d, %d, %d)\n", 
 					g_CubemapSamples[cubemapID].origin[0], g_CubemapSamples[cubemapID].origin[1], g_CubemapSamples[cubemapID].origin[2] );
 
 				continue;
@@ -835,6 +837,12 @@ void Cubemap_FixupBrushSidesMaterials( void )
 			}
 		}
 	}
+
+#ifdef MAPBASE
+	ColorSpewMessage(SPEW_MESSAGE, &green, " done (0)\n");
+#else
+	Msg("done(0)\n");
+#endif 
 }
 
 
@@ -1008,13 +1016,13 @@ void Cubemap_AttachDefaultCubemapToSpecularSides( void )
 	// build a mapping from side to entity id so that we can get the entity origin
 	CUtlVector<int> sideToEntityIndex;
 	sideToEntityIndex.SetCount(g_MainMap->nummapbrushsides);
-	int i;
-	for ( i = 0; i < g_MainMap->nummapbrushsides; i++ )
+
+	for (int i = 0; i < g_MainMap->nummapbrushsides; i++ )
 	{
 		sideToEntityIndex[i] = -1;
 	}
 
-	for ( i = 0; i < g_MainMap->nummapbrushes; i++ )
+	for (int i = 0; i < g_MainMap->nummapbrushes; i++ )
 	{
 		int entityIndex = g_MainMap->mapbrushes[i].entitynum;
 		for ( int j = 0; j < g_MainMap->mapbrushes[i].numsides; j++ )
@@ -1059,13 +1067,13 @@ void Cubemap_AttachDefaultCubemapToSpecularSides( void )
 // Populate with cubemaps that were skipped
 void Cubemap_AddUnreferencedCubemaps()
 {
+	int					j;
 	char				pTextureName[1024];
 	char				pFileName[1024];
 	PatchInfo_t			info;
 	dcubemapsample_t	*pSample;
-	int					i,j;
 
-	for ( i=0; i<g_nCubemapSamples; ++i )
+	for (int i = 0; i<g_nCubemapSamples; ++i )
 	{
 		pSample = &g_CubemapSamples[i];	
 
@@ -1077,7 +1085,7 @@ void Cubemap_AddUnreferencedCubemaps()
 		GeneratePatchedName( "c", info, false, pTextureName, 1024 );
 		
 		// find or add
-		for ( j=0; j<s_DefaultCubemapNames.Count(); ++j )
+		for (j = 0; j<s_DefaultCubemapNames.Count(); ++j )
 		{
 			if ( !stricmp( s_DefaultCubemapNames[j], pTextureName ) )
 			{

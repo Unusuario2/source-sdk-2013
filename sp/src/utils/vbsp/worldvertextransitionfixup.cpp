@@ -1,4 +1,4 @@
-//========= Copyright Valve Corporation, All rights reserved. ============//
+//============= Copyright Valve Corporation, All rights reserved. =============//
 //
 // Purpose: 
 //
@@ -51,7 +51,7 @@ static void GeneratePatchedMaterialName( const char *pMaterialName, char *pBuffe
 	Assert( nLen < TEXTURE_NAME_LENGTH - 1 );
 	if ( nLen >= TEXTURE_NAME_LENGTH - 1 )
 	{
-		Error( "Generated worldvertextransition patch name : %s too long! (max = %d)\n", pBuffer, TEXTURE_NAME_LENGTH );
+		Error("\tGenerated worldvertextransition patch name : %s too long! (max = %d)\n", pBuffer, TEXTURE_NAME_LENGTH );
 	}
 
 	BackSlashToForwardSlash( pBuffer );
@@ -90,7 +90,7 @@ void CreateWorldVertexTransitionPatchedMaterial( const char *pOriginalMaterialNa
 			RemoveKey( kv, "$envmap" );
 		}
 
-		Warning( "Patching WVT material: %s\n", pPatchedMaterialName );
+		Warning("\tPatching WVT material: %s\n", pPatchedMaterialName );
 		WriteMaterialKeyValuesToPak( pPatchedMaterialName, kv );
 	}
 }
@@ -111,7 +111,7 @@ int CreateBrushVersionOfWorldVertexTransitionMaterial( int originalTexInfo )
 
 	char patchedMaterialName[1024];
 	GeneratePatchedMaterialName( pOriginalMaterialName, patchedMaterialName, 1024 );
-//	Warning( "GeneratePatchedMaterialName: %s %s\n", pMaterialName, patchedMaterialName );
+//	Warning("\tGeneratePatchedMaterialName: %s %s\n", pMaterialName, patchedMaterialName );
 	
 	// Make sure the texdata doesn't already exist.
 	int nTexDataID = FindTexData( patchedMaterialName );
@@ -165,19 +165,19 @@ void WorldVertexTransitionFixup( void )
 {
 	CUtlVector<entitySideList_t> sideList;
 	sideList.SetCount( g_MainMap->num_entities );
-	int i;
-	for ( i = 0; i < g_MainMap->num_entities; i++ )
+
+	for (int i = 0; i < g_MainMap->num_entities; i++ )
 	{
 		sideList[i].firstBrushSide = 0;
 		sideList[i].brushSideCount = 0;
 	}
 
-	for ( i = 0; i < g_MainMap->nummapbrushes; i++ )
+	for (int i = 0; i < g_MainMap->nummapbrushes; i++ )
 	{
 		sideList[g_MainMap->mapbrushes[i].entitynum].brushSideCount += g_MainMap->mapbrushes[i].numsides;
 	}
 	int curSide = 0;
-	for ( i = 0; i < g_MainMap->num_entities; i++ )
+	for (int i = 0; i < g_MainMap->num_entities; i++ )
 	{
 		sideList[i].firstBrushSide = curSide;
 		curSide += sideList[i].brushSideCount;

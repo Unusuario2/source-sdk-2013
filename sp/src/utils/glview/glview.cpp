@@ -1,4 +1,4 @@
-//========= Copyright Valve Corporation, All rights reserved. ============//
+//============= Copyright Valve Corporation, All rights reserved. =============//
 //
 // Purpose: 
 //
@@ -259,7 +259,6 @@ void Cam_BuildMatrix (void)
 {
 	float	xa, ya;
 	float	matrix[4][4];
-	int		i;
 
 	xa = angles[0]/180*M_PI;
 	ya = angles[1]/180*M_PI;
@@ -273,7 +272,7 @@ void Cam_BuildMatrix (void)
 
 	glGetFloatv (GL_PROJECTION_MATRIX, &matrix[0][0]);
 
-	for (i=0 ; i<3 ; i++)
+	for (int i = 0; i<3 ; i++)
 	{
 		vright[i] = matrix[i][0];
 		vup[i] = matrix[i][1];
@@ -368,7 +367,7 @@ void Draw (void)
 void ReadPolyFileType(const char *name, int nList, BOOL drawLines)
 {
 	FILE	*f;
-	int		i, j, numverts;
+	int	numverts;
 	float	v[8];
 	int		c;
 	int		r;
@@ -386,7 +385,7 @@ void ReadPolyFileType(const char *name, int nList, BOOL drawLines)
 	c = 0;
 	glNewList (nList, GL_COMPILE);
 	
-	for (i = 0; i < 3; i++)  // Find the center point so we can put the viewer there by default
+	for (int i = 0; i < 3; i++)  // Find the center point so we can put the viewer there by default
 		g_Center[i] = 0.0f;
 
 	if (drawLines)           // Slight hilite
@@ -406,7 +405,7 @@ void ReadPolyFileType(const char *name, int nList, BOOL drawLines)
 		else
 			glBegin (GL_POLYGON);
 
-		for (i=0 ; i<numverts ; i++)
+		for (int i = 0; i<numverts ; i++)
 		{
 			r = fscanf( f, "%f %f %f %f %f %f\n", &v[0], &v[1],
 				&v[2], &v[3], &v[4], &v[5]);
@@ -449,7 +448,7 @@ void ReadPolyFileType(const char *name, int nList, BOOL drawLines)
 			};
 			glVertex3f (v[0], v[1], v[2]);
 
-			for (j = 0; j < 3; j++)
+			for (int j = 0; j < 3; j++)
 			{
 				g_Center[j] += v[j];
 			}
@@ -467,7 +466,7 @@ void ReadPolyFileType(const char *name, int nList, BOOL drawLines)
 
 	if (g_nTotalPoints > 0)  // Avoid division by zero
 	{
-		for (i = 0; i < 3; i++)
+		for (int i = 0; i < 3; i++)
 		{
 			g_Center[i] = g_Center[i]/(float)g_nTotalPoints; // Calculate center...
 			origin[i] = g_Center[i];
@@ -843,7 +842,7 @@ void ReadPolyFile (const char *name)
 void ReadPortalFile (char *name)
 {
 	FILE	*f;
-	int		i, numverts;
+	int		numverts;
 	float	v[8];
 	int		c;
 	int		r;
@@ -876,7 +875,7 @@ void ReadPortalFile (char *name)
 			break;
 
 		glBegin(GL_LINE_LOOP);
-		for (i=0 ; i<numverts ; i++)
+		for (int i = 0; i<numverts ; i++)
 		{
 			r = fscanf (f, "(%f %f %f )\n", &v[0], &v[1],
 				&v[2]);

@@ -28,12 +28,14 @@ static const int	ice_smod[4][4] = {
 				{361, 445, 451, 397},
 				{397, 425, 395, 505}};
 
+
 	/* XOR values for the S-boxes */
 static const int	ice_sxor[4][4] = {
 				{0x83, 0x85, 0x9b, 0xcd},
 				{0xcc, 0xa7, 0xad, 0x41},
 				{0x4b, 0x2e, 0xd4, 0x33},
 				{0xea, 0xcb, 0x2e, 0x04}};
+
 
 	/* Permutation values for the P-box */
 static const unsigned long	ice_pbox[32] = {
@@ -45,6 +47,7 @@ static const unsigned long	ice_pbox[32] = {
 		0x00020000, 0x00400000, 0x08000000, 0x10000000,
 		0x00000002, 0x00000040, 0x00000800, 0x00001000,
 		0x00040000, 0x00100000, 0x02000000, 0x80000000};
+
 
 	/* The key rotation schedule */
 static const int	ice_keyrot[16] = {
@@ -129,13 +132,12 @@ ice_perm32 (
  * Initialise the ICE S-boxes.
  * This only has to be done once.
  */
-
 static void
 ice_sboxes_init (void)
 {
 	register int	i;
 
-	for (i=0; i<1024; i++) {
+	for (i = 0; i<1024; i++) {
 	    int			col = (i >> 1) & 0xff;
 	    int			row = (i & 0x1) | ((i & 0x200) >> 8);
 	    unsigned long	x;
@@ -158,7 +160,6 @@ ice_sboxes_init (void)
 /*
  * Create a new ICE key.
  */
-
 IceKey::IceKey (int n)
 {
 	if (!ice_sboxes_initialised) {
@@ -181,13 +182,12 @@ IceKey::IceKey (int n)
 /*
  * Destroy an ICE key.
  */
-
 IceKey::~IceKey ()
 {
 	int	i, j;
 
-	for (i=0; i<_rounds; i++)
-	    for (j=0; j<3; j++)
+	for (i = 0; i<_rounds; i++)
+	    for (j = 0; j<3; j++)
 		_keysched[i].val[j] = 0;
 
 	_rounds = _size = 0;
@@ -199,7 +199,6 @@ IceKey::~IceKey ()
 /*
  * The single round ICE f function.
  */
-
 static unsigned long
 ice_f (
 	register unsigned long	p,
@@ -233,7 +232,6 @@ ice_f (
 /*
  * Encrypt a block of 8 bytes of data with the given ICE key.
  */
-
 void
 IceKey::encrypt (
 	const unsigned char	*ptext,
@@ -268,7 +266,6 @@ IceKey::encrypt (
 /*
  * Decrypt a block of 8 bytes of data with the given ICE key.
  */
-
 void
 IceKey::decrypt (
 	const unsigned char	*ctext,
@@ -303,7 +300,6 @@ IceKey::decrypt (
 /*
  * Set 8 rounds [n, n+7] of the key schedule of an ICE key.
  */
-
 void
 IceKey::scheduleBuild (
 	unsigned short	*kb,
@@ -312,15 +308,15 @@ IceKey::scheduleBuild (
 ) {
 	int		i;
 
-	for (i=0; i<8; i++) {
+	for (i = 0; i<8; i++) {
 	    register int	j;
 	    register int	kr = keyrot[i];
 	    IceSubkey		*isk = &_keysched[n + i];
 
-	    for (j=0; j<3; j++)
+	    for (j = 0; j<3; j++)
 		isk->val[j] = 0;
 
-	    for (j=0; j<15; j++) {
+	    for (j = 0; j<15; j++) {
 		register int	k;
 		unsigned long	*curr_sk = &isk->val[j % 3];
 
@@ -339,7 +335,6 @@ IceKey::scheduleBuild (
 /*
  * Set the key schedule of an ICE key.
  */
-
 void
 IceKey::set (
 	const unsigned char	*key
@@ -349,18 +344,18 @@ IceKey::set (
 	if (_rounds == 8) {
 	    unsigned short	kb[4];
 
-	    for (i=0; i<4; i++)
+	    for (i = 0; i<4; i++)
 		kb[3 - i] = (key[i*2] << 8) | key[i*2 + 1];
 
 	    scheduleBuild (kb, 0, ice_keyrot);
 	    return;
 	}
 
-	for (i=0; i<_size; i++) {
+	for (i = 0; i<_size; i++) {
 	    int			j;
 	    unsigned short	kb[4];
 
-	    for (j=0; j<4; j++)
+	    for (j = 0; j<4; j++)
 		kb[3 - j] = (key[i*8 + j*2] << 8) | key[i*8 + j*2 + 1];
 
 	    scheduleBuild (kb, i*8, ice_keyrot);
@@ -372,7 +367,6 @@ IceKey::set (
 /*
  * Return the key size, in bytes.
  */
-
 int
 IceKey::keySize () const
 {
@@ -383,11 +377,9 @@ IceKey::keySize () const
 /*
  * Return the block size, in bytes.
  */
-
 int
 IceKey::blockSize () const
 {
 	return (8);
 }
-
 #endif // !_STATIC_LINKED || _SHARED_LIB

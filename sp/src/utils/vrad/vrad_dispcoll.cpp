@@ -1,4 +1,4 @@
-//========= Copyright Valve Corporation, All rights reserved. ============//
+//============= Copyright Valve Corporation, All rights reserved. =============//
 //
 // Purpose: 
 //
@@ -114,7 +114,7 @@ void CVRADDispColl::CalcSampleRadius2AndBox( dface_t *pFace )
 	if ( flPatchSampleRadius > g_MaxDispPatchRadius )
 	{
 		flPatchSampleRadius = g_MaxDispPatchRadius;
-		Warning( "Patch Sample Radius Clamped!\n" );
+		Warning("\tPatch Sample Radius Clamped!\n" );
 	}
 	m_flPatchSampleRadius2 = flPatchSampleRadius * flPatchSampleRadius;
 }

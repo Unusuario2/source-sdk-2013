@@ -1,4 +1,4 @@
-//========= Copyright Valve Corporation, All rights reserved. ============//
+//========= Copyright Valve Corporation, All rights reserved. =================//
 //
 // Purpose: BSP Building tool
 //
@@ -20,6 +20,10 @@
 #include "byteswap.h"
 #include "worldvertextransitionfixup.h"
 
+#ifdef MAPBASE
+#include "../common/StandartColorFormat.h" //this control the color of the console.
+#endif 
+
 #ifdef MAPBASE_VSCRIPT
 #include "vscript/ivscript.h"
 #include "vscript_vbsp.h"
@@ -33,31 +37,29 @@ char		name[1024];
 char		materialPath[1024];
 
 vec_t		microvolume = 1.0;
-qboolean	noprune;
-qboolean	glview;
-qboolean	nodetail;
-qboolean	fulldetail;
-qboolean	onlyents;
+
+bool		noprune;
+bool		glview;
+bool		nodetail;
+bool		fulldetail;
+bool		onlyents;
 bool		onlyprops;
-qboolean	nomerge;
-qboolean	nomergewater = false;
-qboolean	nowater;
-qboolean	nocsg;
-qboolean	noweld;
-qboolean	noshare;
-qboolean	nosubdiv;
-qboolean	notjunc;
-qboolean	noopt;
-#ifdef MAPBASE
-qboolean	noleaktest;
-#else
-qboolean	leaktest;
-#endif
-qboolean	verboseentities;
-qboolean	dumpcollide = false;
-qboolean	g_bLowPriority = false;
-qboolean	g_DumpStaticProps = false;
-qboolean	g_bSkyVis = false;			// skybox vis is off by default, toggle this to enable it
+bool		nomerge;
+bool		nomergewater = false;
+bool		nowater;
+bool		nocsg;
+bool		noweld;
+bool		noshare;
+bool		nosubdiv;
+bool		notjunc;
+bool		noopt;
+bool		verboseentities;
+bool		dumpcollide = false;
+bool		g_bLowPriority = false;
+bool		g_DumpStaticProps = false;
+bool		g_bSkyVis = false; // skybox vis is off by default, toggle this to enable it
+bool		noleaktest;
+
 bool		g_bLightIfMissing = false;
 bool		g_snapAxialPlanes = false;
 bool		g_bKeepStaleZip = false;
@@ -101,6 +103,20 @@ int			entity_num;
 
 
 node_t		*block_nodes[BLOCKS_SPACE+2][BLOCKS_SPACE+2];
+
+/*
+#ifdef MAPBASE
+	#ifdef _WIN32
+	void EnableANSI() {
+		HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+		DWORD dwMode = 0;
+		if (hOut != INVALID_HANDLE_VALUE && GetConsoleMode(hOut, &dwMode)) {
+			SetConsoleMode(hOut, dwMode | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
+		}
+	}
+	#endif
+#endif
+*/
 
 //-----------------------------------------------------------------------------
 // Assign occluder areas (must happen *after* the world model is processed)
@@ -311,7 +327,7 @@ void ProcessWorldModel (void)
 		}
 		else
 		{
-			Warning( ("**** leaked ****\n") );
+			Warning("\n\t!========== Leak ==========!\n");
 			leaked = true;
 			LeakFile (tree);
 #ifdef MAPBASE
@@ -320,7 +336,7 @@ void ProcessWorldModel (void)
 			if (leaktest)
 #endif
 			{
-				Warning( ("--- MAP LEAKED ---\n") );
+				Warning("\t!======= Map Leaked =======!\n");
 				exit (0);
 			}
 		}
@@ -347,7 +363,12 @@ void ProcessWorldModel (void)
 	// this turns portals with one solid side into faces
 	// it also subdivides each face if necessary to fit max lightmap dimensions
 	MakeFaces (tree->headnode);
+
+#ifdef MAPBASE
+	ColorSpewMessage(SPEW_MESSAGE, &green, " done (%d)\n", (int)(Plat_FloatTime() - start));
+#else
 	Msg("done (%d)\n", (int)(Plat_FloatTime() - start) );
+#endif
 
 	if (glview)
 	{
@@ -364,7 +385,12 @@ void ProcessWorldModel (void)
 
 	start = Plat_FloatTime();
 
-	Msg("FixTjuncs...\n");
+#ifdef MAPBASE
+		Msg("FixTjuncs...");
+		ColorSpewMessage(SPEW_MESSAGE, &green, " done (0)\n");
+#else
+		Msg("FixTjuncs...done (0)\n");
+#endif
 	
 	// This unifies the vertex list for all edges (splits collinear edges to remove t-junctions)
 	// It also welds the list of vertices out of each winding/portal and rounds nearly integer verts to integer
@@ -373,16 +399,26 @@ void ProcessWorldModel (void)
 	// this merges all of the solid nodes that have separating planes
 	if (!noprune)
 	{
-		Msg("PruneNodes...\n");
+#ifdef MAPBASE
+		Msg("PruneNodes... ");
+		ColorSpewMessage(SPEW_MESSAGE, &green, "done (0)\n");
+#else
+		Msg("PruneNodes...done (0)\n");
+#endif
 		PruneNodes (tree->headnode);
 	}
 
 //	Msg( "SplitSubdividedFaces...\n" );
 //	SplitSubdividedFaces( tree->headnode );
 
-	Msg("WriteBSP...\n");
+	Msg("WriteBSP...");
 	WriteBSP (tree->headnode, pLeafFaceList);
-	Msg("done (%d)\n", (int)(Plat_FloatTime() - start) );
+
+#ifdef MAPBASE
+	ColorSpewMessage(SPEW_MESSAGE, &green, " done (%d)\n", (int)(Plat_FloatTime() - start));
+#else
+	Msg("done (%d)\n", (int)(Plat_FloatTime() - start));
+#endif
 
 	if (!leaked)
 	{
@@ -425,7 +461,7 @@ void ProcessSubModel( )
 	{
 		const char *pClassName = ValueForKey( e, "classname" );
 		const char *pTargetName = ValueForKey( e, "targetname" );
-		Error( "bmodel %d has no head node (class '%s', targetname '%s')", entity_num, pClassName, pTargetName );
+		Error("\tbmodel %d has no head node (class '%s', targetname '%s')", entity_num, pClassName, pTargetName );
 	}
 
 	MakeTreePortals (tree);
@@ -502,8 +538,7 @@ static tree_t *ClipOccluderBrushes( )
 
 		entity_t *e = &entities[entity_num];
 		int end = e->firstbrush + e->numbrushes;
-		int i;
-		for ( i = e->firstbrush; i < end; ++i )
+		for (int i = e->firstbrush; i < end; ++i )
 		{
 			mapBrushes.AddToTail( &g_MainMap->mapbrushes[i] );
 		}
@@ -540,11 +575,11 @@ static void GenerateOccluderSideList( int nEntity, CUtlVector<side_t*> &occluder
 {
 	entity_t *e = &entities[nEntity];
 	int end = e->firstbrush + e->numbrushes;
-	int i, j;
-	for ( i = e->firstbrush; i < end; ++i )
+
+	for (int i = e->firstbrush; i < end; ++i )
 	{
 		mapbrush_t *mb = &g_MainMap->mapbrushes[i];
-		for ( j = 0; j < mb->numsides; ++j )
+		for (int j = 0; j < mb->numsides; ++j )
 		{
 			occluderSides.AddToTail( &(mb->original_sides[j]) );
 		}
@@ -700,7 +735,7 @@ void SetOccluderArea( int nOccluder, int nArea, int nEntityNum )
 		{
 			pTargetName = "<no name>";
 		}
-		Warning("Occluder \"%s\" straddles multiple areas. This is invalid!\n", pTargetName );
+		Warning("\tOccluder \"%s\" straddles multiple areas. This is invalid!\n", pTargetName );
 	}
 #endif
 }
@@ -791,7 +826,7 @@ void MarkNoDynamicShadowSides()
 		g_MainMap->brushsides[iSide].m_bDynamicShadowsEnabled = true;
 	}
 
-	for ( int i=0; i < g_NoDynamicShadowSides.Count(); i++ )
+	for ( int i = 0; i < g_NoDynamicShadowSides.Count(); i++ )
 	{
 		int brushSideID = g_NoDynamicShadowSides[i];
 	
@@ -818,7 +853,7 @@ static void Compute3DSkyboxAreas( node_t *headnode, CUtlVector<int>& areas )
 			node_t *pLeaf = PointInLeaf( headnode, entities[i].origin );
 			if (pLeaf->contents & CONTENTS_SOLID)
 			{
-				Error ("Error! Entity sky_camera in solid volume! at %.1f %.1f %.1f\n", entities[i].origin.x, entities[i].origin.y, entities[i].origin.z);
+				Error ("\tError! Entity sky_camera in solid volume! at %.1f %.1f %.1f\n", entities[i].origin.x, entities[i].origin.y, entities[i].origin.z);
 			}
 			areas.AddToTail( pLeaf->area );
 		}
@@ -901,12 +936,12 @@ void LoadPhysicsDLL( void )
 
 void PrintCommandLine( int argc, char **argv )
 {
-	Warning( "Command line: " );
+	Warning("\tCommand line: " );
 	for ( int z=0; z < argc; z++ )
 	{
-		Warning( "\"%s\" ", argv[z] );
+		Warning("\t\"%s\" ", argv[z] );
 	}
-	Warning( "\n\n" );
+	Warning("\t\n\n" );
 }
 
 
@@ -929,7 +964,11 @@ int RunVBSP( int argc, char **argv )
 
 	LoadCmdLineFromFile( argc, argv, mapbase, "vbsp" );
 
+#ifdef MAPBASE
+	ColorSpewMessage(SPEW_MESSAGE, &cyan, "Valve Software - vbsp.exe (Build: pc32 % s)", __DATE__ );
+#else
 	Msg( "Valve Software - vbsp.exe (%s)\n", __DATE__ );
+#endif
 
 	for (i=1 ; i<argc ; i++)
 	{
@@ -1262,7 +1301,7 @@ int RunVBSP( int argc, char **argv )
 			}
 			else
 			{
-				Warning("Cannot print documentation without scripting enabled!\n");
+				Warning("\tCannot print documentation without scripting enabled!\n");
 			}
 
 			DeleteCmdLine( argc, argv );
@@ -1272,7 +1311,7 @@ int RunVBSP( int argc, char **argv )
 #endif
 		else if (argv[i][0] == '-')
 		{
-			Warning("VBSP: Unknown option \"%s\"\n\n", argv[i]);
+			Warning("\tVBSP: Unknown option \"%s\"\n\n", argv[i]);
 			i = 100000;	// force it to print the usage
 			break;
 		}
@@ -1354,6 +1393,15 @@ int RunVBSP( int argc, char **argv )
 				"  -replacematerials : Substitute materials according to materialsub.txt in content\\maps\n"
 				"  -FullMinidumps  : Write large minidumps on crash.\n"
 				"  -nohiddenmaps   : Exclude manifest maps if they are currently hidden.\n"
+#ifdef MAPBASE
+				"  -defaultcubemap : Makes a dummy cubemap.\n"
+				"  -skyboxcubemap  : Makes a skybox cubemaps for LDR cubemaps. (HDR skybox cubemaps are not supported)\n"
+				"  -defaultcubemapres  : Sets the dummy cubemap resolution. (Default 32)\n"
+				"  -defaultproppermodelsstatic  : Inserts propper_model into the level.\n"
+				"  -strippropperentities  : Strip out any entities with 'propper_' in their classname, as they don't actually exist in-game.\n"
+				"  -scripting      : Vscript vbsp system.\n"
+				"  -doc			   : Prints all the related documentation of vbsp Vscript.\n"
+#endif
 				);
 			}
 
@@ -1402,7 +1450,15 @@ int RunVBSP( int argc, char **argv )
 
 	sprintf( materialPath, "%smaterials", gamedir );
 	InitMaterialSystem( materialPath, CmdLib_GetFileSystemFactory() );
-	Msg( "materialPath: %s\n", materialPath );
+
+#ifdef MAPBASE
+	Msg("Material path: +- ");
+	ColorSpewMessage(SPEW_MESSAGE, &blue, "%s", materialPath);
+	ColorSpewMessage(SPEW_MESSAGE, &green, " done (0)\n");
+#else
+	Msg("materialPath: %s\n", materialPath);
+#endif
+
 
 #ifdef MAPBASE_VSCRIPT
 	if (g_iScripting)
@@ -1529,7 +1585,12 @@ int RunVBSP( int argc, char **argv )
 	
 	char str[512];
 	GetHourMinuteSecondsString( (int)( end - start ), str, sizeof( str ) );
-	Msg( "%s elapsed\n", str );
+
+#ifdef MAPBASE
+	ColorSpewMessage(SPEW_MESSAGE, &green, "--> Geometry complete in %s.", str);
+#else
+	Msg("%s elapsed\n", str);
+#endif
 
 	DeleteCmdLine( argc, argv );
 	ReleasePakFileLumps();
@@ -1548,9 +1609,17 @@ int RunVBSP( int argc, char **argv )
 main
 ============
 */
-int main (int argc, char **argv)
+int main(int argc, char** argv)
 {
 	// Install an exception handler.
+
+/*
+#ifdef MAPBASE
+	#ifdef _WIN32
+		EnableANSI();
+	#endif 
+#endif
+*/ 
 	SetupDefaultToolsMinidumpHandler();
 	return RunVBSP( argc, argv );
 }

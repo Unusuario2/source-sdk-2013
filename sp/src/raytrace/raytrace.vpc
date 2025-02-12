@@ -15,7 +15,7 @@ $Configuration
 	}
 }
 
-$Project "Raytrace"
+$Project "Raytracelib"
 {
 	$Folder	"Source Files"
 	{

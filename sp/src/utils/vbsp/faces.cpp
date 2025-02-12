@@ -1,4 +1,4 @@
-//========= Copyright Valve Corporation, All rights reserved. ============//
+//============= Copyright Valve Corporation, All rights reserved. =============//
 //
 // Purpose: 
 //
@@ -96,7 +96,7 @@ unsigned HashVec (Vector& vec)
 	y = (MAX_COORD_INTEGER + (int)(vec[1]+0.5)) >> HASH_BITS;
 
 	if ( x < 0 || x >= HASH_SIZE || y < 0 || y >= HASH_SIZE )
-		Error ("HashVec: point outside valid range");
+		Error ("\tHashVec: point outside valid range");
 	
 	return y*HASH_SIZE + x;
 }
@@ -112,13 +112,12 @@ Uses hashing
 int	GetVertexnum (Vector& in)
 {
 	int			h;
-	int			i;
 	Vector		vert;
 	int			vnum;
 
 	c_totalverts++;
 
-	for (i=0 ; i<3 ; i++)
+	for (int i=0 ; i<3 ; i++)
 	{
 		if ( fabs(in[i] - (int)(in[i]+0.5)) < INTEGRAL_EPSILON)
 			vert[i] = (int)(in[i]+0.5);
@@ -139,7 +138,7 @@ int	GetVertexnum (Vector& in)
 	
 // emit a vertex
 	if (numvertexes == MAX_MAP_VERTS)
-		Error ("Too many unique verts, max = %d (map has too much brush geometry)\n", MAX_MAP_VERTS);
+		Error ("\tToo many unique verts, max = %d (map has too much brush geometry)\n", MAX_MAP_VERTS);
 
 	dvertexes[numvertexes].point[0] = vert[0];
 	dvertexes[numvertexes].point[1] = vert[1];
@@ -176,7 +175,7 @@ int	GetVertexnum (Vector& v)
 		if ( fabs(v[i] - (int)(v[i]+0.5)) < INTEGRAL_EPSILON )
 			v[i] = (int)(v[i]+0.5);
 		if (v[i] < MIN_COORD_INTEGER || v[i] > MAX_COORD_INTEGER)
-			Error ("GetVertexnum: outside world, vertex %.1f %.1f %.1f", v.x, v.y, v.z);
+			Error ("\tGetVertexnum: outside world, vertex %.1f %.1f %.1f", v.x, v.y, v.z);
 	}
 
 	// search for an existing vertex match
@@ -194,7 +193,7 @@ int	GetVertexnum (Vector& v)
 
 	// new point
 	if (numvertexes == MAX_MAP_VERTS)
-		Error ("Too many unique verts, max = %d (map has too much brush geometry)\n", MAX_MAP_VERTS);
+		Error ("\tToo many unique verts, max = %d (map has too much brush geometry)\n", MAX_MAP_VERTS);
 	VectorCopy (v, dv->point);
 	numvertexes++;
 	c_uniqueverts++;
@@ -223,7 +222,6 @@ void FaceFromSuperverts (face_t **pListHead, face_t *f, int base)
 {
 	face_t	*newf;
 	int		remaining;
-	int		i;
 
 	remaining = numsuperverts;
 	while (remaining > MAXEDGES)
@@ -237,7 +235,7 @@ void FaceFromSuperverts (face_t **pListHead, face_t *f, int base)
 		*pListHead = newf;
 
 		newf->numpoints = MAXEDGES;
-		for (i=0 ; i<MAXEDGES ; i++)
+		for (int i=0 ; i<MAXEDGES ; i++)
 			newf->vertexnums[i] = superverts[(i+base)%numsuperverts];
 
 		f->split[1] = NewFaceFromFace (f);
@@ -252,7 +250,7 @@ void FaceFromSuperverts (face_t **pListHead, face_t *f, int base)
 
 	// copy the vertexes back to the face
 	f->numpoints = remaining;
-	for (i=0 ; i<remaining ; i++)
+	for (int i=0 ; i<remaining ; i++)
 		f->vertexnums[i] = superverts[(i+base)%numsuperverts];
 }
 
@@ -265,18 +263,17 @@ EmitFaceVertexes
 void EmitFaceVertexes (face_t **pListHead, face_t *f)
 {
 	winding_t	*w;
-	int			i;
 
 	if (f->merged || f->split[0] || f->split[1])
 		return;
 
 	w = f->w;
-	for (i=0 ; i<w->numpoints ; i++)
+	for (int i=0 ; i<w->numpoints ; i++)
 	{
 		if (noweld)
 		{	// make every point unique
 			if (numvertexes == MAX_MAP_VERTS)
-				Error ("Too many unique verts, max = %d (map has too much brush geometry)\n", MAX_MAP_VERTS);
+				Error ("\tToo many unique verts, max = %d (map has too much brush geometry)\n", MAX_MAP_VERTS);
 			superverts[i] = numvertexes;
 			VectorCopy (w->p[i], dvertexes[numvertexes].point);
 			numvertexes++;
@@ -299,21 +296,18 @@ EmitNodeFaceVertexes_r
 */
 void EmitNodeFaceVertexes_r (node_t *node)
 {
-	int		i;
-	face_t	*f;
-
 	if (node->planenum == PLANENUM_LEAF)
 	{
 		// leaf faces are emitted in second pass
 		return;
 	}
 
-	for (f=node->faces ; f ; f=f->next)
+	for (face_t* f=node->faces ; f ; f=f->next)
 	{
 		EmitFaceVertexes (&node->faces, f);
 	}
 
-	for (i=0 ; i<2 ; i++)
+	for (int i=0 ; i<2 ; i++)
 	{
 		EmitNodeFaceVertexes_r (node->children[i]);
 	}
@@ -425,7 +419,7 @@ Can be recursively reentered
 */
 void TestEdge (vec_t start, vec_t end, int p1, int p2, int startvert)
 {
-	int		j, k;
+	int		j;
 	vec_t	dist;
 	Vector	delta;
 	Vector	exact;
@@ -439,7 +433,7 @@ void TestEdge (vec_t start, vec_t end, int p1, int p2, int startvert)
 		return;		// degenerate edge
 	}
 
-	for (k=startvert ; k<num_edge_verts ; k++)
+	for (int k=startvert ; k<num_edge_verts ; k++)
 	{
 		j = edge_verts[k];
 		if (j==p1 || j == p2)
@@ -467,7 +461,7 @@ void TestEdge (vec_t start, vec_t end, int p1, int p2, int startvert)
 
 	// the edge p1 to p2 is now free of tjunctions
 	if (numsuperverts >= MAX_SUPERVERTS)
-		Error ("Edge with too many vertices due to t-junctions.  Max %d verts along an edge!\n", MAX_SUPERVERTS);
+		Error ("\tEdge with too many vertices due to t-junctions.  Max %d verts along an edge!\n", MAX_SUPERVERTS);
 	superverts[numsuperverts] = p1;
 	numsuperverts++;
 }
@@ -685,7 +679,7 @@ void FixFaceEdges (face_t **pList, face_t *f)
 		g_numprimindices += newPrim.indexCount;
 		if ( g_numprimitives > MAX_MAP_PRIMITIVES || g_numprimindices > MAX_MAP_PRIMINDICES )
 		{
-			Error("Too many t-junctions to fix up! (%d prims, max %d :: %d indices, max %d)\n", g_numprimitives, MAX_MAP_PRIMITIVES, g_numprimindices, MAX_MAP_PRIMINDICES );
+			Error("\tToo many t-junctions to fix up! (%d prims, max %d :: %d indices, max %d)\n", g_numprimitives, MAX_MAP_PRIMITIVES, g_numprimindices, MAX_MAP_PRIMINDICES );
 		}
 		for ( i = 0; i < outIndices.Count(); i++ )
 		{
@@ -701,18 +695,15 @@ FixEdges_r
 */
 void FixEdges_r (node_t *node)
 {
-	int		i;
-	face_t	*f;
-
 	if (node->planenum == PLANENUM_LEAF)
 	{
 		return;
 	}
 
-	for (f=node->faces ; f ; f=f->next)
+	for (face_t* f=node->faces ; f ; f=f->next)
 		FixFaceEdges (&node->faces, f);
 
-	for (i=0 ; i<2 ; i++)
+	for (int i=0 ; i<2 ; i++)
 		FixEdges_r (node->children[i]);
 }
 
@@ -722,12 +713,8 @@ void FixEdges_r (node_t *node)
 //-----------------------------------------------------------------------------
 void FixLeafFaceEdges( face_t **ppLeafFaceList )
 {
-	face_t *f;
-
-	for ( f = *ppLeafFaceList; f; f = f->next )
-	{
+	for (face_t* f = *ppLeafFaceList; f; f = f->next )
 		FixFaceEdges( ppLeafFaceList, f );
-	}
 }
 
 /*
@@ -841,14 +828,14 @@ void FreeFaceList( face_t *pFaces )
 
 void GetEdge2_InitOptimizedList()
 {
-	for( int i=0; i < MAX_MAP_VERTS; i++ )
+	for( int i = 0; i < MAX_MAP_VERTS; i++ )
 		g_VertEdgeList[i].RemoveAll();
 }
 
 
 void IntSort( CUtlVector<int> &theList )
 {
-	for( int i=0; i < theList.Size()-1; i++ )
+	for( int i = 0; i < theList.Size()-1; i++ )
 	{
 		if( theList[i] > theList[i+1] )
 		{
@@ -867,7 +854,7 @@ void IntSort( CUtlVector<int> &theList )
 int AddEdge( int v1, int v2, face_t *f )
 {
 	if (numedges >= MAX_MAP_EDGES)
-		Error ("Too many edges in map, max == %d", MAX_MAP_EDGES);
+		Error ("\tToo many edges in map, max == %d", MAX_MAP_EDGES);
 
 	g_VertEdgeList[v1].AddToTail( numedges );
 	g_VertEdgeList[v2].AddToTail( numedges );
@@ -902,7 +889,7 @@ int GetEdge2 (int v1, int v2,  face_t *f)
 	{
 		// Check all edges connected to v1.
 		CUtlVector<int> &theList = g_VertEdgeList[v1];
-		for( int i=0; i < theList.Size(); i++ )
+		for( int i = 0; i < theList.Size(); i++ )
 		{
 			int iEdge = theList[i];
 			edge = &dedges[iEdge];
@@ -1124,17 +1111,16 @@ MergeFaceList
 */
 void MergeFaceList(face_t **pList)
 {
-	face_t	*f1, *f2, *end;
-	face_t	*merged;
+	face_t	*merged,*end;
 	plane_t	*plane;
 
 	merged = NULL;
 	
-	for (f1 = *pList; f1 ; f1 = f1->next)
+	for (face_t* f1 = *pList; f1 ; f1 = f1->next)
 	{
 		if (f1->merged || f1->split[0] || f1->split[1])
 			continue;
-		for (f2 = *pList; f2 != f1 ; f2=f2->next)
+		for (face_t* f2 = *pList; f2 != f1 ; f2=f2->next)
 		{
 			if (f2->merged || f2->split[0] || f2->split[1])
 				continue;
@@ -1205,7 +1191,7 @@ void SubdivideFace (face_t **pFaceList, face_t *f)
 			}
 #if 0
 			if (maxs - mins <= 0)
-				Error ("zero extents");
+				Error ("\tzero extents");
 #endif
 			if (maxs - mins <= g_maxLightmapDimension)
 				break;
@@ -1219,7 +1205,7 @@ void SubdivideFace (face_t **pFaceList, face_t *f)
 
 			ClipWindingEpsilon (w, temp, dist, ON_EPSILON, &frontw, &backw);
 			if (!frontw || !backw)
-				Error ("SubdivideFace: didn't split the polygon");
+				Error ("\tSubdivideFace: didn't split the polygon");
 
 			f->split[0] = NewFaceFromFace (f);
 			f->split[0]->w = frontw;
@@ -1265,7 +1251,7 @@ static bool AssignBottomWaterMaterialToFace( face_t *f )
 	{
 		if( !Q_stristr( pMaterialName, "nodraw" ) && !Q_stristr( pMaterialName, "toolsskip" ) )
 		{
-			Warning("error: material %s doesn't have a $bottommaterial\n", pMaterialName );
+			Warning("\terror: material %s doesn't have a $bottommaterial\n", pMaterialName );
 		}
 		return false;
 	}
@@ -1273,10 +1259,10 @@ static bool AssignBottomWaterMaterialToFace( face_t *f )
 	//Assert( mapplanes[f->planenum].normal.z < 0 );
 	texinfo_t newTexInfo;
 	newTexInfo.flags = pTexInfo->flags;
-	int j, k;
-	for (j=0 ; j<2 ; j++)
+
+	for (int j=0 ; j<2 ; j++)
 	{
-		for (k=0 ; k<4 ; k++)
+		for (int k=0 ; k<4 ; k++)
 		{
 			newTexInfo.textureVecsTexelsPerWorldUnits[j][k] = pTexInfo->textureVecsTexelsPerWorldUnits[j][k];
 			newTexInfo.lightmapVecsLuxelsPerWorldUnits[j][k] = pTexInfo->lightmapVecsLuxelsPerWorldUnits[j][k];
@@ -1455,9 +1441,8 @@ typedef winding_t *pwinding_t;
 
 static void PrintWinding( winding_t *w )
 {
-	int i;
 	Msg( "\t---\n" );
-	for( i = 0; i < w->numpoints; i++ )
+	for(int i = 0; i < w->numpoints; i++ )
 	{
 		Msg( "\t%f %f %f\n", w->p[i].x, w->p[i].y, w->p[i].z );
 	}
@@ -1494,7 +1479,7 @@ int AddWindingToPrimverts( const winding_t *w, unsigned short *pIndices, int ver
 			g_numprimverts++;
 			if ( g_numprimverts > MAX_MAP_PRIMVERTS )
 			{
-				Error( "Exceeded max water verts.\nIncrease surface subdivision size or lower your subdivision size in vmt files! (%d>%d)\n", 
+				Error( "\tExceeded max water verts.\nIncrease surface subdivision size or lower your subdivision size in vmt files! (%d>%d)\n", 
 					( int )g_numprimverts, ( int )MAX_MAP_PRIMVERTS );
 			}
 		}
@@ -1701,7 +1686,7 @@ static void SubdivideFaceBySubdivSize( face_t *f, float subdivsize )
 		g_numprimindices++;
 		if( g_numprimindices > MAX_MAP_PRIMINDICES )
 		{
-			Error( "Exceeded max water indicies.\nIncrease surface subdivision size! (%d>%d)\n", g_numprimindices, MAX_MAP_PRIMINDICES );
+			Error( "\tExceeded max water indicies.\nIncrease surface subdivision size! (%d>%d)\n", g_numprimindices, MAX_MAP_PRIMINDICES );
 		}
 	}
 	delete [] pStripIndices;
@@ -1713,14 +1698,14 @@ static void SubdivideFaceBySubdivSize( face_t *f, float subdivsize )
 		g_numprimindices++;
 		if( g_numprimindices > MAX_MAP_PRIMINDICES )
 		{
-			Error( "Exceeded max water indicies.\nIncrease surface subdivision size! (%d>%d)\n", g_numprimindices, MAX_MAP_PRIMINDICES );
+			Error( "\tExceeded max water indicies.\nIncrease surface subdivision size! (%d>%d)\n", g_numprimindices, MAX_MAP_PRIMINDICES );
 		}
 	}
 #endif
 	g_numprimitives++; // don't increment until we get here and are sure that we have a primitive.
 	if( g_numprimitives > MAX_MAP_PRIMITIVES )
 	{
-		Error( "Exceeded max water primitives.\nIncrease surface subdivision size! (%d>%d)\n", ( int )g_numprimitives, ( int )MAX_MAP_PRIMITIVES );
+		Error( "\tExceeded max water primitives.\nIncrease surface subdivision size! (%d>%d)\n", ( int )g_numprimitives, ( int )MAX_MAP_PRIMITIVES );
 	}
 }
 
@@ -1749,7 +1734,7 @@ void SubdivideFaceBySubdivSize( face_t *f )
 		if( subdivSize > 0.0f )
 		{
 			// NOTE: Subdivision is unsupported and should be phased out
-			Warning("Using subdivision on %s\n", pMaterialName );
+			Warning("\tUsing subdivision on %s\n", pMaterialName );
 			SubdivideFaceBySubdivSize( f, subdivSize );
 		}
 	}
@@ -1761,8 +1746,7 @@ void SplitSubdividedFaces_Node_r( node_t *node )
 	{
 		return;
 	}
-	face_t *f;
-	for( f = node->faces; f ;f = f->next )
+	for(face_t* f = node->faces; f ;f = f->next )
 	{
 		SubdivideFaceBySubdivSize( f );
 	}

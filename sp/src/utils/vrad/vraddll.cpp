@@ -1,4 +1,4 @@
-//========= Copyright Valve Corporation, All rights reserved. ============//
+//============= Copyright Valve Corporation, All rights reserved. =============//
 //
 // Purpose: 
 //
@@ -80,8 +80,7 @@ int CalcDatSize()
 	int ret = 0;
 	int count = sizeof( g_Dats ) / sizeof( g_Dats[0] );
 	
-	int i;
-	for( i=1; i < count; i++ )
+	for(int i=1; i < count; i++ )
 	{
 		if( g_Dats[i-1].size > g_Dats[i].size )
 		{
@@ -96,15 +95,14 @@ int CalcDatSize()
 		}
 	}
 
-	for( i=0; i < count; i++ )
+	for(int i = 0; i < count; i++ )
 		ret += g_Dats[i].size;
 	
 	return ret;
 }
 
+
 int g_TotalDatSize = CalcDatSize();
-
-
 
 
 int CVRadDLL::main( int argc, char **argv )

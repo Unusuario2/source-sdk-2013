@@ -1,4 +1,4 @@
-//========= Copyright Valve Corporation, All rights reserved. ============//
+//============= Copyright Valve Corporation, All rights reserved. =============//
 //
 // Purpose: 
 //
@@ -60,13 +60,12 @@ The originals are undisturbed.
 */
 bspbrush_t *SubtractBrush (bspbrush_t *a, bspbrush_t *b)
 {	// a - b = out (list)
-	int		i;
 	bspbrush_t	*front, *back;
 	bspbrush_t	*out, *in;
 
 	in = a;
 	out = NULL;
-	for (i=0 ; i<b->numsides && in ; i++)
+	for (int i=0 ; i<b->numsides && in ; i++)
 	{
 		SplitBrush2 (in, b->sides[i].planenum, &front, &back);
 		if (in != a)
@@ -100,12 +99,11 @@ The originals are undisturbed.
 */
 bspbrush_t *IntersectBrush (bspbrush_t *a, bspbrush_t *b)
 {
-	int		i;
 	bspbrush_t	*front, *back;
 	bspbrush_t	*in;
 
 	in = a;
-	for (i=0 ; i<b->numsides && in ; i++)
+	for (int i=0 ; i<b->numsides && in ; i++)
 	{
 		SplitBrush2 (in, b->sides[i].planenum, &front, &back);
 		if (in != a)
@@ -133,18 +131,16 @@ There will be false negatives for some non-axial combinations.
 */
 qboolean BrushesDisjoint (bspbrush_t *a, bspbrush_t *b)
 {
-	int		i, j;
-
 	// check bounding boxes
-	for (i=0 ; i<3 ; i++)
+	for (int i=0 ; i<3 ; i++)
 		if (a->mins[i] >= b->maxs[i]
 		|| a->maxs[i] <= b->mins[i])
 			return true;	// bounding boxes don't overlap
 
 	// check for opposing planes
-	for (i=0 ; i<a->numsides ; i++)
+	for (int i=0 ; i<a->numsides ; i++)
 	{
-		for (j=0 ; j<b->numsides ; j++)
+		for (int j=0 ; j<b->numsides ; j++)
 		{
 			if (a->sides[i].planenum ==
 			(b->sides[j].planenum^1) )
@@ -168,11 +164,10 @@ Any planes shared with the box edge will be set to no texinfo
 */
 bspbrush_t	*ClipBrushToBox (bspbrush_t *brush, const Vector& clipmins, const Vector& clipmaxs)
 {
-	int		i, j;
 	bspbrush_t	*front,	*back;
 	int		p;
 
-	for (j=0 ; j<2 ; j++)
+	for (int j=0 ; j<2 ; j++)
 	{
 		if (brush->maxs[j] > clipmaxs[j])
 		{
@@ -196,7 +191,7 @@ bspbrush_t	*ClipBrushToBox (bspbrush_t *brush, const Vector& clipmins, const Vec
 
 	// remove any colinear faces
 
-	for (i=0 ; i<brush->numsides ; i++)
+	for (int i=0 ; i<brush->numsides ; i++)
 	{
 		p = brush->sides[i].planenum & ~1;
 		if (p == maxplanenums[0] || p == maxplanenums[1] 
@@ -422,7 +417,7 @@ bspbrush_t *MakeBspBrushList (mapbrush_t **pBrushes, int nBrushCount, const Vect
 	ComputeBoundingPlanes( clipmins, clipmaxs );
 
 	bspbrush_t	*pBrushList = NULL;
-	for ( int i=0; i < nBrushCount; ++i )
+	for ( int i = 0; i < nBrushCount; ++i )
 	{
 		bspbrush_t *pNewBrush = CreateClippedBrush( pBrushes[i], clipmins, clipmaxs );
 		if ( pNewBrush )
@@ -500,7 +495,7 @@ void WriteBrushMap (char *name, bspbrush_t *list)
 	Msg("writing %s\n", name);
 	f = fopen (name, "w");
 	if (!f)
-		Error ("Can't write %s\b", name);
+		Error ("\tCan't write %s\b", name);
 
 	fprintf (f, "{\n\"classname\" \"worldspawn\"\n");
 
@@ -539,7 +534,7 @@ void WriteBrushVMF(char *name, bspbrush_t *list)
 	Msg("writing %s\n", name);
 	f = fopen (name, "w");
 	if (!f)
-		Error ("Can't write %s\b", name);
+		Error ("\tCan't write %s\b", name);
 
 	fprintf (f, "world\n{\n\"classname\" \"worldspawn\"\n");
 

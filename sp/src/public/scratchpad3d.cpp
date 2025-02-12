@@ -1,4 +1,4 @@
-//========= Copyright Valve Corporation, All rights reserved. ============//
+//============= Copyright Valve Corporation, All rights reserved. =============//
 //
 // Purpose: 
 //
@@ -201,7 +201,7 @@ void CScratchPad3D::DrawRectGeneric( int iPlane, int otherDim1, int otherDim2, f
 
 void CScratchPad3D::DeleteCommands()
 {
-	for( int i=0; i < m_Commands.Size(); i++ )
+	for( int i = 0; i < m_Commands.Size(); i++ )
 		delete m_Commands[i];
 
 	m_Commands.RemoveAll();
@@ -239,7 +239,7 @@ bool CScratchPad3D::LoadCommandsFromFile( )
 
 		if( !pCmd )
 		{
-			Assert( !"LoadCommandsFromFile: invalid file" );
+			Assert( !"\tLoadCommandsFromFile: invalid file" );
 			m_pFileSystem->Close( fp );
 			return false;
 		}
@@ -273,7 +273,7 @@ void CScratchPad3D::SetMapping(
 	m_Commands.AddToTail( cmd );
 	
 	Vector vDivisor(1,1,1);
-	for( int i=0; i < 3; i++ )
+	for( int i = 0; i < 3; i++ )
 		vDivisor[i] = fabs(vInputMax[i] - vInputMin[i]) < 0.0001f ? 0.001f : (vInputMax[i] - vInputMin[i]);
 
 	Vector vScale = (vOutputMax - vOutputMin) / vDivisor; 
@@ -457,7 +457,7 @@ void CScratchPad3D::Flush()
 	}
 	
 	// Append the new commands to the file.
-	for( int i=0; i < m_Commands.Size(); i++ )
+	for( int i = 0; i < m_Commands.Size(); i++ )
 	{
 		m_pFileSystem->Write( &m_Commands[i]->m_iCommand, sizeof(m_Commands[i]->m_iCommand), fp );
 		m_Commands[i]->Write( m_pFileSystem, fp );

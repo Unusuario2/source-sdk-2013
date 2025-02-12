@@ -1,4 +1,4 @@
-//========= Copyright Valve Corporation, All rights reserved. ============//
+//============= Copyright Valve Corporation, All rights reserved. =============//
 //
 // Purpose: 
 //
@@ -7,6 +7,7 @@
 #include <ssemath.h>
 #include <lightdesc.h>
 #include "mathlib.h"
+
 
 void LightDesc_t::RecalculateDerivedValues(void)
 {
@@ -45,6 +46,7 @@ void LightDesc_t::RecalculateDerivedValues(void)
 	m_RangeSquared=m_Range*m_Range;
 
 }
+
 
 void LightDesc_t::ComputeLightAtPointsForDirectional(
 	const FourVectors &pos, const FourVectors &normal,
@@ -164,7 +166,6 @@ void LightDesc_t::ComputeLightAtPoints( const FourVectors &pos, const FourVector
 }
 
 
-
 void LightDesc_t::ComputeNonincidenceLightAtPoints( const FourVectors &pos, FourVectors &color ) const
 {
 	FourVectors delta;
@@ -256,7 +257,6 @@ void LightDesc_t::ComputeNonincidenceLightAtPoints( const FourVectors &pos, Four
 }
 
 
-
 void LightDesc_t::SetupOldStyleAttenuation( float fQuadraticAttn, float fLinearAttn, float fConstantAttn )
 {
 	// old-style manually typed quadrtiac coefficients
@@ -283,6 +283,7 @@ void LightDesc_t::SetupOldStyleAttenuation( float fQuadraticAttn, float fLinearA
 		m_Color *= fScaleFactor;
 }
 
+
 void LightDesc_t::SetupNewStyleAttenuation( float fFiftyPercentDistance, 
 											float fZeroPercentDistance )
 {
@@ -292,13 +293,13 @@ void LightDesc_t::SetupNewStyleAttenuation( float fFiftyPercentDistance,
 	if (d0<d50)
 	{
 		// !!warning in lib code???!!!
-		Warning("light has _fifty_percent_distance of %f but no zero_percent_distance\n",d50);
+		Warning("\tlight has _fifty_percent_distance of %f but no zero_percent_distance\n",d50);
 		d0=2.0*d50;
 	}
 	float a=0,b=1,c=0;
 	if (! SolveInverseQuadraticMonotonic(0,1.0,d50,2.0,d0,256.0,a,b,c))
 	{
-		Warning("can't solve quadratic for light %f %f\n",d50,d0);
+		Warning("\tcan't solve quadratic for light %f %f\n",d50,d0);
 	}
 	float v50=c+d50*(b+d50*a);
 	float scale=2.0/v50;

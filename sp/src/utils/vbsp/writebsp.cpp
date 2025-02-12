@@ -1,4 +1,4 @@
-//========= Copyright Valve Corporation, All rights reserved. ============//
+//============= Copyright Valve Corporation, All rights reserved. =============//
 //
 // Purpose: 
 //
@@ -15,6 +15,10 @@
 #include "utilmatlib.h"
 #include "utldict.h"
 #include "map.h"
+
+#ifdef MAPBASE
+#include "../common/StandartColorFormat.h" //this control the color of the console.
+#endif
 
 int		c_nofaces;
 int		c_facenodes;
@@ -45,13 +49,11 @@ brushes will be saved in the map.
 */
 void EmitPlanes (void)
 {
-	int			i;
 	dplane_t	*dp;
-	plane_t		*mp;
+	plane_t* mp = g_MainMap->mapplanes;
 	int		planetranslate[MAX_MAP_PLANES];
 
-	mp = g_MainMap->mapplanes;
-	for (i=0 ; i<g_MainMap->nummapplanes ; i++, mp++)
+	for (int i=0 ; i<g_MainMap->nummapplanes ; i++, mp++)
 	{
 		dp = &dplanes[numplanes];
 		planetranslate[i] = numplanes;
@@ -85,14 +87,14 @@ void EmitMarkFace (dleaf_t *leaf_p, face_t *f)
 		return;	// degenerate face
 
 	if (facenum < 0 || facenum >= numfaces)
-		Error ("Bad leafface");
+		Error ("\tBad leafface");
 	for (i=leaf_p->firstleafface ; i<numleaffaces ; i++)
 		if (dleaffaces[i] == facenum)
 			break;		// merged out face
 	if (i == numleaffaces)
 	{
 		if (numleaffaces >= MAX_MAP_LEAFFACES)
-			Error ("Too many detail brush faces, max = %d\n", MAX_MAP_LEAFFACES);
+			Error ("\tToo many detail brush faces, max = %d\n", MAX_MAP_LEAFFACES);
 
 		dleaffaces[numleaffaces] =  facenum;
 		numleaffaces++;
@@ -119,7 +121,7 @@ void EmitLeaf (node_t *node)
 
 	// emit a leaf
 	if (numleafs >= MAX_MAP_LEAFS)
-		Error ("Too many BSP leaves, max = %d", MAX_MAP_LEAFS);
+		Error ("\tToo many BSP leaves, max = %d", MAX_MAP_LEAFS);
 
 	node->diskId = numleafs;
 	leaf_p = &dleafs[numleafs];
@@ -158,7 +160,7 @@ void EmitLeaf (node_t *node)
 	for (b=node->brushlist ; b ; b=b->next)
 	{
 		if (numleafbrushes >= MAX_MAP_LEAFBRUSHES)
-			Error ("Too many brushes in one leaf, max = %d", MAX_MAP_LEAFBRUSHES);
+			Error ("\tToo many brushes in one leaf, max = %d", MAX_MAP_LEAFBRUSHES);
 
 		brushnum = b->original - g_MainMap->mapbrushes;
 		for (i=leaf_p->firstleafbrush ; i<numleafbrushes ; i++)
@@ -210,7 +212,7 @@ side_t *pOrigFaceSideList[MAX_MAP_PLANES];
 //-----------------------------------------------------------------------------
 int CreateOrigFace( face_t *f )
 {
-    int         i, j;
+    int         j;
     dface_t     *of;
     side_t      *side;
     int         vIndices[128];
@@ -234,7 +236,7 @@ int CreateOrigFace( face_t *f )
     // get the next original face
     //
     if( numorigfaces >= MAX_MAP_FACES )
-		Error( "Too many faces in map, max = %d", MAX_MAP_FACES );
+		Error("\tToo many faces in map, max = %d", MAX_MAP_FACES );
 	of = &dorigfaces[numorigfaces];
     numorigfaces++;
 
@@ -275,7 +277,7 @@ int CreateOrigFace( face_t *f )
     //
     // save the vertices
     //
-    for( i = 0; i < pWinding->numpoints; i++ )
+    for(int i = 0; i < pWinding->numpoints; i++ )
     {
         //
         // compare vertices
@@ -286,7 +288,7 @@ int CreateOrigFace( face_t *f )
     //
     // save off points -- as edges
     //
-    for( i = 0; i < pWinding->numpoints; i++ )
+    for(int i = 0; i < pWinding->numpoints; i++ )
 	{
         //
         // look for matching edges first
@@ -311,7 +313,7 @@ int CreateOrigFace( face_t *f )
                 // get next surface edge
                 //
                 if( numsurfedges >= MAX_MAP_SURFEDGES )
-                    Error( "Too much brush geometry in bsp, numsurfedges == MAX_MAP_SURFEDGES" );                
+                    Error("\tToo much brush geometry in bsp, numsurfedges == MAX_MAP_SURFEDGES" );                
                 dsurfedges[numsurfedges] = -j;
                 numsurfedges++;
                 break;
@@ -329,7 +331,7 @@ int CreateOrigFace( face_t *f )
             // get next surface edge
             //
             if( numsurfedges >= MAX_MAP_SURFEDGES )
-				Error( "Too much brush geometry in bsp, numsurfedges == MAX_MAP_SURFEDGES" );                
+				Error("\tToo much brush geometry in bsp, numsurfedges == MAX_MAP_SURFEDGES" );                
             dsurfedges[numsurfedges] = ( numedges - 1 );
             numsurfedges++;
         }
@@ -348,26 +350,20 @@ int CreateOrigFace( face_t *f )
 //-----------------------------------------------------------------------------
 int FindOrigFace( face_t *f )
 {
-    int         i;
     static int  bClear = 0;
-    side_t      *pSide;
 
-    //
     // initially clear the face side lists (per face plane)
-    //
     if( !bClear )
     {
-        for( i = 0; i < MAX_MAP_PLANES; i++ )
+        for(int i = 0; i < MAX_MAP_PLANES; i++ )
         {
             pOrigFaceSideList[i] = NULL;
         }
         bClear = 1;
     }
 
-    //
     // compare the sides
-    //
-    for( pSide = pOrigFaceSideList[f->planenum]; pSide; pSide = pSide->next )
+    for(side_t* pSide = pOrigFaceSideList[f->planenum]; pSide; pSide = pSide->next )
     {
         if( pSide == f->originalface )
             return pSide->origIndex;
@@ -414,7 +410,6 @@ EmitFace
 void EmitFace( face_t *f, qboolean onNode )
 {
 	dface_t	*df;
-	int		i;
 	int		e;
 
 //	void SubdivideFaceBySubdivSize( face_t *f ); // garymcthack
@@ -437,7 +432,7 @@ void EmitFace( face_t *f, qboolean onNode )
 		// keep NODRAW terrain surfaces though
 		if ( f->dispinfo == -1 )
 			return;
-		Warning("NODRAW on terrain surface!\n");
+		Warning("\tNODRAW on terrain surface!\n");
 	}
 
 	// save output number so leaffaces can use
@@ -447,7 +442,7 @@ void EmitFace( face_t *f, qboolean onNode )
     // get the next available .bsp face slot
     //
 	if (numfaces >= MAX_MAP_FACES)
-		Error( "Too many faces in map, max = %d", MAX_MAP_FACES );
+		Error("\tToo many faces in map, max = %d", MAX_MAP_FACES );
 	df = &dfaces[numfaces];
 
 	// Save the correlation between dfaces and faces -- since dfaces doesnt have worldcraft face id
@@ -499,16 +494,14 @@ void EmitFace( face_t *f, qboolean onNode )
 	df->SetNumPrims( f->numPrims );
 	df->SetDynamicShadowsEnabled( f->originalface->m_bDynamicShadowsEnabled );
 
-    //
     // save off points -- as edges
-    //
-	for( i = 0; i < f->numpoints; i++ )
+	for(int i = 0; i < f->numpoints; i++ )
 	{
 		//e = GetEdge (f->pts[i], f->pts[(i+1)%f->numpoints], f);
 		e = GetEdge2 (f->vertexnums[i], f->vertexnums[(i+1)%f->numpoints], f);
 
 		if (numsurfedges >= MAX_MAP_SURFEDGES)
-			Error( "Too much brush geometry in bsp, numsurfedges == MAX_MAP_SURFEDGES" );                
+			Error("\tToo much brush geometry in bsp, numsurfedges == MAX_MAP_SURFEDGES" );                
 		dsurfedges[numsurfedges] = e;
 		numsurfedges++;
 	}
@@ -573,7 +566,6 @@ int EmitDrawNode_r (node_t *node)
 {
 	dnode_t	*n;
 	face_t	*f;
-	int		i;
 
 	if (node->planenum == PLANENUM_LEAF)
 	{
@@ -583,7 +575,7 @@ int EmitDrawNode_r (node_t *node)
 
 	// emit a node	
 	if (numnodes == MAX_MAP_NODES)
-		Error ("MAX_MAP_NODES");
+		Error ("\tMAX_MAP_NODES");
 	node->diskId = numnodes;
 
 	n = &dnodes[numnodes];
@@ -593,7 +585,7 @@ int EmitDrawNode_r (node_t *node)
 	VECTOR_COPY (node->maxs, n->maxs);
 
 	if (node->planenum & 1)
-		Error ("WriteDrawNodes_r: odd planenum");
+		Error ("\tWriteDrawNodes_r: odd planenum");
 	n->planenum = node->planenum;
 	n->firstface = numfaces;
 	n->area = node->area;
@@ -612,7 +604,7 @@ int EmitDrawNode_r (node_t *node)
 	//
 	// recursively output the other nodes
 	//	
-	for (i=0 ; i<2 ; i++)
+	for (int i=0 ; i<2 ; i++)
 	{
 		if (node->children[i]->planenum == PLANENUM_LEAF)
 		{
@@ -680,6 +672,7 @@ int FindMatchingBrushSideTexinfo( int sideIndex, const texinfomap_t *pMap )
 	int sideTexFlags = texinfo[side.texinfo].flags;
 	int sideTexData = texinfo[side.texinfo].texdata;
 	int sideSurfaceProp = g_SurfaceProperties[sideTexData];
+
 	for ( int j = 0; j < texinfo.Count(); j++ )
 	{
 		if ( pMap[j].refCount > 0 && 
@@ -703,6 +696,7 @@ void ComapctTexinfoArray( texinfomap_t *pMap )
 	texinfo.RemoveAll();
 	int firstSky = -1;
 	int first2DSky = -1;
+
 	for ( int i = 0; i < old.Count(); i++ )
 	{
 		if ( !pMap[i].refCount )
@@ -745,6 +739,7 @@ void CompactTexdataArray( texdatamap_t *pMap )
 	oldTexData.CopyArray( dtexdata, numtexdata );
 	// clear current table and rebuild
 	numtexdata = 0;
+
 	for ( int i = 0; i < oldTexData.Count(); i++ )
 	{
 		// unreferenced, note in map and skip
@@ -767,12 +762,13 @@ void CompactTexdataArray( texdatamap_t *pMap )
 
 void CompactTexinfos()
 {
-	Msg("Compacting texture/material tables...\n");
+	Msg("Compacting texture/material tables...");
 	texinfomap_t *texinfoMap = new texinfomap_t[texinfo.Count()];
 	texdatamap_t *texdataMap = new texdatamap_t[numtexdata];
 	memset( texinfoMap, 0, sizeof(texinfoMap[0])*texinfo.Count() );
 	memset( texdataMap, 0, sizeof(texdataMap[0])*numtexdata );
 	int i;
+
 	// get texinfos referenced by faces
 	for ( i = 0; i < numfaces; i++ )
 	{
@@ -881,9 +877,24 @@ void CompactTexinfos()
 			g_WaterOverlays[i].nTexInfo = texinfoMap[g_WaterOverlays[i].nTexInfo].outputIndex;
 		}
 	}
+#ifdef MAPBASE
+	ColorSpewMessage(SPEW_MESSAGE, &green, " done (0)\n");
+	Msg("  Reduced ");
+	ColorSpewMessage(SPEW_MESSAGE,  &magenta, "[%d]", oldCount);
+	Msg(" texinfos to ");
+	ColorSpewMessage(SPEW_MESSAGE,  &magenta, "[%d]\n",texinfo.Count());
 
-	Msg("Reduced %d texinfos to %d\n", oldCount, texinfo.Count() );
-	Msg("Reduced %d texdatas to %d (%d bytes to %d)\n", oldTexdataCount, numtexdata, oldTexdataString, g_TexDataStringData.Count() );
+	Msg("  Reduced ");
+	ColorSpewMessage(SPEW_MESSAGE,  &magenta, "[%d]", oldTexdataCount);
+	Msg(" texinfos to ");
+	ColorSpewMessage(SPEW_MESSAGE,  &magenta, "[%d] ", numtexdata);
+	ColorSpewMessage(SPEW_MESSAGE,  &magenta, "(%d bytes to %d)\n", oldTexdataString, g_TexDataStringData.Count());
+#else
+	Msg(" done\n");
+
+	Msg("Reduced %d texinfos to %d\n", oldCount, texinfo.Count());
+	Msg("Reduced %d texdatas to %d (%d bytes to %d)\n", oldTexdataCount, numtexdata, oldTexdataString, g_TexDataStringData.Count());
+#endif
 
 	delete[] texinfoMap;
 	delete[] texdataMap;
@@ -896,7 +907,6 @@ WriteBSP
 */
 void WriteBSP (node_t *headnode, face_t *pLeafFaceList )
 {
-	int		i;
 	int		oldfaces;
     int     oldorigfaces;
 
@@ -921,7 +931,7 @@ void WriteBSP (node_t *headnode, face_t *pLeafFaceList )
 	//
 	// add all displacement faces for the particular model
 	//
-	for( i = 0; i < nummapdispinfo; i++ )
+	for(int i = 0; i < nummapdispinfo; i++ )
 	{
 		int entityIndex = GetDispInfoEntityNum( &mapdispinfo[i] );
 		if( entityIndex == entity_num )
@@ -1016,7 +1026,7 @@ void SetLightStyles (void)
 		if (j == stylenum)
 		{
 			if (stylenum == MAX_SWITCHED_LIGHTS)
-				Error ("Too many switched lights (error at light %s), max = %d", t, MAX_SWITCHED_LIGHTS);
+				Error ("\tToo many switched lights (error at light %s), max = %d", t, MAX_SWITCHED_LIGHTS);
 			strcpy (lighttargets[j], t);
 			stylenum++;
 		}
@@ -1066,7 +1076,7 @@ void EmitBrushes (void)
 		for (j=0 ; j<b->numsides ; j++)
 		{
 			if (numbrushsides == MAX_MAP_BRUSHSIDES)
-				Error ("MAX_MAP_BRUSHSIDES");
+				Error ("\tMAX_MAP_BRUSHSIDES");
 			cp = &dbrushsides[numbrushsides];
 			numbrushsides++;
 			cp->planenum = b->original_sides[j].planenum;
@@ -1096,7 +1106,7 @@ void EmitBrushes (void)
 				if (i == b->numsides)
 				{
 					if (numbrushsides >= MAX_MAP_BRUSHSIDES)
-						Error ("MAX_MAP_BRUSHSIDES");
+						Error ("\tMAX_MAP_BRUSHSIDES");
 
 					dbrushsides[numbrushsides].planenum = planenum;
 					dbrushsides[numbrushsides].texinfo =
@@ -1150,8 +1160,7 @@ void BeginBSPFile (void)
 // to zero everywhere by default.
 static void ClearDistToClosestWater( void )
 {
-	int i;
-	for( i = 0; i < numleafs; i++ )
+	for(int i = 0; i < numleafs; i++ )
 	{
 		g_LeafMinDistToWater[i] = 0;
 	}
@@ -1203,7 +1212,7 @@ void EnsurePresenceOfWaterLODControlEntity( void )
 		// Don't bother if there isn't any water in the map.
 		return;
 	}
-	for( int i=0; i < num_entities; i++ )
+	for( int i = 0; i < num_entities; i++ )
 	{
 		entity_t *e = &entities[i];
 
@@ -1216,7 +1225,7 @@ void EnsurePresenceOfWaterLODControlEntity( void )
 	}
 
 	// None found, add one.
-	Warning( "Water found with no water_lod_control entity, creating a default one.\n" );
+	Warning("\tWater found with no water_lod_control entity, creating a default one.\n" );
 
 	entity_t *mapent = &entities[num_entities];
 	num_entities++;
@@ -1286,7 +1295,15 @@ void EndBSPFile (void)
 	
 	char	targetPath[1024];
 	GetPlatformMapPath( source, targetPath, g_nDXLevel, 1024 );
+
+#ifdef MAPBASE
+	Msg("Writing Bsp file: +- ");
+	ColorSpewMessage(SPEW_MESSAGE, &blue, "%s ", targetPath);
+	ColorSpewMessage(SPEW_MESSAGE, &green, "done (0)\n");
+#else
 	Msg ("Writing %s\n", targetPath);
+#endif
+
 	WriteBSPFile (targetPath);
 }
 
@@ -1302,12 +1319,11 @@ void BeginModel (void)
 	dmodel_t	*mod;
 	int			start, end;
 	mapbrush_t	*b;
-	int			j;
 	entity_t	*e;
 	Vector		mins, maxs;
 
 	if (nummodels == MAX_MAP_MODELS)
-		Error ("Too many brush models in map, max = %d", MAX_MAP_MODELS);
+		Error ("\tToo many brush models in map, max = %d", MAX_MAP_MODELS);
 	mod = &dmodels[nummodels];
 
 	mod->firstface = numfaces;
@@ -1325,7 +1341,7 @@ void BeginModel (void)
 	end = start + e->numbrushes;
 	ClearBounds (mins, maxs);
 
-	for (j=start ; j<end ; j++)
+	for (int j=start ; j<end ; j++)
 	{
 		b = &g_MainMap->mapbrushes[j];
 		if (!b->numsides)
@@ -1407,15 +1423,14 @@ static void AddNodeToBounds(int node, CUtlVector<int>& skipAreas, Vector& mins, 
 			return;
 
 		// Skip 3D skybox
-		int i;
-		for ( i = skipAreas.Count(); --i >= 0; )
+		for (int i = skipAreas.Count(); --i >= 0; )
 		{
 			if (dleafs[leaf].area == skipAreas[i])
 				return;
 		}
 
 		unsigned int firstface = dleafs[leaf].firstleafface;
-		for ( i = 0; i < dleafs[leaf].numleaffaces; ++i )
+		for (int i = 0; i < dleafs[leaf].numleaffaces; ++i )
 		{
 			unsigned int face = dleaffaces[ firstface + i ];
 
@@ -1461,8 +1476,7 @@ bool IsBoxInsideWorld( int node, CUtlVector<int> &skipAreas, const Vector &vecMi
 				return false;
 
 			// Skip 3D skybox
-			int i;
-			for ( i = skipAreas.Count(); --i >= 0; )
+			for (int i = skipAreas.Count(); --i >= 0; )
 			{
 				if ( dleafs[leaf].area == skipAreas[i] )
 					return false;
@@ -1509,8 +1523,7 @@ void AddDispsToBounds( int nHeadNode, CUtlVector<int>& skipAreas, Vector &vecMin
 	Vector vecDispMins, vecDispMaxs;
 
 	// first determine how many displacement surfaces there will be per leaf
-	int i;
-	for ( i = 0; i < g_dispinfo.Count(); ++i )
+	for (int i = 0; i < g_dispinfo.Count(); ++i )
 	{
 		ComputeDispInfoBounds( i, vecDispMins, vecDispMaxs );
 		if ( IsBoxInsideWorld( nHeadNode, skipAreas, vecDispMins, vecDispMaxs ) )

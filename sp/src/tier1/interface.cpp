@@ -1,4 +1,4 @@
-//========= Copyright Valve Corporation, All rights reserved. ============//
+//============= Copyright Valve Corporation, All rights reserved. =============//
 //
 // Purpose: 
 //
@@ -346,10 +346,10 @@ CSysModule *Sys_LoadModule( const char *pModuleName, Sys_Flags flags /* = SYS_NO
 			 !CommandLine()->FindParm( "-allowdebug" ) && 
 			 !Sys_IsDebuggerPresent() )
 		{
-			Error( "Module %s is a debug build\n", pModuleName );
+			Error("\tModule %s is a debug build\n", pModuleName );
 		}
 
-		DevWarning( "Module %s is a debug build\n", pModuleName );
+		DevWarning("\tModule %s is a debug build\n", pModuleName );
 
 		if ( !s_bRunningWithDebugModules )
 		{

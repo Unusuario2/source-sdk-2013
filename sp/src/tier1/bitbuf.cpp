@@ -1,4 +1,4 @@
-//========= Copyright Valve Corporation, All rights reserved. ============//
+//============= Copyright Valve Corporation, All rights reserved. =============//
 //
 // Purpose: 
 //
@@ -864,7 +864,7 @@ unsigned int bf_read::CheckReadUBitLong(int numbits)
 	int i, nBitValue;
 	unsigned int r = 0;
 
-	for(i=0; i < numbits; i++)
+	for(i = 0; i < numbits; i++)
 	{
 		nBitValue = ReadOneBitNoCheck();
 		r |= nBitValue << i;
@@ -972,7 +972,7 @@ unsigned int bf_read::PeekUBitLong( int numbits )
 	savebf = *this;  // Save current state info
 
 	r = 0;
-	for(i=0; i < numbits; i++)
+	for(i = 0; i < numbits; i++)
 	{
 		nBitValue = ReadOneBit();
 
@@ -1419,7 +1419,7 @@ char* bf_read::ReadAndAllocateString( bool *pOverflow )
 
 	// Now copy into the output and return it;
 	char *pRet = new char[ nChars + 1 ];
-	for ( int i=0; i <= nChars; i++ )
+	for ( int i = 0; i <= nChars; i++ )
 		pRet[i] = str[i];
 
 	return pRet;

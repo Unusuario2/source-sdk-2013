@@ -1,4 +1,4 @@
-//========= Copyright Valve Corporation, All rights reserved. ============//
+//============= Copyright Valve Corporation, All rights reserved. =============//
 //
 // Purpose: 
 //
@@ -21,6 +21,10 @@
 #include "byteswap.h"
 
 //#define ALLOWDEBUGOPTIONS (0 || _DEBUG)
+
+#ifdef MAPBASE
+#include "../common/StandartColorFormat.h" //this control the color of the console.
+#endif 
 
 static FileHandle_t pFpTrans = NULL;
 
@@ -54,7 +58,7 @@ float		maxchop = 4; // coarsest allowed number of luxel widths for a patch
 float		minchop = 4; // "-chop" tightest number of luxel widths for a patch, used on edges
 float		dispchop = 8.0f;	// number of luxel widths for a patch
 float		g_MaxDispPatchRadius = 1500.0f;			// Maximum radius allowed for displacement patches
-qboolean	g_bDumpPatches;
+bool		g_bDumpPatches;
 bool	    bDumpNormals = false;
 bool		g_bDumpRtEnv = false;
 bool		bRed2Black = true;
@@ -85,6 +89,11 @@ bool		g_bInterrupt = false;	// Wsed with background lighting in WC. Tells VRAD
 									// to stop lighting.
 float g_SunAngularExtent=0.0;
 
+#ifdef MAPBASE
+int g_nCompressConstantThreshold = 0; //before was 2
+bool		g_bExportLightmaps = false;
+#endif
+
 float g_flSkySampleScale = 1.0;
 
 bool g_bLargeDispSampleRadius = false;
@@ -96,22 +105,23 @@ bool g_bShowStaticPropNormals = false;
 float		gamma_value = 0.5;
 float		indirect_sun = 1.0;
 float		reflectivityScale = 1.0;
-qboolean	do_extra = true;
+bool		do_extra = true;
 bool		debug_extra = false;
-qboolean	do_fast = false;
-qboolean	do_centersamples = false;
+bool		do_fast = false;
+bool		do_centersamples = false;
 int			extrapasses = 4;
 float		smoothing_threshold = 0.7071067; // cos(45.0*(M_PI/180)) 
+
 // Cosine of smoothing angle(in radians)
 float		coring = 1.0;	// Light threshold to force to blackness(minimizes lightmaps)
-qboolean	texscale = true;
+bool		texscale = true;
 int			dlight_map = 0; // Setting to 1 forces direct lighting into different lightmap than radiosity
 
 float		luxeldensity = 1.0;
 unsigned	num_degenerate_faces;
 
-qboolean	g_bLowPriority = false;
-qboolean	g_bLogHashData = false;
+bool		g_bLowPriority = false;
+bool		g_bLogHashData = false;
 bool		g_bNoDetailLighting = false;
 double		g_flStartTime;
 bool		g_bStaticPropLighting = false;
@@ -144,13 +154,13 @@ int		nodeparents[MAX_MAP_NODES];
 
 void MakeParents (int nodenum, int parent)
 {
-	int		i, j;
+	int		j;
 	dnode_t	*node;
 
 	nodeparents[nodenum] = parent;
 	node = &dnodes[nodenum];
 
-	for (i=0 ; i<2 ; i++)
+	for (int i=0 ; i<2 ; i++)
 	{
 		j = node->children[i];
 		if (j < 0)
@@ -194,7 +204,7 @@ void ReadLightFile (char *filename)
 	FileHandle_t f = g_pFileSystem->Open( filename, "r" );
 	if (!f)
 	{
-		Warning("Warning: Couldn't open texlight file %s.\n", filename);
+		Warning("\tWarning: Couldn't open texlight file %s.\n", filename);
 		return;
 	}
 
@@ -240,7 +250,7 @@ void ReadLightFile (char *filename)
 			char szTexlight[256];
 			Vector value;
 			if ( num_texlights == MAX_TEXLIGHTS )
-				Error ("Too many texlights, max = %d", MAX_TEXLIGHTS);
+				Error ("\tToo many texlights, max = %d", MAX_TEXLIGHTS);
 
 			int argCnt = sscanf (scan, "%s ",szTexlight );
 
@@ -267,12 +277,12 @@ void ReadLightFile (char *filename)
 							  || texlights[j].value[1] != value[1]
 							  || texlights[j].value[2] != value[2] )
 					{
-						Warning( "Warning: Overriding '%s' from '%s' with '%s'!\n",
+						Warning("\tWarning: Overriding '%s' from '%s' with '%s'!\n",
 								texlights[j].name, texlights[j].filename, filename );
 					}
 					else
 					{
-						Warning( "Warning: Redundant '%s' def in '%s' AND '%s'!\n",
+						Warning("\tWarning: Redundant '%s' def in '%s' AND '%s'!\n",
 								 texlights[j].name, texlights[j].filename, filename );
 					}
 					break;
@@ -298,8 +308,6 @@ LightForTexture
 */
 void LightForTexture( const char *name, Vector& result )
 {
-	int		i;
-
 	result[ 0 ] = result[ 1 ] = result[ 2 ] = 0;
 
 	char baseFilename[ MAX_PATH ];
@@ -318,7 +326,7 @@ void LightForTexture( const char *name, Vector& result )
 				// 'originalName_%d_%d_%d'.
 				strcpy( baseFilename, base );
 				bool foundSeparators = true;
-				for ( int i=0; i<3; ++i )
+				for ( int i = 0; i<3; ++i )
 				{
 					char *underscore = Q_strrchr( baseFilename, '_' );
 					if ( underscore && *underscore )
@@ -339,7 +347,7 @@ void LightForTexture( const char *name, Vector& result )
 		}
 	}
 
-	for (i=0 ; i<num_texlights ; i++)
+	for (int i=0 ; i<num_texlights ; i++)
 	{
 		if (!Q_strcasecmp (name, texlights[i].name))
 		{
@@ -364,7 +372,6 @@ WindingFromFace
 */
 winding_t	*WindingFromFace (dface_t *f, Vector& origin )
 {
-	int			i;
 	int			se;
 	dvertex_t	*dv;
 	int			v;
@@ -373,7 +380,7 @@ winding_t	*WindingFromFace (dface_t *f, Vector& origin )
 	w = AllocWinding (f->numedges);
 	w->numpoints = f->numedges;
 
-	for (i=0 ; i<f->numedges ; i++)
+	for (int i=0 ; i<f->numedges ; i++)
 	{
 		se = dsurfedges[f->firstedge + i];
 		if (se < 0)
@@ -452,14 +459,13 @@ qboolean IsFog( dface_t *f )
 
 void ProcessSkyCameras()
 {
-	int i;
 	num_sky_cameras = 0;
-	for (i = 0; i < numareas; ++i)
+	for (int i = 0; i < numareas; ++i)
 	{
 		area_sky_cameras[i] = -1;
 	}
 
-	for (i = 0; i < num_entities; ++i)
+	for (int i = 0; i < num_entities; ++i)
 	{
 		entity_t *e = &entities[i];
 		const char *name = ValueForKey (e, "classname");
@@ -504,7 +510,6 @@ void MakePatchForFace (int fn, winding_t *w)
 	float	    area;
 	CPatch		*patch;
 	Vector		centroid(0,0,0);
-	int			i, j;
 	texinfo_t	*tx;
 
     // get texture info
@@ -555,11 +560,11 @@ void MakePatchForFace (int fn, winding_t *w)
     if ( texscale )
     {
         // Compute the texture "scale" in s,t
-        for( i=0; i<2; i++ )
+        for(int i = 0; i<2; i++ )
         {
             patch->scale[i] = 0.0f;
 			chopscale[i] = 0.0f;
-            for( j=0; j<3; j++ )
+            for(int j = 0; j<3; j++ )
 			{
                 patch->scale[i] += 
 					tx->textureVecsTexelsPerWorldUnits[i][j] * 
@@ -602,7 +607,7 @@ void MakePatchForFace (int fn, winding_t *w)
 		// origin offset faces must create new planes
 		if (numplanes + fakeplanes >= MAX_MAP_PLANES)
 		{
-			Error ("numplanes + fakeplanes >= MAX_MAP_PLANES");
+			Error ("\tnumplanes + fakeplanes >= MAX_MAP_PLANES");
 		}
 		pl = &dplanes[numplanes + fakeplanes];
 		fakeplanes++;
@@ -665,13 +670,12 @@ void MakePatchForFace (int fn, winding_t *w)
 
 entity_t *EntityForModel (int modnum)
 {
-	int		i;
 	char	*s;
 	char	name[16];
 
 	sprintf (name, "*%i", modnum);
 	// search the entities for one using modnum
-	for (i=0 ; i<num_entities ; i++)
+	for (int i=0 ; i<num_entities ; i++)
 	{
 		s = ValueForKey (&entities[i], "model");
 		if (!strcmp (s, name))
@@ -697,7 +701,13 @@ void MakePatches (void)
 	entity_t	*ent;
 
 	ParseEntities ();
+
+#ifdef MAPBASE
+	Msg("Number of faces ");
+	ColorSpewMessage(SPEW_MESSAGE, &magenta, "[%i]\n",numfaces);
+#else
 	qprintf ("%i faces\n", numfaces);
+#endif
 
 	for (i=0 ; i<nummodels ; i++)
 	{
@@ -725,10 +735,15 @@ void MakePatches (void)
 
 	if (num_degenerate_faces > 0)
 	{
-		qprintf("%d degenerate faces\n", num_degenerate_faces );
+		Warning("\t%d degenerate faces\n", num_degenerate_faces );
 	}
 
+#ifdef MAPBASE
+	Msg("Total area ");
+	ColorSpewMessage(SPEW_MESSAGE, &magenta, "[%i square feet [%.2f square inches]]\n", (int)(totalarea / 144), totalarea);
+#else
 	qprintf ("%i square feet [%.2f square inches]\n", (int)(totalarea/144), totalarea );
+#endif
 
 	// make the displacement surface patches
 	StaticDispMgr()->MakePatches();
@@ -813,7 +828,7 @@ int CreateChildPatch( int nParentIndex, winding_t *pWinding, float flArea, const
 	VectorScale( total, child->luxscale, total );
 	if ( child->chop > minchop && (total[0] < child->chop) && (total[1] < child->chop) && (total[2] < child->chop) )
 	{
-		for ( int i=0; i<3; ++i )
+		for ( int i = 0; i<3; ++i )
 		{
 			if ( (child->face_maxs[i] == child->maxs[i] || child->face_mins[i] == child->mins[i] )
 			  && total[i] > minchop )
@@ -899,7 +914,7 @@ void SubdividePatch( int ndxPatch )
 
 	if( area1 == 0 || area2 == 0 )
 	{
-		Msg( "zero area child patch\n" );
+		Warning( "\tZero area child patch\n" );
 		return;
 	}
 
@@ -930,7 +945,12 @@ void SubdividePatches (void)
 		return;
 
 	unsigned int uiPatchCount = g_Patches.Size();
-	qprintf ("%i patches before subdivision\n", uiPatchCount);
+#ifdef MAPBASE
+	Msg("Pacthes before subdivision ");
+	ColorSpewMessage(SPEW_MESSAGE, &magenta, "[%i]\n", g_Patches.Size());
+#else
+	qprintf ("%i patches before subdivision\n", g_Patches.Size());
+#endif
 
 	for (i = 0; i < uiPatchCount; i++)
 	{
@@ -1039,8 +1059,12 @@ void SubdividePatches (void)
 		}
 #endif
 	}
-
-	qprintf ("%i patches after subdivision\n", uiPatchCount);
+#ifdef MAPBASE
+	Msg("Patches after subdivision ");
+	ColorSpewMessage(SPEW_MESSAGE, &magenta, "[%i]\n", uiPatchCount);
+#else
+	qprintf("%i patches after subdivision\n", uiPatchCount);
+#endif
 }
 
 
@@ -1200,7 +1224,6 @@ void MakeTransfer( int ndxPatch1, int ndxPatch2, transfer_t *all_transfers )
 
 void MakeScales ( int ndxPatch, transfer_t *all_transfers )
 {
-	int		j;
 	float	total;
 	transfer_t	*t, *t2;
 	total = 0;
@@ -1220,13 +1243,13 @@ void MakeScales ( int ndxPatch, transfer_t *all_transfers )
 
 		patch->transfers = ( transfer_t* )calloc (1, patch->numtransfers * sizeof(transfer_t));
 		if (!patch->transfers)
-			Error ("Memory allocation failure");
+			Error ("\tMemory allocation failure");
 
 		// get total transfer energy
 		t2 = all_transfers;
 
 		// overflow check!
-		for (j=0 ; j<patch->numtransfers ; j++, t2++)
+		for (int j=0 ; j<patch->numtransfers ; j++, t2++)
 		{
 			total += t2->transfer;
 		}
@@ -1239,7 +1262,7 @@ void MakeScales ( int ndxPatch, transfer_t *all_transfers )
 
 		t = patch->transfers;
 		t2 = all_transfers;
-		for (j=0 ; j<patch->numtransfers ; j++, t++, t2++)
+		for (int j=0 ; j<patch->numtransfers ; j++, t++, t2++)
 		{
 			t->transfer = t2->transfer*total;
 			t->patch = t2->patch;
@@ -1267,16 +1290,15 @@ WriteWorld
 */
 void WriteWorld (char *name, int iBump)
 {
-	unsigned	j;
 	FileHandle_t out;
 	CPatch		*patch;
 
 	out = g_pFileSystem->Open( name, "w" );
 	if (!out)
-		Error ("Couldn't open %s", name);
+		Error ("\tCouldn't open %s", name);
 
 	unsigned int uiPatchCount = g_Patches.Size();
-	for (j=0; j<uiPatchCount; j++)
+	for (unsigned int j = 0; j<uiPatchCount; j++)
 	{
 		patch = &g_Patches.Element( j );
 
@@ -1311,7 +1333,7 @@ void WriteRTEnv (char *name)
 
 	out = g_pFileSystem->Open( name, "w" );
 	if (!out)
-		Error ("Couldn't open %s", name);
+		Error ("\tCouldn't open %s", name);
 
 	winding_t *triw = AllocWinding( 3 );
 	triw->numpoints = 3;
@@ -1335,10 +1357,8 @@ void WriteRTEnv (char *name)
 
 void WriteWinding (FileHandle_t out, winding_t *w, Vector& color )
 {
-	int			i;
-
 	CmdLib_FPrintf (out, "%i\n", w->numpoints);
-	for (i=0 ; i<w->numpoints ; i++)
+	for (int i=0 ; i<w->numpoints ; i++)
 	{
 		CmdLib_FPrintf (out, "%5.2f %5.2f %5.2f %5.3f %5.3f %5.3f\n",
 			w->p[i][0],
@@ -1382,7 +1402,7 @@ void WriteTrace( const char *pFileName, const FourRays &rays, const RayTracingRe
 
 	out = g_pFileSystem->Open( pFileName, "a" );
 	if (!out)
-		Error ("Couldn't open %s", pFileName);
+		Error ("\tCouldn't open %s", pFileName);
 
 	// Draws rays
 	for ( int i = 0; i < 4; ++i )
@@ -1411,14 +1431,13 @@ CollectLight
 // pull received light from children.
 void CollectLight( Vector& total )
 {
-	int i, j;
 	CPatch	*patch;
 
 	VectorFill( total, 0 );
 
 	// process patches in reverse order so that children are processed before their parents
 	unsigned int uiPatchCount = g_Patches.Size();
-	for( i = uiPatchCount - 1; i >= 0; i-- )
+	for(int i = uiPatchCount - 1; i >= 0; i-- )
 	{
 		patch = &g_Patches.Element( i );
 		int normalCount = patch->needsBumpmap ? NUM_BUMP_VECTS+1 : 1;
@@ -1430,7 +1449,7 @@ void CollectLight( Vector& total )
 		else if ( patch->child1 == g_Patches.InvalidIndex() )
 		{
 			// This is a leaf node.
-			for ( j = 0; j < normalCount; j++ )
+			for (int j = 0; j < normalCount; j++ )
 			{
 				VectorAdd( patch->totallight.light[j], addlight[i].light[j], patch->totallight.light[j] );
 			}
@@ -1456,7 +1475,7 @@ void CollectLight( Vector& total )
 			s2 = child2->area / (child1->area + child2->area);
 
 			// patch->totallight = s1 * child1->totallight + s2 * child2->totallight
-			for ( j = 0; j < normalCount; j++ )
+			for (int j = 0; j < normalCount; j++ )
 			{
 				VectorScale( child1->totallight.light[j], s1, patch->totallight.light[j] );
 				VectorMA( patch->totallight.light[j], s2, child2->totallight.light[j], patch->totallight.light[j] );
@@ -1466,7 +1485,7 @@ void CollectLight( Vector& total )
 			VectorScale( emitlight[patch->child1], s1, emitlight[i] );
 			VectorMA( emitlight[i], s2, emitlight[patch->child2], emitlight[i] );
 		}
-		for ( j = 0; j < NUM_BUMP_VECTS+1; j++ )
+		for (int j = 0; j < NUM_BUMP_VECTS+1; j++ )
 		{
 			VectorFill( addlight[ i ].light[j], 0 );
 		}
@@ -1596,7 +1615,7 @@ void GatherLight (int threadnum, void *pUserData)
 				VectorSubtract (patch2->origin, patch->origin, delta);
 				VectorNormalize (delta);
 				// find light emitted from other patch
-				for(i=0; i<3; i++)
+				for(i = 0; i<3; i++)
 				{
 					v[i] = emitlight[trans->patch][i] * patch2->reflectivity[i];
 				}
@@ -1627,7 +1646,7 @@ void GatherLight (int threadnum, void *pUserData)
 			VectorFill( sum, 0 );
 			for (k=0 ; k<num ; k++, trans++)
 			{
-				for(i=0; i<3; i++)
+				for(i = 0; i<3; i++)
 				{
 					v[i] = emitlight[trans->patch][i] * g_Patches[trans->patch].reflectivity[i];
 				}
@@ -1677,7 +1696,7 @@ void BounceLight (void)
 
 	g_pFileSystem->Close( dFp );
 
-	for (i=0; i<num_patches ; i++)
+	for (i = 0; i<num_patches ; i++)
 	{
 		Vector total;
 
@@ -1711,7 +1730,16 @@ void BounceLight (void)
 		// light is always received to leaf patches
 		CollectLight( added );
 
+#ifdef MAPBASE
+		Msg("\tBounce #%i added ", i + 1);
+		ColorSpewMessage(SPEW_MESSAGE, &red, "R");
+		ColorSpewMessage(SPEW_MESSAGE, &green, "G");
+		ColorSpewMessage(SPEW_MESSAGE, &blue, "B");
+		ColorSpewMessage(SPEW_MESSAGE, &magenta, " [%.0f, %.0f, %.0f]\n", added[0], added[1], added[2]);
+#else
 		qprintf ("\tBounce #%i added RGB(%.0f, %.0f, %.0f)\n", i+1, added[0], added[1], added[2] );
+#endif
+
 
 		if ( i+1 == numbounce || (added[0] < 1.0 && added[1] < 1.0 && added[2] < 1.0) )
 			bouncing = false;
@@ -1752,15 +1780,13 @@ RadWorld
 */
 void RadWorld_Start()
 {
-	unsigned	i;
-
 	if (luxeldensity < 1.0)
 	{
 		// Remember the old lightmap vectors.
 		float oldLightmapVecs[MAX_MAP_TEXINFO][2][4];
-		for (i = 0; i < texinfo.Count(); i++)
+		for (unsigned int i = 0; i < texinfo.Count(); i++)
 		{
-			for( int j=0; j < 2; j++ )
+			for( int j = 0; j < 2; j++ )
 			{
 				for( int k=0; k < 3; k++ )
 				{
@@ -1770,7 +1796,7 @@ void RadWorld_Start()
 		}
 
 		// rescale luxels to be no denser than "luxeldensity"
-		for (i = 0; i < texinfo.Count(); i++)
+		for (unsigned int i = 0; i < texinfo.Count(); i++)
 		{
 			texinfo_t	*tx = &texinfo[i];
 
@@ -1912,7 +1938,7 @@ void BuildFacesVisibleToLights( bool bAllVisible )
 
 	// For stats.. figure out how many faces it's going to touch.
 	int nFacesToProcess = 0;
-	for( int i=0; i < numfaces; i++ )
+	for( int i = 0; i < numfaces; i++ )
 	{
 		if( g_FacesVisibleToLights[i>>3] & (1 << (i & 7)) )
 			++nFacesToProcess;
@@ -1929,10 +1955,23 @@ void MakeAllScales (void)
 	// release visibility matrix
 	FreeVisMatrix ();
 
-	Msg("transfers %d, max %d\n", total_transfer, max_transfer );
+#ifdef MAPBASE
+	Msg("Transfers ");
+	ColorSpewMessage(SPEW_MESSAGE, &magenta, "[%d]", total_transfer);
+	Msg(", max ");
+	ColorSpewMessage(SPEW_MESSAGE, &magenta, "[%d]\n", max_transfer);
+#else
+	Msg("transfers %d, max %d\n", total_transfer, max_transfer);
+#endif
 
+#ifdef MAPBASE
+	Msg("Transfer lists");
+	ColorSpewMessage(SPEW_MESSAGE, &magenta, " [%f megs]\n"
+		, (float)total_transfer * sizeof(transfer_t) / (1024*1024));
+#else
 	qprintf ("transfer lists: %5.1f megs\n"
 		, (float)total_transfer * sizeof(transfer_t) / (1024*1024));
+#endif
 }
 
 
@@ -1945,7 +1984,7 @@ void MakeAllScales (void)
 		IScratchPad3D *pPad = ScratchPad3D_Create();
 		pPad->SetAutoFlush( false );
 
-		for ( int i=0; i < numfaces; i++ )
+		for ( int i = 0; i < numfaces; i++ )
 		{
 			dface_t *f = &g_pFaces[i];
 
@@ -2073,7 +2112,7 @@ bool RadWorld_Go()
 		//
 		// displacement surface luxel accumulation (make threaded!!!)
 		//
-		StaticDispMgr()->StartTimer( "Build Patch/Sample Hash Table(s)....." );
+		StaticDispMgr()->StartTimer( "Build Patch/Sample Hash Table(s)... " );
 		StaticDispMgr()->InsertSamplesDataIntoHashTable();
 		StaticDispMgr()->InsertPatchSampleDataIntoHashTable();
 		StaticDispMgr()->EndTimer();
@@ -2086,7 +2125,13 @@ bool RadWorld_Go()
 		// Distribute the lighting data to workers.
 		VMPI_DistributeLightData();
 			
+#ifdef MAPBASE
+		Msg("FinalLightFace... "); 
+		ColorSpewMessage(SPEW_MESSAGE, &green, "done (0)\n");
+		fflush(stdout);
+#else
 		Msg("FinalLightFace Done\n"); fflush(stdout);
+#endif
 	}
 
 	return true;
@@ -2113,7 +2158,7 @@ void InitDumpPatchesFiles()
 			pFileSamples[iStyle][iBump] = g_pFileSystem->Open( szFilename, "w" );
 			if( !pFileSamples[iStyle][iBump] )
 			{
-				Error( "Can't open %s for -dump.\n", szFilename );
+				Error( "\tCan't open %s for -dump.\n", szFilename );
 			}
 		}
 	}
@@ -2156,7 +2201,12 @@ void VRAD_LoadBSP( char const *pFilename )
 	if ( !g_pFileSystem->FileExists( global_lights ) )
 	{
 		// Otherwise, try looking in the BIN directory from which we were run from
-		Msg( "Could not find lights.rad in %s.\nTrying VRAD BIN directory instead...\n", 
+#ifdef MAPBASE
+		Warning( "\tCould not find lights.rad in %s.\n\tTrying VRAD BIN directory instead...\n", 
+#else
+		Warning( "Could not find lights.rad in %s.\nTrying BIN directory instead...\n",
+#endif
+
 			    global_lights );
 		GetModuleFileName( NULL, global_lights, sizeof( global_lights ) );
 		Q_ExtractFilePath( global_lights, global_lights, sizeof( global_lights ) );
@@ -2180,7 +2230,14 @@ void VRAD_LoadBSP( char const *pFilename )
 
 	GetPlatformMapPath( source, platformPath, 0, MAX_PATH );
 
-	Msg( "Loading %s\n", platformPath );
+#ifdef MAPBASE
+	Msg("Loading bsp file: +- ");
+	ColorSpewMessage(SPEW_MESSAGE, &blue, "%s", platformPath);
+	ColorSpewMessage(SPEW_MESSAGE, &green, " done (0)\n");
+#else
+	Msg("Loading %s...done\n", platformPath);
+#endif
+
 	VMPI_SetCurrentStage( "LoadBSPFile" );
 	LoadBSPFile (platformPath);
 	
@@ -2259,7 +2316,13 @@ void VRAD_LoadBSP( char const *pFilename )
 	float start = Plat_FloatTime();
 	g_RtEnv.SetupAccelerationStructure();
 	float end = Plat_FloatTime();
+
+#ifdef MAPBASE
+	ColorSpewMessage(SPEW_MESSAGE, &green, "done (%.2f)\n", end - start);
+#else
 	printf ( "Done (%.2f seconds)\n", end-start );
+#endif
+
 
 #if 0  // To test only k-d build
 	exit(0);
@@ -2272,7 +2335,7 @@ void VRAD_LoadBSP( char const *pFilename )
 	{
 		if( !g_pIncremental->Init( source, incrementfile ) )
 		{
-			Error( "Unable to load incremental lighting file in %s.\n", incrementfile );
+			Error( "\tUnable to load incremental lighting file in %s.\n", incrementfile );
 			return;
 		}
 	}
@@ -2289,6 +2352,13 @@ void VRAD_ComputeOtherLighting()
 
 	ComputePerLeafAmbientLighting();
 
+#ifdef MAPBASE
+	if (g_nCompressConstantThreshold != 0)
+	{
+		CompressConstantLightmaps(g_nCompressConstantThreshold);
+	}
+#endif
+
 	// bake the static props high quality vertex lighting into the bsp
 	if ( !do_fast && g_bStaticPropLighting )
 	{
@@ -2300,7 +2370,12 @@ extern void CloseDispLuxels();
 
 void VRAD_Finish()
 {
-	Msg( "Ready to Finish\n" ); 
+#ifdef MAPBASE
+	ColorSpewMessage(SPEW_MESSAGE, &green, "--> Map build ready to finish\n");
+#else
+	Msg( "Ready to Finish\n" );
+#endif
+
 	fflush( stdout );
 
 	if ( verbose )
@@ -2308,7 +2383,14 @@ void VRAD_Finish()
 		PrintBSPFileSizes();
 	}
 
-	Msg( "Writing %s\n", platformPath );
+#ifdef MAPBASE
+	Msg("Writing Bsp file: +- ");
+	ColorSpewMessage(SPEW_MESSAGE, &blue, "%s ", platformPath);
+	ColorSpewMessage(SPEW_MESSAGE, &green, "done (0)\n");
+#else
+	Msg("Writing %s\n", platformPath);
+#endif
+
 	VMPI_SetCurrentStage( "WriteBSPFile" );
 	WriteBSPFile(platformPath);
 
@@ -2331,7 +2413,12 @@ void VRAD_Finish()
 	
 	char str[512];
 	GetHourMinuteSecondsString( (int)( end - g_flStartTime ), str, sizeof( str ) );
-	Msg( "%s elapsed\n", str );
+
+#ifdef MAPBASE
+	ColorSpewMessage(SPEW_MESSAGE, &green, "--> Bake lighting build finished %s seconds.\n\n", str);
+#else
+	Msg("%s elapsed\n", str);
+#endif
 
 	ReleasePakFileLumps();
 }
@@ -2372,6 +2459,12 @@ int ParseCommandLine( int argc, char **argv, bool *onlydetail )
 		{
 			g_bStaticPropPolys = true;
 		}
+#ifdef MAPBASE
+		else if (!stricmp(argv[i], "-exportLightmaps"))
+		{
+			g_bExportLightmaps = true;
+		}
+#endif
 		else if ( !Q_stricmp( argv[i], "-nossprops" ) )
 		{
 			g_bDisablePropSelfShadowing = true;
@@ -2411,14 +2504,14 @@ int ParseCommandLine( int argc, char **argv, bool *onlydetail )
 				int bounceParam = atoi (argv[i]);
 				if ( bounceParam < 0 )
 				{
-					Warning("Error: expected non-negative value after '-bounce'\n" );
+					Warning("\tError: expected non-negative value after '-bounce'\n" );
 					return 1;
 				}
 				numbounce = (unsigned)bounceParam;
 			}
 			else
 			{
-				Warning("Error: expected a value after '-bounce'\n" );
+				Warning("\tError: expected a value after '-bounce'\n" );
 				return 1;
 			}
 		}
@@ -2433,13 +2526,13 @@ int ParseCommandLine( int argc, char **argv, bool *onlydetail )
 				numthreads = atoi (argv[i]);
 				if ( numthreads <= 0 )
 				{
-					Warning("Error: expected positive value after '-threads'\n" );
+					Warning("\tError: expected positive value after '-threads'\n" );
 					return 1;
 				}
 			}
 			else
 			{
-				Warning("Error: expected a value after '-threads'\n" );
+				Warning("\tError: expected a value after '-threads'\n" );
 				return 1;
 			}
 		}
@@ -2451,7 +2544,7 @@ int ParseCommandLine( int argc, char **argv, bool *onlydetail )
 			}
 			else
 			{
-				Warning("Error: expected a filepath after '-lights'\n" );
+				Warning("\tError: expected a filepath after '-lights'\n" );
 				return 1;
 			}
 		}
@@ -2471,6 +2564,15 @@ int ParseCommandLine( int argc, char **argv, bool *onlydetail )
 		{
 			do_fast = true;
 		}
+#ifdef MAPBASE
+		else if(!Q_stricmp(argv[i], "-ultrafast")) 
+		{
+			do_fast = true;
+			g_bFastAmbient = true;
+			do_extra = false; 
+			numbounce = 1;
+		}
+#endif
 		else if (!Q_stricmp(argv[i],"-noskyboxrecurse"))
 		{
 			g_bNoSkyRecurse = true;
@@ -2487,10 +2589,30 @@ int ParseCommandLine( int argc, char **argv, bool *onlydetail )
 			}
 			else
 			{
-				Warning("Error: expected a scale factor after '-extrasky'\n" );
+				Warning("\tError: expected a scale factor after '-extrasky'\n" );
 				return 1;
 			}
 		}
+#ifdef MAPBASE
+		else if (!Q_stricmp(argv[i], "-extrapasses"))
+		{
+			if (++i < argc)
+			{
+				int extrapassesParam = atoi(argv[i]);
+				if (extrapassesParam < 0)
+				{
+					Warning("Error: expected non-negative value after '-extrapasses'\n");
+					return 1;
+				}
+				extrapasses = extrapassesParam;
+			}
+			else
+			{
+				Warning("Error: expected a value after '-extrapasses'\n");
+				return 1;
+			}
+		}
+#endif
 		else if (!Q_stricmp(argv[i],"-centersamples"))
 		{
 			do_centersamples = true;
@@ -2503,7 +2625,7 @@ int ParseCommandLine( int argc, char **argv, bool *onlydetail )
 			}
 			else
 			{
-				Warning("Error: expected an angle after '-smooth'\n" );
+				Warning("\tError: expected an angle after '-smooth'\n" );
 				return 1;
 			}
 		}
@@ -2521,7 +2643,7 @@ int ParseCommandLine( int argc, char **argv, bool *onlydetail )
 			}
 			else
 			{
-				Warning("Error: expected a value after '-luxeldensity'\n" );
+				Warning("\tError: expected a value after '-luxeldensity'\n" );
 				return 1;
 			}
 		}
@@ -2547,7 +2669,7 @@ int ParseCommandLine( int argc, char **argv, bool *onlydetail )
 			}
 			else
 			{
-				Warning("Error: expected an angular extent value (0..180) '-softsun'\n" );
+				Warning("\tError: expected an angular extent value (0..180) '-softsun'\n" );
 				return 1;
 			}
 		}
@@ -2559,7 +2681,7 @@ int ParseCommandLine( int argc, char **argv, bool *onlydetail )
 			}
 			else
 			{
-				Warning( "Error: expected a sample size after '-maxdispsamplesize'\n" );
+				Warning("\tError: expected a sample size after '-maxdispsamplesize'\n" );
 				return 1;
 			}
 		}
@@ -2593,6 +2715,25 @@ int ParseCommandLine( int argc, char **argv, bool *onlydetail )
 		{
 			SetHDRMode( false );
 		}
+#ifdef MAPBASE
+		else if (!Q_stricmp(argv[i], "-compressconstant"))
+		{
+			if (++i < argc)
+			{
+				g_nCompressConstantThreshold = (int)atof(argv[i]);
+			}
+			else
+			{
+				g_nCompressConstantThreshold = -1;
+			}
+
+			if (g_nCompressConstantThreshold < 0)
+			{
+				Warning("Error: -compressconstant # (# = [0..768])\n");
+				return 1;
+			}
+		}
+#endif
 		else if (!Q_stricmp(argv[i],"-maxchop"))
 		{
 			if ( ++i < argc )
@@ -2600,13 +2741,13 @@ int ParseCommandLine( int argc, char **argv, bool *onlydetail )
 				maxchop = (float)atof (argv[i]);
 				if ( maxchop < 1 )
 				{
-					Warning("Error: expected positive value after '-maxchop'\n" );
+					Warning("\tError: expected positive value after '-maxchop'\n" );
 					return 1;
 				}
 			}
 			else
 			{
-				Warning("Error: expected a value after '-maxchop'\n" );
+				Warning("\tError: expected a value after '-maxchop'\n" );
 				return 1;
 			}
 		}
@@ -2617,14 +2758,14 @@ int ParseCommandLine( int argc, char **argv, bool *onlydetail )
 				minchop = (float)atof (argv[i]);
 				if ( minchop < 1 )
 				{
-					Warning("Error: expected positive value after '-chop'\n" );
+					Warning("\tError: expected positive value after '-chop'\n" );
 					return 1;
 				}
 				minchop = min( minchop, maxchop );
 			}
 			else
 			{
-				Warning("Error: expected a value after '-chop'\n" );
+				Warning("\tError: expected a value after '-chop'\n" );
 				return 1;
 			}
 		}
@@ -2635,13 +2776,13 @@ int ParseCommandLine( int argc, char **argv, bool *onlydetail )
 				dispchop = ( float )atof( argv[i] );
 				if ( dispchop < 1.0f )
 				{
-					Warning( "Error: expected positive value after '-dipschop'\n" );
+					Warning("\tError: expected positive value after '-dipschop'\n" );
 					return 1;
 				}
 			}
 			else
 			{
-				Warning( "Error: expected a value after '-dispchop'\n" );
+				Warning("\tError: expected a value after '-dispchop'\n" );
 				return 1;
 			}
 		}
@@ -2652,13 +2793,13 @@ int ParseCommandLine( int argc, char **argv, bool *onlydetail )
 				g_MaxDispPatchRadius = ( float )atof( argv[i] );
 				if ( g_MaxDispPatchRadius < 10.0f )
 				{
-					Warning( "Error: g_MaxDispPatchRadius < 10.0\n" );
+					Warning("\tError: g_MaxDispPatchRadius < 10.0\n" );
 					return 1;
 				}
 			}
 			else
 			{
-				Warning( "Error: expected a value after '-disppatchradius'\n" );
+				Warning("\tError: expected a value after '-disppatchradius'\n" );
 				return 1;
 			}
 		}
@@ -2672,7 +2813,7 @@ int ParseCommandLine( int argc, char **argv, bool *onlydetail )
 			}
 			else
 			{
-				Warning("Error: expected a value after '-scale'\n" );
+				Warning("\tError: expected a value after '-scale'\n" );
 				return 1;
 			}
 		}
@@ -2686,7 +2827,7 @@ int ParseCommandLine( int argc, char **argv, bool *onlydetail )
 			}
 			else
 			{
-				Warning("Error: expected three color values after '-ambient'\n" );
+				Warning("\tError: expected three color values after '-ambient'\n" );
 				return 1;
 			}
 		}
@@ -2698,7 +2839,7 @@ int ParseCommandLine( int argc, char **argv, bool *onlydetail )
 			}
 			else
 			{
-				Warning("Error: expected a value after '-dlight'\n" );
+				Warning("\tError: expected a value after '-dlight'\n" );
 				return 1;
 			}
 		}
@@ -2726,7 +2867,7 @@ int ParseCommandLine( int argc, char **argv, bool *onlydetail )
 			}
 			else
 			{
-				Warning("Error: expected a light threshold after '-coring'\n" );
+				Warning("\tError: expected a light threshold after '-coring'\n" );
 				return 1;
 			}
 		}
@@ -2756,12 +2897,12 @@ int ParseCommandLine( int argc, char **argv, bool *onlydetail )
 
 void PrintCommandLine( int argc, char **argv )
 {
-	Warning( "Command line: " );
+	Warning("\tCommand line: " );
 	for ( int z=0; z < argc; z++ )
 	{
-		Warning( "\"%s\" ", argv[z] );
+		Warning("\t\"%s\" ", argv[z] );
 	}
-	Warning( "\n\n" );
+	Warning("\t\n\n" );
 }
 
 
@@ -2778,9 +2919,15 @@ void PrintUsage( int argc, char **argv )
 		"  -v (or -verbose): Turn on verbose output (also shows more command\n"
 		"  -bounce #       : Set max number of bounces (default: 100).\n"
 		"  -fast           : Quick and dirty lighting.\n"
+#ifdef MAPBASE
+		"  -ultrafast	  : Very quick and dirty lighting, same as -fast -fastambient -noextra -bounce 1\n"
+#endif
 		"  -fastambient    : Per-leaf ambient sampling is lower quality to save compute time.\n"
 		"  -final          : High quality processing. equivalent to -extrasky 16.\n"
-		"  -extrasky n     : trace N times as many rays for indirect light and sky ambient.\n"
+		"  -extrasky #     : trace # times as many rays for indirect light and sky ambient.\n"
+#ifdef MAPBASE
+		"  -extrapasses #  : Lets you scale how many extra passes you want your map to go through (default 4), differences above this value are minimal.\n"
+#endif
 		"  -low            : Run as an idle-priority process.\n"
 		"  -mpi            : Use VMPI to distribute computations.\n"
 		"  -rederror       : Show errors in red.\n"
@@ -2821,16 +2968,22 @@ void PrintUsage( int argc, char **argv )
 		"  -loghash        : Log the sample hash table to samplehash.txt.\n"
 		"  -onlydetail     : Only light detail props and per-leaf lighting.\n"
 		"  -maxdispsamplesize #: Set max displacement sample size (default: 512).\n"
-		"  -softsun <n>    : Treat the sun as an area light source of size <n> degrees."
+		"  -softsun #    : Treat the sun as an area light source of size # degrees."
 		"                    Produces soft shadows.\n"
 		"                    Recommended values are between 0 and 5. Default is 0.\n"
 		"  -FullMinidumps  : Write large minidumps on crash.\n"
 		"  -chop           : Smallest number of luxel widths for a bounce patch, used on edges\n"
 		"  -maxchop		   : Coarsest allowed number of luxel widths for a patch, used in face interiors\n"
+#ifdef MAPBASE
+		"  -exportLightmaps : Exports the lightmaps generated by vrad.\n"
+#endif
 		"\n"
 		"  -LargeDispSampleRadius: This can be used if there are splotches of bounced light\n"
 		"                          on terrain. The compile will take longer, but it will gather\n"
 		"                          light across a wider area.\n"
+#ifdef MAPBASE
+		"  -compressconstant #: compress lightmaps whose color variation is less than # units, a good start is 4. (default 0)\n"
+#endif
         "  -StaticPropLighting   : generate backed static prop vertex lighting\n"
         "  -StaticPropPolys   : Perform shadow tests of static props at polygon precision\n"
         "  -OnlyStaticProps   : Only perform direct static prop lighting (vrad debug option)\n"
@@ -2851,7 +3004,7 @@ void PrintUsage( int argc, char **argv )
 	{
 		if ( V_stricmp( argv[i], "-mpi_ListParams" ) == 0 )
 		{
-			Warning( "VMPI-specific options:\n\n" );
+			Warning("\tVMPI-specific options:\n\n" );
 
 			bool bIsSDKMode = VMPI_IsSDKMode();
 			for ( int i=k_eVMPICmdLineParam_FirstParam+1; i < k_eVMPICmdLineParam_LastParam; i++ )
@@ -2859,9 +3012,9 @@ void PrintUsage( int argc, char **argv )
 				if ( (VMPI_GetParamFlags( (EVMPICmdLineParam)i ) & VMPI_PARAM_SDK_HIDDEN) && bIsSDKMode )
 					continue;
 					
-				Warning( "[%s]\n", VMPI_GetParamString( (EVMPICmdLineParam)i ) );
+				Warning("\t[%s]\n", VMPI_GetParamString( (EVMPICmdLineParam)i ) );
 				Warning( VMPI_GetParamHelpString( (EVMPICmdLineParam)i ) );
-				Warning( "\n\n" );
+				Warning("\t\n\n" );
 			}
 			break;
 		}
@@ -2873,12 +3026,16 @@ void PrintUsage( int argc, char **argv )
 int RunVRAD( int argc, char **argv )
 {
 #if defined(_MSC_VER) && ( _MSC_VER >= 1310 )
-	Msg("Valve Software - vrad.exe SSE (" __DATE__ ")\n" );
+	#ifdef MAPBASE
+		ColorSpewMessage(SPEW_MESSAGE, &cyan, "Valve Software - vrad.exe (Build: pc32 %s)", __DATE__);
+	#else
+		Msg("Valve Software - vrad.exe (" __DATE__ ")\n" );
+	#endif
 #else
 	Msg("Valve Software - vrad.exe (" __DATE__ ")\n" );
 #endif
 
-	Msg("\n      Valve Radiosity Simulator     \n");
+	//Msg("\n      Valve Radiosity Simulator     \n"); //no need to have this.
 
 	verbose = true;  // Originally FALSE
 

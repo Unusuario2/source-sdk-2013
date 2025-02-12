@@ -1,4 +1,4 @@
-//========= Copyright Valve Corporation, All rights reserved. ============//
+//============= Copyright Valve Corporation, All rights reserved. =============//
 //
 //
 //
@@ -39,7 +39,7 @@ void CSplitString::Construct( const char *pString, const char **pSeparators, int
 	{
 		int iFirstSeparator = -1;
 		const char *pFirstSeparator = 0;
-		for ( int i=0; i < nSeparators; i++ )
+		for ( int i = 0; i < nSeparators; i++ )
 		{
 			const char *pTest = V_stristr( pCurPos, pSeparators[i] );
 			if ( pTest && (!pFirstSeparator || pTest < pFirstSeparator) )

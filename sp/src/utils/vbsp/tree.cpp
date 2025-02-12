@@ -1,4 +1,4 @@
-//========= Copyright Valve Corporation, All rights reserved. ============//
+//============= Copyright Valve Corporation, All rights reserved. =============//
 //
 // Purpose: 
 //
@@ -115,11 +115,10 @@ void FreeTree (tree_t *tree)
 
 void PrintTree_r (node_t *node, int depth)
 {
-	int		i;
 	plane_t	*plane;
 	bspbrush_t	*bb;
 
-	for (i=0 ; i<depth ; i++)
+	for (int i=0 ; i<depth ; i++)
 		Msg ("  ");
 	if (node->planenum == PLANENUM_LEAF)
 	{
@@ -170,16 +169,16 @@ void PruneNodes_r (node_t *node)
 	&& (node->children[1]->contents & CONTENTS_SOLID) )
 	{
 		if (node->faces)
-			Error ("node->faces seperating CONTENTS_SOLID");
+			Error ("\tnode->faces seperating CONTENTS_SOLID");
 		if (node->children[0]->faces || node->children[1]->faces)
-			Error ("!node->faces with children");
+			Error ("\t!node->faces with children");
 
 		// FIXME: free stuff
 		node->planenum = PLANENUM_LEAF;
 		node->contents = CONTENTS_SOLID;
 
 		if (node->brushlist)
-			Error ("PruneNodes: node->brushlist");
+			Error ("\tPruneNodes: node->brushlist");
 
 		// combine brush lists
 		node->brushlist = node->children[1]->brushlist;

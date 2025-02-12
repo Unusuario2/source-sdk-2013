@@ -1,4 +1,4 @@
-//========= Copyright Valve Corporation, All rights reserved. ============//
+//============= Copyright Valve Corporation, All rights reserved. =============//
 //
 // Purpose: 
 //
@@ -375,7 +375,7 @@ void *CDataManagerBase::GetForFreeByIndex( unsigned short memoryIndex )
 		unsigned size = GetRealSize( mem.pStore );
 		if ( size > m_memUsed )
 		{
-			ExecuteOnce( Warning( "Data manager 'used' memory incorrect\n" ) );
+			ExecuteOnce( Warning("\tData manager 'used' memory incorrect\n" ) );
 			size = m_memUsed;
 		}
 		m_memUsed -= size;

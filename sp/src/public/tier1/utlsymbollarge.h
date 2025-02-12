@@ -1,4 +1,4 @@
-//========= Copyright Valve Corporation, All rights reserved. ============//
+//============= Copyright Valve Corporation, All rights reserved. =============//
 //
 // Purpose: Defines a large symbol table (intp sized handles, can store more than 64k strings)
 //
@@ -328,7 +328,7 @@ public:
 	{
 		uint64 unBytesUsed = 0u;
 
-		for ( int i=0; i < m_StringPools.Count(); i++ )
+		for ( int i = 0; i < m_StringPools.Count(); i++ )
 		{
 			StringPool_t *pPool = m_StringPools[i];
 
@@ -399,7 +399,7 @@ inline CUtlSymbolLarge CUtlSymbolTableLargeBase<TreeType, CASEINSENSITIVE, POOL_
 template < class TreeType, bool CASEINSENSITIVE, size_t POOL_SIZE >
 inline int CUtlSymbolTableLargeBase<TreeType, CASEINSENSITIVE, POOL_SIZE>::FindPoolWithSpace( int len )	const
 {
-	for ( int i=0; i < m_StringPools.Count(); i++ )
+	for ( int i = 0; i < m_StringPools.Count(); i++ )
 	{
 		StringPool_t *pPool = m_StringPools[i];
 
@@ -478,7 +478,7 @@ inline void CUtlSymbolTableLargeBase<TreeType, CASEINSENSITIVE, POOL_SIZE>::Remo
 {
 	m_Lookup.Purge();
 
-	for ( int i=0; i < m_StringPools.Count(); i++ )
+	for ( int i = 0; i < m_StringPools.Count(); i++ )
 	{
 		StringPool_t * pString = m_StringPools[i];
 		free( pString );

@@ -1,4 +1,4 @@
-//========= Copyright Valve Corporation, All rights reserved. ============//
+//============= Copyright Valve Corporation, All rights reserved. =============//
 //
 // Purpose: 
 //
@@ -16,6 +16,10 @@
 #include "disp_ivp.h"
 #include "builddisp.h"
 #include "mathlib/vector.h"
+
+#ifdef MAPBASE
+#include "../common/StandartColorFormat.h" //this control the color of the console.
+#endif 
 
 // map displacement info -- runs parallel to the dispinfos struct
 int              nummapdispinfo = 0;
@@ -174,7 +178,7 @@ void DispMapToCoreDispInfo( mapdispinfo_t *pMapDisp, CCoreDispInfo *pCoreDispInf
 		Assert( pFace->numedges == 4 );
 
 		Vector pt[4];
-		for( int i=0; i < 4; i++ )
+		for( int i = 0; i < 4; i++ )
 			pt[i] = pWinding->p[i];
 
 		int zeroOffset[2] = {0,0};
@@ -281,7 +285,6 @@ void DispMapToCoreDispInfo( mapdispinfo_t *pMapDisp, CCoreDispInfo *pCoreDispInf
 //-----------------------------------------------------------------------------
 void EmitInitialDispInfos( void )
 {
-	int					i;
 	mapdispinfo_t		*pMapDisp;
 	ddispinfo_t			*pDisp;
 	Vector				v;
@@ -289,7 +292,8 @@ void EmitInitialDispInfos( void )
 	// Calculate the total number of verts.
 	int nTotalVerts = 0;
 	int nTotalTris = 0;
-	for ( i=0; i < nummapdispinfo; i++ )
+
+	for (int i = 0; i < nummapdispinfo; i++ )
 	{
 		nTotalVerts += NUM_DISP_POWER_VERTS( mapdispinfo[i].power );
 		nTotalTris += NUM_DISP_POWER_TRIS( mapdispinfo[i].power );
@@ -303,7 +307,7 @@ void EmitInitialDispInfos( void )
 
 	int iCurVert = 0;
 	int iCurTri = 0;
-	for( i = 0; i < nummapdispinfo; i++ )
+	for(int i = 0; i < nummapdispinfo; i++ )
 	{
 		pDisp = &g_dispinfo[i];
 		pMapDisp = &mapdispinfo[i];
@@ -367,7 +371,7 @@ void EmitInitialDispInfos( void )
 
 void ExportCoreDispNeighborData( const CCoreDispInfo *pIn, ddispinfo_t *pOut )
 {
-	for ( int i=0; i < 4; i++ )
+	for ( int i = 0; i < 4; i++ )
 	{
 		pOut->m_EdgeNeighbors[i] = *pIn->GetEdgeNeighbor( i );
 		pOut->m_CornerNeighbors[i] = *pIn->GetCornerNeighbors( i );
@@ -379,7 +383,7 @@ void ExportNeighborData( CCoreDispInfo **ppListBase, ddispinfo_t *pBSPDispInfos,
 	FindNeighboringDispSurfs( ppListBase, listSize );
 
 	// Export the neighbor data.
-	for ( int i=0; i < nummapdispinfo; i++ )
+	for ( int i = 0; i < nummapdispinfo; i++ )
 	{
 		ExportCoreDispNeighborData( g_CoreDispInfos[i], &pBSPDispInfos[i] );
 	}
@@ -392,7 +396,7 @@ void ExportCoreDispAllowedVertList( const CCoreDispInfo *pIn, ddispinfo_t *pOut 
 		pIn->GetAllowedVerts().GetNumDWords() == sizeof( pOut->m_AllowedVerts ) / 4,
 		("ExportCoreDispAllowedVertList: size mismatch")
 		);
-	for ( int i=0; i < pIn->GetAllowedVerts().GetNumDWords(); i++ )
+	for ( int i = 0; i < pIn->GetAllowedVerts().GetNumDWords(); i++ )
 		pOut->m_AllowedVerts[i] = pIn->GetAllowedVerts().GetDWord( i );
 }
 
@@ -401,7 +405,7 @@ void ExportAllowedVertLists( CCoreDispInfo **ppListBase, ddispinfo_t *pBSPDispIn
 {
 	SetupAllowedVerts( ppListBase, listSize );
 
-	for ( int i=0; i < listSize; i++ )
+	for ( int i = 0; i < listSize; i++ )
 	{
 		ExportCoreDispAllowedVertList( ppListBase[i], &pBSPDispInfos[i] );
 	}
@@ -414,7 +418,7 @@ bool FindEnclosingTri(
 	int *pStartVert,
 	float bcCoords[3] )
 {
-	for ( int i=0; i < indices.Count(); i += 3 )
+	for ( int i = 0; i < indices.Count(); i += 3 )
 	{
 		GetBarycentricCoords2D( 
 			vertCoords[indices[i+0]],
@@ -450,7 +454,7 @@ void SnapRemainingVertsToSurface( CCoreDispInfo *pCoreDisp, ddispinfo_t *pDispIn
 	vertsTouched.SetSize( pCoreDisp->GetSize() );
 	memset( vertsTouched.Base(), 0, sizeof( bool ) * vertsTouched.Count() );
 
-	for ( int i=0; i < indices.Count(); i++ )
+	for ( int i = 0; i < indices.Count(); i++ )
 		vertsTouched[ indices[i] ] = true;
 
 	// Generate 2D floating point coordinates for each vertex. We use these to generate
@@ -510,7 +514,7 @@ void SnapRemainingVertsToSurface( CCoreDispInfo *pCoreDisp, ddispinfo_t *pDispIn
 void SnapRemainingVertsToSurface( CCoreDispInfo **ppListBase, ddispinfo_t *pBSPDispInfos, int listSize )
 {
 //g_pPad = ScratchPad3D_Create();
-	for ( int i=0; i < listSize; i++ )
+	for ( int i = 0; i < listSize; i++ )
 	{
 		SnapRemainingVertsToSurface( ppListBase[i], &pBSPDispInfos[i] );
 	}
@@ -518,9 +522,12 @@ void SnapRemainingVertsToSurface( CCoreDispInfo **ppListBase, ddispinfo_t *pBSPD
 
 void EmitDispLMAlphaAndNeighbors()
 {
-	int i;
-
-	Msg( "Finding displacement neighbors...\n" );
+#ifdef MAPBASE
+	Msg("Finding displacement neighbors... ");
+	ColorSpewMessage(SPEW_MESSAGE, &green, "done (0)\n");
+#else 
+	Msg("Finding displacement neighbors...\n");
+#endif 
 
 	// Build the CCoreDispInfos.
 	CUtlVector<dface_t*> faces;
@@ -540,7 +547,7 @@ void EmitDispLMAlphaAndNeighbors()
 		g_CoreDispInfos[nIndex] = pDisp;
 	}
 
-	for ( i=0; i < nummapdispinfo; i++ )
+	for (int i = 0; i < nummapdispinfo; i++ )
 	{
 		g_CoreDispInfos[i]->SetDispUtilsHelperInfo( g_CoreDispInfos.Base(), nummapdispinfo );
 	}
@@ -550,7 +557,7 @@ void EmitDispLMAlphaAndNeighbors()
 	int nMemSize = texinfo.Count() * sizeof(int);
 	int *pSwappedTexInfos = (int*)stackalloc( nMemSize );
 	memset( pSwappedTexInfos, 0xFF, nMemSize );
-	for( i = 0; i < numfaces; i++ )
+	for(int i = 0; i < numfaces; i++ )
 	{
         dface_t *pFace = &dfaces[i];
 
@@ -583,8 +590,14 @@ void EmitDispLMAlphaAndNeighbors()
 	// overlay code works right.
 	SnapRemainingVertsToSurface( g_CoreDispInfos.Base(), g_dispinfo.Base(), nummapdispinfo );
 
-	Msg( "Finding lightmap sample positions...\n" );
-	for ( i=0; i < nummapdispinfo; i++ )
+#ifdef MAPBASE
+		Msg("Finding lightmap sample positions... ");
+		ColorSpewMessage(SPEW_MESSAGE, &green, "done (0)\n");
+#else 
+	Msg("Finding lightmap sample positions...\n");
+#endif 
+	
+	for (int i = 0; i < nummapdispinfo; i++ )
 	{
 		dface_t *pFace = faces[i];
 		ddispinfo_t *pDisp = &g_dispinfo[pFace->dispinfo];
@@ -595,11 +608,11 @@ void EmitDispLMAlphaAndNeighbors()
 		CalculateLightmapSamplePositions( pCoreDispInfo, pFace, g_DispLightmapSamplePositions );
 	}
 
-	StartPacifier( "Displacement Alpha : ");
+	StartPacifier( "Displacement Alpha -> ");
 
 	// Build lightmap alphas.
 	int dispCount = 0;	// How many we've processed.
-	for( i = 0; i < nummapdispinfo; i++ )
+	for(int i = 0; i < nummapdispinfo; i++ )
 	{
         dface_t *pFace = faces[i];
 
@@ -627,7 +640,7 @@ void DispGetFaceInfo( mapbrush_t *pBrush )
 	if( pBrush->entitynum != 0 )
 	{
 		char* pszEntityName = ValueForKey( &g_LoadingMap->entities[pBrush->entitynum], "classname" );
-		Error( "Error: displacement found on a(n) %s entity - not supported (entity %d, brush %d)\n", pszEntityName, pBrush->entitynum, pBrush->brushnum );
+		Error("\tError: displacement found on a(n) %s entity - not supported (entity %d, brush %d)\n", pszEntityName, pBrush->entitynum, pBrush->brushnum );
 	}
 
 	for( i = 0; i < pBrush->numsides; i++ )
@@ -637,7 +650,7 @@ void DispGetFaceInfo( mapbrush_t *pBrush )
 		{
 			// error checking!!
 			if( pSide->winding->numpoints != 4 )
-				Error( "Trying to create a non-quad displacement! (entity %d, brush %d)\n", pBrush->entitynum, pBrush->brushnum );
+				Error("\tTrying to create a non-quad displacement! (entity %d, brush %d)\n", pBrush->entitynum, pBrush->brushnum );
 			pSide->pMapDisp->face.originalface = pSide;
 			pSide->pMapDisp->face.texinfo = pSide->texinfo;
 			pSide->pMapDisp->face.dispinfo = -1;

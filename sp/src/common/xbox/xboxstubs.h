@@ -1,4 +1,4 @@
-//========= Copyright Valve Corporation, All rights reserved. ============//
+//============= Copyright Valve Corporation, All rights reserved. =============//
 //
 // Purpose: Win32 replacements for XBox.
 //
@@ -73,6 +73,7 @@ typedef enum
 	XK_MAX_KEYS,
 } xKey_t;
 
+
 //typedef enum
 //{
 //	XVRB_NONE,		// off
@@ -82,6 +83,7 @@ typedef enum
 //	XVRB_STATUS,	// status reports
 //	XVRB_ALL,
 //} xverbose_e;
+
 
 typedef unsigned short WORD;
 #ifndef POSIX
@@ -106,6 +108,7 @@ typedef DWORD COLORREF;
 // 	BYTE        abOnline[20];                   // Online identification
 // } XNADDR;
 
+
 typedef int XNADDR;
 typedef uint64 XUID;
 
@@ -113,9 +116,11 @@ typedef struct {
 	BYTE        ab[8];                          // xbox to xbox key identifier
 } XNKID;
 
+
 typedef struct {
 	BYTE        ab[16];                         // xbox to xbox key exchange key
 } XNKEY;
+
 
 typedef struct _XSESSION_INFO
 {
@@ -123,6 +128,7 @@ typedef struct _XSESSION_INFO
 	XNADDR hostAddress;             // 36 bytes
 	XNKEY keyExchangeKey;           // 16 bytes
 } XSESSION_INFO, *PXSESSION_INFO;
+
 
 typedef struct _XUSER_DATA
 {
@@ -147,17 +153,20 @@ typedef struct _XUSER_DATA
 	};
 } XUSER_DATA, *PXUSER_DATA;
 
+
 typedef struct _XUSER_PROPERTY
 {
 	DWORD                               dwPropertyId;
 	XUSER_DATA                          value;
 } XUSER_PROPERTY, *PXUSER_PROPERTY;
 
+
 typedef struct _XUSER_CONTEXT
 {
 	DWORD                               dwContextId;
 	DWORD                               dwValue;
 } XUSER_CONTEXT, *PXUSER_CONTEXT;
+
 
 typedef struct _XSESSION_SEARCHRESULT
 {
@@ -172,11 +181,13 @@ typedef struct _XSESSION_SEARCHRESULT
 	PXUSER_CONTEXT  pContexts;
 } XSESSION_SEARCHRESULT, *PXSESSION_SEARCHRESULT;
 
+
 typedef struct _XSESSION_SEARCHRESULT_HEADER
 {
 	DWORD dwSearchResults;
 	XSESSION_SEARCHRESULT *pResults;
 } XSESSION_SEARCHRESULT_HEADER, *PXSESSION_SEARCHRESULT_HEADER;
+
 
 typedef struct _XSESSION_REGISTRANT
 {
@@ -187,11 +198,13 @@ typedef struct _XSESSION_REGISTRANT
 
 } XSESSION_REGISTRANT;
 
+
 typedef struct _XSESSION_REGISTRATION_RESULTS
 {
 	DWORD wNumRegistrants;
 	XSESSION_REGISTRANT *rgRegistrants;
 } XSESSION_REGISTRATION_RESULTS, *PXSESSION_REGISTRATION_RESULTS;
+
 
 typedef struct {
 	BYTE        bFlags;                         
@@ -206,11 +219,13 @@ typedef struct {
 	DWORD       dwDnBitsPerSec;                
 } XNQOSINFO;
 
+
 typedef struct {
 	uint        cxnqos;                        
 	uint        cxnqosPending;                 
 	XNQOSINFO   axnqosinfo[1];                 
 } XNQOS;
+
 
 #define XSESSION_CREATE_HOST				0
 #define XUSER_DATA_TYPE_INT32				0
@@ -218,6 +233,7 @@ typedef struct {
 #define XNET_QOS_LISTEN_ENABLE				0
 #define XNET_QOS_LISTEN_DISABLE				0
 #define XNET_QOS_LISTEN_SET_DATA			0
+
 
 FORCEINLINE void			XBX_ProcessEvents() {}
 FORCEINLINE unsigned int	XBX_GetSystemTime() { return 0; }
@@ -228,8 +244,10 @@ FORCEINLINE	void			XBX_SetStorageDeviceId( DWORD idx ) {}
 FORCEINLINE const char		*XBX_GetLanguageString() { return ""; }
 FORCEINLINE bool			XBX_IsLocalized() { return false; }
 
+
 #define XCONTENT_MAX_DISPLAYNAME_LENGTH	128
 #define XCONTENT_MAX_FILENAME_LENGTH	42
+
 
 #define XBX_INVALID_STORAGE_ID ((DWORD) -1)
 #define XBX_STORAGE_DECLINED ((DWORD) -2)

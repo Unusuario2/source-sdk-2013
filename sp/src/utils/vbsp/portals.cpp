@@ -1,4 +1,4 @@
-//========= Copyright Valve Corporation, All rights reserved. ============//
+//============= Copyright Valve Corporation, All rights reserved. =============//
 //
 // Purpose: 
 //
@@ -12,6 +12,10 @@
 #include "iscratchpad3d.h"
 #include "csg.h"
 #include "fmtstr.h"
+
+#ifdef MAPBASE
+#include "../common/StandartColorFormat.h" //this control the color of the console.
+#endif 
 
 int		c_active_portals;
 int		c_peak_portals;
@@ -63,9 +67,7 @@ strongest visible content present
 */
 int VisibleContents (int contents)
 {
-	int		i;
-
-	for (i=1 ; i<=LAST_VISIBLE_CONTENTS ; i<<=1)
+	for (int i=1 ; i<=LAST_VISIBLE_CONTENTS ; i<<=1)
 	{
 		if (contents & i )
 		{
@@ -153,7 +155,7 @@ qboolean Portal_EntityFlood (portal_t *p, int s)
 {
 	if (p->nodes[0]->planenum != PLANENUM_LEAF
 		|| p->nodes[1]->planenum != PLANENUM_LEAF)
-		Error ("Portal_EntityFlood: not a leaf");
+		Error ("\tPortal_EntityFlood: not a leaf");
 
 	// can never cross to a solid 
 	if ( (p->nodes[0]->contents & CONTENTS_SOLID)
@@ -191,7 +193,7 @@ AddPortalToNodes
 void AddPortalToNodes (portal_t *p, node_t *front, node_t *back)
 {
 	if (p->nodes[0] || p->nodes[1])
-		Error ("AddPortalToNode: allready included");
+		Error ("\tAddPortalToNode: allready included");
 
 	p->nodes[0] = front;
 	p->next[0] = front->portals;
@@ -218,7 +220,7 @@ void RemovePortalFromNode (portal_t *portal, node_t *l)
 	{
 		t = *pp;
 		if (!t)
-			Error ("RemovePortalFromNode: portal not in leaf");	
+			Error ("\tRemovePortalFromNode: portal not in leaf");	
 
 		if ( t == portal )
 			break;
@@ -228,7 +230,7 @@ void RemovePortalFromNode (portal_t *portal, node_t *l)
 		else if (t->nodes[1] == l)
 			pp = &t->next[1];
 		else
-			Error ("RemovePortalFromNode: portal not bounding leaf");
+			Error ("\tRemovePortalFromNode: portal not bounding leaf");
 	}
 	
 	if (portal->nodes[0] == l)
@@ -247,13 +249,10 @@ void RemovePortalFromNode (portal_t *portal, node_t *l)
 
 void PrintPortal (portal_t *p)
 {
-	int			i;
-	winding_t	*w;
-	
-	w = p->winding;
-	for (i=0 ; i<w->numpoints ; i++)
-		Msg ("(%5.0f,%5.0f,%5.0f)\n",w->p[i][0]
-		, w->p[i][1], w->p[i][2]);
+	winding_t	*w = p->winding;
+
+	for (int i=0 ; i<w->numpoints ; i++)
+		Msg ("(%5.0f,%5.0f,%5.0f)\n",w->p[i][0], w->p[i][1], w->p[i][2]);
 }
 
 // because of water areaportals support, the areaportal may not be the only brush on this node
@@ -280,7 +279,7 @@ The created portals will face the global outside_node
 void MakeHeadnodePortals (tree_t *tree)
 {
 	Vector		bounds[2];
-	int			i, j, n;
+	int			n;
 	portal_t	*p, *portals[6];
 	plane_t		bplanes[6], *pl;
 	node_t *node;
@@ -288,7 +287,7 @@ void MakeHeadnodePortals (tree_t *tree)
 	node = tree->headnode;
 
 // pad with some space so there will never be null volume leafs
-	for (i=0 ; i<3 ; i++)
+	for (int i=0 ; i<3 ; i++)
 	{
 		bounds[0][i] = tree->mins[i] - SIDESPACE;
 		bounds[1][i] = tree->maxs[i] + SIDESPACE;
@@ -299,8 +298,8 @@ void MakeHeadnodePortals (tree_t *tree)
 	tree->outside_node.portals = NULL;
 	tree->outside_node.contents = 0;
 
-	for (i=0 ; i<3 ; i++)
-		for (j=0 ; j<2 ; j++)
+	for (int i=0 ; i<3 ; i++)
+		for (int j=0 ; j<2 ; j++)
 		{
 			n = j*3 + i;
 
@@ -325,9 +324,9 @@ void MakeHeadnodePortals (tree_t *tree)
 		}
 		
 // clip the basewindings by all the other planes
-	for (i=0 ; i<6 ; i++)
+	for (int i=0 ; i<6 ; i++)
 	{
-		for (j=0 ; j<6 ; j++)
+		for (int j=0 ; j<6 ; j++)
 		{
 			if (j == i)
 				continue;
@@ -350,7 +349,6 @@ BaseWindingForNode
 winding_t	*BaseWindingForNode (node_t *node)
 {
 	winding_t	*w;
-	node_t		*n;
 	plane_t		*plane;
 	Vector		normal;
 	vec_t		dist;
@@ -358,7 +356,7 @@ winding_t	*BaseWindingForNode (node_t *node)
 	w = BaseWindingForPlane (g_MainMap->mapplanes[node->planenum].normal, g_MainMap->mapplanes[node->planenum].dist);
 
 	// clip by all the parents
-	for (n=node->parent ; n && w ; )
+	for (node_t* n=node->parent ; n && w ; )
 	{
 		plane = &g_MainMap->mapplanes[n->planenum];
 
@@ -416,7 +414,7 @@ void MakeNodePortal (node_t *node)
 		}
 		else
 		{
-			Error ("CutNodePortals_r: mislinked portal");
+			Error ("\tCutNodePortals_r: mislinked portal");
 		}
 
 		ChopWindingInPlace (&w, normal, dist, 0.1);
@@ -471,7 +469,7 @@ void SplitNodePortals (node_t *node)
 		else if (p->nodes[1] == node)
 			side = 1;
 		else
-			Error ("CutNodePortals_r: mislinked portal");
+			Error ("\tCutNodePortals_r: mislinked portal");
 		next_portal = p->next[side];
 
 		other_node = p->nodes[!side];
@@ -552,16 +550,14 @@ CalcNodeBounds
 */
 void CalcNodeBounds (node_t *node)
 {
-	portal_t	*p;
-	int			s;
-	int			i;
+	int s;
 
 	// calc mins/maxs for both leafs and nodes
 	ClearBounds (node->mins, node->maxs);
-	for (p = node->portals ; p ; p = p->next[s])	
+	for (portal_t* p = node->portals ; p ; p = p->next[s])
 	{
 		s = (p->nodes[1] == node);
-		for (i=0 ; i<p->winding->numpoints ; i++)
+		for (int i=0 ; i<p->winding->numpoints ; i++)
 			AddPointToBounds (p->winding->p[i], node->mins, node->maxs);
 	}
 }
@@ -574,15 +570,13 @@ MakeTreePortals_r
 */
 void MakeTreePortals_r (node_t *node)
 {
-	int		i;
-
 	CalcNodeBounds (node);
 	if (node->mins[0] >= node->maxs[0])
 	{
-		Warning("WARNING: node without a volume\n");
+		Warning("\tWARNING: node without a volume\n");
 	}
 
-	for (i=0 ; i<3 ; i++)
+	for (int i=0 ; i<3 ; i++)
 	{
 		if (node->mins[i] < (MIN_COORD_INTEGER-SIDESPACE) || node->maxs[i] > (MAX_COORD_INTEGER+SIDESPACE))
 		{
@@ -595,7 +589,7 @@ void MakeTreePortals_r (node_t *node)
 				pMatName = TexDataStringTable_GetString( pTexData->nameStringTableID );
 			}
 			Vector point = node->portals->winding->p[0];
-			Warning("WARNING: BSP node with unbounded volume (material: %s, near %s)\n", pMatName, VecToString(point) );
+			Warning("\tWARNING: BSP node with unbounded volume (material: %s, near %s)\n", pMatName, VecToString(point) );
 			break;
 		}
 	}
@@ -637,12 +631,11 @@ FLOOD ENTITIES
 //-----------------------------------------------------------------------------
 void FloodPortals_r (node_t *node, int dist)
 {
-	portal_t	*p;
 	int			s;
 
 	node->occupied = dist;
 
-	for (p=node->portals ; p ; p = p->next[s])
+	for (portal_t *p=node->portals ; p ; p = p->next[s])
 	{
 		s = (p->nodes[1] == node);
 
@@ -660,12 +653,11 @@ void FloodPortals_r (node_t *node, int dist)
 
 void FloodAreaLeak_r( node_t *node, int dist )
 {
-	portal_t	*p;
 	int			s;
 
 	node->occupied = dist;
 
-	for (p=node->portals ; p ; p = p->next[s])
+	for (portal_t* p=node->portals ; p ; p = p->next[s])
 	{
 		s = (p->nodes[1] == node);
 
@@ -743,7 +735,6 @@ Marks all nodes that can be reached by entites
 */
 qboolean FloodEntities (tree_t *tree)
 {
-	int		i;
 	Vector	origin;
 	char	*cl;
 	qboolean	inside;
@@ -754,7 +745,7 @@ qboolean FloodEntities (tree_t *tree)
 	inside = false;
 	tree->outside_node.occupied = 0;
 
-	for (i=1 ; i<num_entities ; i++)
+	for (int i=1 ; i<num_entities ; i++)
 	{
 		GetVectorForKey (&entities[i], "origin", origin);
 		if (VectorCompare(origin, vec3_origin))
@@ -849,7 +840,7 @@ void FloodAreas_r (node_t *node, portal_t *pSeeThrough)
 		// note the current area as bounding the portal
 		if (e->portalareas[1])
 		{
-			Warning("WARNING: areaportal entity %i (brush %i) touches > 2 areas\n", b->original->entitynum, b->original->id );
+			Warning("\tWARNING: areaportal entity %i (brush %i) touches > 2 areas\n", b->original->entitynum, b->original->id );
 			return;
 		}
 		
@@ -921,7 +912,7 @@ void FindAreas_r (node_t *node)
 }
 
 #ifdef MAPBASE
-extern qboolean	noleaktest;
+extern bool		noleaktest;
 #endif
 
 void ReportAreaportalLeak( tree_t *tree, node_t *node )
@@ -975,7 +966,7 @@ void ReportAreaportalLeak( tree_t *tree, node_t *node )
 #ifdef MAPBASE
 	if (!noleaktest)
 	{
-		Warning( ("--- AREAPORTAL LEAK ---\n") );
+		Warning("\n\t|======= AreaPortal Leak =======|\n");
 		exit(0);
 	}
 #endif
@@ -1013,7 +1004,7 @@ void SetAreaPortalAreas_r (tree_t *tree, node_t *node)
 		if (!e->portalareas[1])
 		{
 			ReportAreaportalLeak( tree, node );
-			Warning("\nBrush %i: areaportal brush doesn't touch two areas\n", b->original->id);
+			Warning("\t\nBrush %i: areaportal brush doesn't touch two areas\n", b->original->id);
 			return;
 		}
 	}
@@ -1037,10 +1028,10 @@ int FindUniquePoints( const Vector2D *pPoints, int nPoints, int *indexMap, int n
 
 	// This could be slightly more efficient.
 	int nUniquePoints = 0;
-	for ( int i=0; i < nPoints; i++ )
+	for ( int i = 0; i < nPoints; i++ )
 	{
 		int j;
-		for ( j=0; j < nUniquePoints; j++ )
+		for ( j = 0; j < nUniquePoints; j++ )
 		{
 			if ( pPoints[i].DistToSqr( pPoints[indexMap[j]] ) < flToleranceSqr )
 				break;
@@ -1048,7 +1039,7 @@ int FindUniquePoints( const Vector2D *pPoints, int nPoints, int *indexMap, int n
 		if ( j == nUniquePoints )
 		{
 			if ( nUniquePoints >= nMaxIndexMapPoints )
-				Error( "FindUniquePoints: overflowed unique point list (size %d).", nMaxIndexMapPoints );
+				Error("\tFindUniquePoints: overflowed unique point list (size %d).", nMaxIndexMapPoints );
 
 			indexMap[nUniquePoints++] = i;
 		}
@@ -1075,9 +1066,8 @@ int Convex2D( Vector2D const *pPoints, int nPoints, int *indices, int nMaxIndice
 	memset( touched, 0, nPoints*sizeof(touched[0]) );
 
 	// Find the (lower) left side.
-	int i;
 	int iBest = 0;
-	for( i=1; i < nPoints; i++ )
+	for(int i = 1; i < nPoints; i++ )
 	{
 		if( pPoints[indexMap[i]].x < pPoints[indexMap[iBest]].x ||
 			(pPoints[indexMap[i]].x == pPoints[indexMap[iBest]].x && pPoints[indexMap[i]].y < pPoints[indexMap[iBest]].y) )
@@ -1102,7 +1092,7 @@ int Convex2D( Vector2D const *pPoints, int nPoints, int *indices, int nMaxIndice
 		int iMinAngle = -1;
 		float flMinAngle = 5000;
 
-		for( i=0; i < nPoints; i++ )
+		for(int i = 0; i < nPoints; i++ )
 		{
 			Vector2D vTo = pPoints[indexMap[i]] - *pStartPoint;
 			float flDistToSqr = vTo.LengthSqr();
@@ -1214,27 +1204,21 @@ void EmitClipPortalGeometry( node_t *pHeadNode, portal_t *pPortal, int iSrcArea,
 {
 	// Build a list of all the points in portals from the same original face.
 	CUtlVector<portal_t*> portals;
-	FindPortalsLeadingToArea_R( 
-		pHeadNode, 
-		iSrcArea, 
-		dp->otherarea, 
-		&pPortal->plane,
-		portals );
+	FindPortalsLeadingToArea_R( pHeadNode, iSrcArea, dp->otherarea, &pPortal->plane,portals );
 
 	CUtlVector<Vector> points;
 	for( int iPortal=0; iPortal < portals.Size(); iPortal++ )
 	{
 		portal_t *pPointPortal = portals[iPortal];
 		winding_t *pWinding = pPointPortal->winding;
-		for( int i=0; i < pWinding->numpoints; i++ )
+		for(int i = 0; i < pWinding->numpoints; i++ )
 		{
 			points.AddToTail( pWinding->p[i] );
 		}
 	}
 
 	// Get the 2D convex hull.
-
-	//// First transform them into a plane.
+	// First transform them into a plane.
 	QAngle vAngles;
 	Vector vecs[3];
 
@@ -1245,9 +1229,8 @@ void EmitClipPortalGeometry( node_t *pHeadNode, portal_t *pPortal, int iSrcArea,
 	mTransform.SetBasisVectors( vecs[0], vecs[1], vecs[2] );
 	VMatrix mInvTransform = mTransform.Transpose();
 
-	int i;
 	CUtlVector<Vector2D> points2D;
-	for( i=0; i < points.Size(); i++ )
+	for(int i = 0; i < points.Size(); i++ )
 	{
 		Vector vTest = mTransform * points[i];
 		points2D.AddToTail( Vector2D( vTest.y, vTest.z ) );
@@ -1263,16 +1246,16 @@ void EmitClipPortalGeometry( node_t *pHeadNode, portal_t *pPortal, int iSrcArea,
 
 	if ( nIndices >= 32 )
 	{
-		Warning( "Warning: area portal has %d verts. Could be a vbsp bug.\n", nIndices );
+		Warning("\tWarning: area portal has %d verts. Could be a vbsp bug.\n", nIndices );
 	}
 
 	if( dp->m_FirstClipPortalVert + dp->m_nClipPortalVerts >= MAX_MAP_PORTALVERTS )
 	{
 		Vector *p = pPortal->winding->p;
-		Error( "MAX_MAP_PORTALVERTS (probably a broken areaportal near %.1f %.1f %.1f ", p->x, p->y, p->z );
+		Error("\tMAX_MAP_PORTALVERTS (probably a broken areaportal near %.1f %.1f %.1f ", p->x, p->y, p->z );
 	}
 	
-	for( i=0; i < nIndices; i++ )
+	for(int i = 0; i < nIndices; i++ )
 	{
 		g_ClipPortalVerts[g_nClipPortalVerts] = points[ indices[i] ];
 		++g_nClipPortalVerts;
@@ -1312,7 +1295,7 @@ void EmitAreaPortals (node_t *headnode)
 	dareaportal_t	*dp;
 
 	if (c_areas > MAX_MAP_AREAS)
-		Error ("Map is split into too many unique areas (max = %d)\nProbably too many areaportals", MAX_MAP_AREAS);
+		Error ("\tMap is split into too many unique areas (max = %d)\nProbably too many areaportals", MAX_MAP_AREAS);
 	numareas = c_areas+1;
 	numareaportals = 1;		// leave 0 as an error
 
@@ -1388,7 +1371,12 @@ void FloodAreas (tree_t *tree)
 	FindAreas_r (tree->headnode);
 	SetAreaPortalAreas_r (tree, tree->headnode);
 	qprintf ("%5i areas\n", c_areas);
-	Msg("done (%d)\n", (int)(Plat_FloatTime() - start) );
+
+#ifdef MAPBASE
+	ColorSpewMessage(SPEW_MESSAGE, &green, " done (%d)\n", (int)(Plat_FloatTime() - start));
+#else
+	Msg("done (%d)\n", (int)(Plat_FloatTime() - start));
+#endif
 }
 
 //======================================================
@@ -1468,13 +1456,13 @@ static void DisplayPortalError( portal_t *p, int viscontents )
 
 	Vector center;
 	WindingCenter( p->winding, center );
-	Warning( "\nFindPortalSide: Couldn't find a good match for which brush to assign to a portal near (%.1f %.1f %.1f)\n", center.x, center.y, center.z);
-	Warning( "Leaf 0 contents: %s\n", contents[0] );
-	Warning( "Leaf 1 contents: %s\n", contents[1] );
-	Warning( "viscontents (node 0 contents ^ node 1 contents): %s\n", contents[2] );
-	Warning( "This means that none of the brushes in leaf 0 or 1 that touches the portal has %s\n", contents[2] );
-	Warning( "Check for a huge brush enclosing the coordinates above that has contents %s\n", contents[2] );
-	Warning( "Candidate brush IDs: " );
+	Warning("\t\nFindPortalSide: Couldn't find a good match for which brush to assign to a portal near (%.1f %.1f %.1f)\n", center.x, center.y, center.z);
+	Warning("\tLeaf 0 contents: %s\n", contents[0] );
+	Warning("\tLeaf 1 contents: %s\n", contents[1] );
+	Warning("\tviscontents (node 0 contents ^ node 1 contents): %s\n", contents[2] );
+	Warning("\tThis means that none of the brushes in leaf 0 or 1 that touches the portal has %s\n", contents[2] );
+	Warning("\tCheck for a huge brush enclosing the coordinates above that has contents %s\n", contents[2] );
+	Warning("\tCandidate brush IDs: " );
 
 	CUtlVector<int> listed;
 	for (int j=0 ; j<2 ; j++)
@@ -1488,12 +1476,12 @@ static void DisplayPortalError( portal_t *p, int viscontents )
 				if ( listed.Find( brush->brushnum ) == -1 )
 				{
 					listed.AddToTail( brush->brushnum );
-					Warning( "Brush %d: ", brush->id );
+					Warning("\tBrush %d: ", brush->id );
 				}
 			}
 		}
 	}
-	Warning( "\n\n" );
+	Warning("\t\n\n" );
 }
 
 
@@ -1512,7 +1500,6 @@ void FindPortalSide (portal_t *p)
 	bspbrush_t	*bb;
 	mapbrush_t	*brush;
 	node_t		*n;
-	int			i,j;
 	int			planenum;
 	side_t		*side, *bestside;
 	float		bestdist;
@@ -1530,7 +1517,7 @@ void FindPortalSide (portal_t *p)
 	bestside = NULL;
 	bestdist = 1000000;
 
-	for (j=0 ; j<2 ; j++)
+	for (int j=0 ; j<2 ; j++)
 	{
 		n = p->nodes[j];
 		p1 = &g_MainMap->mapplanes[p->onnode->planenum];
@@ -1541,7 +1528,7 @@ void FindPortalSide (portal_t *p)
 			if ( !(brush->contents & viscontents) )
 				continue;
 
-			for (i=0 ; i<brush->numsides ; i++)
+			for (int i=0 ; i<brush->numsides ; i++)
 			{
 				side = &brush->original_sides[i];
 				if (side->bevel)
@@ -1581,7 +1568,7 @@ gotit:
 			DisplayPortalError( p, viscontents );
 			if ( ++nWarnCount == 8 )
 			{
-				Warning("*** Suppressing further FindPortalSide errors.... ***\n" );
+				Warning("\t*** Suppressing further FindPortalSide errors.... ***\n" );
 			}
 		}
 	}
@@ -1636,21 +1623,20 @@ MarkVisibleSides
 // UNDONE: Put detail brushes in a separate list (not mapbrushes) ?
 void MarkVisibleSides (tree_t *tree, int startbrush, int endbrush, int detailScreen)
 {
-	int		i, j;
 	mapbrush_t	*mb;
-	int		numsides;
-	qboolean detail;
+	int			numsides;
+	bool		detail;
 
 	qprintf ("--- MarkVisibleSides ---\n");
 
 	// clear all the visible flags
-	for (i=startbrush ; i<endbrush ; i++)
+	for (int i=startbrush ; i<endbrush ; i++)
 	{
 		mb = &g_MainMap->mapbrushes[i];
 
 		if ( detailScreen != FULL_DETAIL )
 		{
-			qboolean onlyDetail = (detailScreen==ONLY_DETAIL)?true:false;
+			bool onlyDetail = (detailScreen==ONLY_DETAIL)?true:false;
 			// true for detail brushes
 			detail = (mb->contents & CONTENTS_DETAIL) ? true : false;
 			if ( onlyDetail ^ detail )
@@ -1661,7 +1647,7 @@ void MarkVisibleSides (tree_t *tree, int startbrush, int endbrush, int detailScr
 		}
 
 		numsides = mb->numsides;
-		for (j=0 ; j<numsides ; j++)
+		for (int j=0 ; j<numsides ; j++)
 			mb->original_sides[j].visible = false;
 	}
 
@@ -1678,12 +1664,11 @@ void MarkVisibleSides (tree_t *tree, mapbrush_t **ppBrushes, int nCount )
 	qprintf ("--- MarkVisibleSides ---\n");
 
 	// clear all the visible flags
-	int	i, j;
-	for ( i=0; i < nCount; ++i )
+	for (int i = 0; i < nCount; ++i )
 	{
 		mapbrush_t *mb = ppBrushes[i];
 		int numsides = mb->numsides;
-		for (j=0 ; j<numsides ; j++)
+		for (int j=0 ; j<numsides ; j++)
 		{
 			mb->original_sides[j].visible = false;
 		}

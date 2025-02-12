@@ -1,4 +1,4 @@
-//========= Copyright Valve Corporation, All rights reserved. ============//
+//============= Copyright Valve Corporation, All rights reserved. =============//
 //
 // Purpose: 
 //
@@ -182,6 +182,11 @@ extern CUtlVector<CFaceMacroTextureInfo>	g_FaceMacroTextureInfos;
 extern CUtlVector<doccluderdata_t>		g_OccluderData;
 extern CUtlVector<doccluderpolydata_t>	g_OccluderPolyData;
 extern CUtlVector<int>					g_OccluderVertexIndices;
+
+#ifdef MAPBASE
+extern CUtlVector<dlightmappage_t>		g_dLightmapPages;
+extern CUtlVector<dlightmappageinfo_t>	g_dLightmapPageInfos;
+#endif
 
 // level flags - see LVLFLAGS_xxx in bspfile.h
 extern uint32 g_LevelFlags;	

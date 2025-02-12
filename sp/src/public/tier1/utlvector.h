@@ -1,4 +1,4 @@
-//========= Copyright Valve Corporation, All rights reserved. ============//
+//============= Copyright Valve Corporation, All rights reserved. =============//
 //
 // Purpose: 
 //
@@ -419,7 +419,7 @@ public:
 	{
 		if ( m_pData != StaticData() )
 		{
-			for( int i=0; i < m_pData->m_Size; i++ )
+			for( int i = 0; i < m_pData->m_Size; i++ )
 			{
 				delete Element(i);
 			}
@@ -915,7 +915,7 @@ void CUtlVector<T, A>::CopyArray( const T *pArray, int size )
 	Assert( (Base() == NULL) || !pArray || (Base() >= (pArray + size)) || (pArray >= (Base() + Count()) ) ); 
 
 	SetSize( size );
-	for( int i=0; i < size; i++ )
+	for( int i = 0; i < size; i++ )
 	{
 		(*this)[i] = pArray[i];
 	}
@@ -943,7 +943,7 @@ int CUtlVector<T, A>::AddVectorToTail( CUtlVector const &src )
 	AddMultipleToTail( src.Count() );
 
 	// Copy the elements.	
-	for ( int i=0; i < src.Count(); i++ )
+	for ( int i = 0; i < src.Count(); i++ )
 	{
 		(*this)[base + i] = src[i];
 	}
@@ -970,7 +970,7 @@ inline int CUtlVector<T, A>::InsertMultipleBefore( int elem, int num, const T *p
 	// Copy stuff in?
 	if ( pToInsert )
 	{
-		for ( int i=0; i < num; i++ )
+		for ( int i = 0; i < num; i++ )
 		{
 			Element( elem+i ) = pToInsert[i];
 		}
@@ -1114,7 +1114,7 @@ inline void CUtlVector<T, A>::Purge()
 template< typename T, class A >
 inline void CUtlVector<T, A>::PurgeAndDeleteElements()
 {
-	for( int i=0; i < m_Size; i++ )
+	for( int i = 0; i < m_Size; i++ )
 	{
 		delete Element(i);
 	}
@@ -1180,7 +1180,7 @@ public:
 
 	inline void PurgeAndDeleteElements()
 	{
-		for( int i=0; i < m_Size; i++ )
+		for( int i = 0; i < m_Size; i++ )
 		{
 			delete [] Element(i);
 		}
