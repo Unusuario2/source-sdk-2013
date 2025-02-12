@@ -23,6 +23,12 @@
 #include "bitmap/imageformat.h"
 #include "coordsize.h"
 
+
+
+
+
+
+
 #ifdef MAPBASE
 #include "vtf/swizzler.h"
 #endif
