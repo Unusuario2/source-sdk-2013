@@ -1,4 +1,4 @@
-//========= Copyright Valve Corporation, All rights reserved. ============//
+//============= Copyright Valve Corporation, All rights reserved. =============//
 //
 // Purpose: 
 //
@@ -270,7 +270,7 @@ extern int			nodeparents[MAX_MAP_NODES];
 extern float		lightscale;
 extern float		dlight_threshold;
 extern float		coring;
-extern qboolean		g_bDumpPatches;
+extern bool			g_bDumpPatches;
 extern bool			bRed2Black;
 extern bool         g_bNoSkyRecurse;
 extern bool			bDumpNormals;
@@ -282,8 +282,8 @@ extern bool			g_bExportLightmaps;
 #endif
 
 extern FileHandle_t	pFileSamples[4][4];
-extern qboolean		g_bLowPriority;
-extern qboolean		do_fast;
+extern bool			g_bLowPriority;
+extern bool			do_fast;
 extern bool			g_bInterrupt;		// Was used with background lighting in WC. Tells VRAD to stop lighting.
 extern IIncremental *g_pIncremental;	// null if not doing incremental lighting
 
@@ -321,15 +321,15 @@ void TouchVMFFile (void);
 
 //==============================================
 
-extern  qboolean do_extra;
-extern  qboolean do_fast;
-extern  qboolean do_centersamples;
-extern  int extrapasses;
-extern	Vector ambient;
-extern  float maxlight;
-extern	unsigned numbounce;
-extern  qboolean g_bLogHashData;
-extern  bool	debug_extra;
+extern  bool			do_extra;
+extern  bool			do_fast;
+extern  bool			do_centersamples;
+extern  int				extrapasses;
+extern	Vector			ambient;
+extern  float			maxlight;
+extern	unsigned		numbounce;
+extern  bool			g_bLogHashData;
+extern  bool			debug_extra;
 extern	directlight_t	*activelights;
 extern	directlight_t	*freelights;
 
@@ -342,7 +342,7 @@ extern bool g_bMPIProps;
 
 extern	byte	nodehit[MAX_MAP_NODES];
 extern  float	gamma_value;
-extern	float	indirect_sun;
+//extern	float	indirect_sun; //not used.
 extern	float	smoothing_threshold;
 extern	int		dlight_map;
 

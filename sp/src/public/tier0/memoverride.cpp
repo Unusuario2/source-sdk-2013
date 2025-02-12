@@ -1,4 +1,4 @@
-//========= Copyright Valve Corporation, All rights reserved. ============//
+//============= Copyright Valve Corporation, All rights reserved. =============//
 //
 // Purpose: Insert this file into all projects using the memory system
 // It will cause that project to use the shader memory allocator
@@ -602,7 +602,7 @@ ALLOC_CALL void *__cdecl _aligned_realloc_base( void *ptr, size_t size, size_t a
 
 ALLOC_CALL void *__cdecl _aligned_recalloc_base( void *ptr, size_t size, size_t align )
 {
-	Error( "Unsupported function\n" );
+	Error("\tUnsupported function\n" );
 	return NULL;
 }
 

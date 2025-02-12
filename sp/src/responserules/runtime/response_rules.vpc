@@ -16,7 +16,7 @@ $Configuration
 	}
 }
 
-$Project "responserules_runtime"
+$Project "Responserules runtime"
 {
 	$Folder	"Source Files"
 	{

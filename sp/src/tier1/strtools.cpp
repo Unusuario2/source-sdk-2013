@@ -1,4 +1,4 @@
-//========= Copyright Valve Corporation, All rights reserved. ============//
+//============= Copyright Valve Corporation, All rights reserved. =============//
 //
 // Purpose: String Tools
 //
@@ -2162,7 +2162,7 @@ void V_AppendSlash( char *pStr, int strSize )
 	if ( len > 0 && !PATHSEPARATOR(pStr[len-1]) )
 	{
 		if ( len+1 >= strSize )
-			Error( "V_AppendSlash: ran out of space on %s.", pStr );
+			Error("\tV_AppendSlash: ran out of space on %s.", pStr );
 		
 		pStr[len] = CORRECT_PATH_SEPARATOR;
 		pStr[len+1] = 0;
@@ -2187,7 +2187,7 @@ void V_MakeAbsolutePath( char *pOut, int outLen, const char *pPath, const char *
 		else
 		{
 			if ( !_getcwd( pOut, outLen ) )
-				Error( "V_MakeAbsolutePath: _getcwd failed." );
+				Error("\tV_MakeAbsolutePath: _getcwd failed." );
 
 			if ( pStartingDir )
 			{
@@ -2202,7 +2202,7 @@ void V_MakeAbsolutePath( char *pOut, int outLen, const char *pPath, const char *
 	}
 
 	if ( !V_RemoveDotSlashes( pOut ) )
-		Error( "V_MakeAbsolutePath: tried to \"..\" past the root." );
+		Error("\tV_MakeAbsolutePath: tried to \"..\" past the root." );
 
 	//V_FixSlashes( pOut ); - handled by V_RemoveDotSlashes
 }
@@ -2419,7 +2419,7 @@ void V_SplitString2( const char *pString, const char **pSeparators, int nSeparat
 	{
 		int iFirstSeparator = -1;
 		const char *pFirstSeparator = 0;
-		for ( int i=0; i < nSeparators; i++ )
+		for ( int i = 0; i < nSeparators; i++ )
 		{
 			const char *pTest = V_stristr( pCurPos, pSeparators[i] );
 			if ( pTest && (!pFirstSeparator || pTest < pFirstSeparator) )
@@ -2715,7 +2715,7 @@ void Q_URLEncodeInternal( char *pchDest, int nDestLen, const char *pchSource, in
 	}
 
 	int iDestPos = 0;
-	for ( int i=0; i < nSourceLen; ++i )
+	for ( int i = 0; i < nSourceLen; ++i )
 	{
 		// We allow only a-z, A-Z, 0-9, period, underscore, and hyphen to pass through unescaped.
 		// These are the characters allowed by both the original RFC 1738 and the latest RFC 3986.
@@ -2773,7 +2773,7 @@ size_t Q_URLDecodeInternal( char *pchDecodeDest, int nDecodeDestLen, const char 
 	}
 
 	int iDestPos = 0;
-	for( int i=0; i < nEncodedSourceLen; ++i )
+	for( int i = 0; i < nEncodedSourceLen; ++i )
 	{
 		if ( bUsePlusForSpace && pchEncodedSource[i] == '+' )
 		{

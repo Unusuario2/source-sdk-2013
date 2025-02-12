@@ -1,4 +1,4 @@
-//========= Copyright Valve Corporation, All rights reserved. ============//
+//============= Copyright Valve Corporation, All rights reserved. =============//
 //
 // Purpose: 
 //
@@ -16,7 +16,7 @@ void ScratchPad_DrawWinding(
 	Vector vColor, 
 	Vector vOffset )
 {
-	for ( int i=0; i < nPoints; i++ )
+	for ( int i = 0; i < nPoints; i++ )
 	{
 		pPad->DrawLine( CSPVert( pPoints[i]+vOffset, vColor ), CSPVert( pPoints[(i+1)%nPoints]+vOffset, vColor ) );
 	}
@@ -78,7 +78,7 @@ void ScratchPad_DrawWorld( IScratchPad3D *pPad, bool bDrawFaceNumbers, const CSP
 	bool bAutoFlush = pPad->GetAutoFlush();
 	pPad->SetAutoFlush( false );
 
-	for ( int i=0; i < numleafs; i++ )
+	for ( int i = 0; i < numleafs; i++ )
 	{
 		dleaf_t *l = &dleafs[i];
 		if ( l->contents & CONTENTS_DETAIL )

@@ -1,4 +1,4 @@
-//========= Copyright Valve Corporation, All rights reserved. ============//
+//============= Copyright Valve Corporation, All rights reserved. =============//
 //
 // Purpose: 
 //
@@ -26,6 +26,11 @@
 #include "tier0/dbg.h"
 #include "lumpfiles.h"
 #include "vtf/vtf.h"
+
+#ifdef MAPBASE
+#include "../common/StandartColorFormat.h" //this control the color of the console.
+#endif 
+
 
 //=============================================================================
 
@@ -1054,7 +1059,7 @@ void CGameLump::SwapGameLump( GameLumpId_t id, int version, byte *dest, byte *sr
 		{
 			if ( version != 6 )
 			{
-				Error( "Unknown Static Prop Lump version %d didn't get swapped!\n", version );
+				Error( "\tUnknown Static Prop Lump version %d didn't get swapped!\n", version );
 			}
 
 			StaticPropLump_t lump;
@@ -1148,7 +1153,7 @@ void CGameLump::SwapGameLump( GameLumpId_t id, int version, byte *dest, byte *sr
 	default:
 		char idchars[5] = {0};
 		Q_memcpy( idchars, &id, 4 );
-		Warning( "Unknown game lump '%s' didn't get swapped!\n", idchars );
+		Warning("\tUnknown game lump '%s' didn't get swapped!\n", idchars );
 		memcpy ( dest, src, length);
 		break;
 	}
@@ -1371,7 +1376,7 @@ static void LoadOcclusionLump()
 		break;
 
 	default:
-		Error("Unknown occlusion lump version!\n");
+		Error("\tUnknown occlusion lump version!\n");
 		break;
 	}
 }
@@ -1439,12 +1444,12 @@ void DecompressVis (byte *in, byte *decompressed)
 	
 		c = in[1];
 		if (!c)
-			Error ("DecompressVis: 0 repeat");
+			Error ("\tDecompressVis: 0 repeat");
 		in += 2;
 		if ((out - decompressed) + c > row)
 		{
 			c = row - (out - decompressed);
-			Warning( "warning: Vis decompression overrun\n" );
+			Warning("\twarning: Vis decompression overrun\n" );
 		}
 		while (c)
 		{
@@ -1513,7 +1518,7 @@ static void SwapPhyscollideLump( byte *pDestBase, byte *pSrcBase, unsigned int &
 
 	if ( !physcollision )
 	{
-		Warning("!!! WARNING: Can't swap the physcollide lump!\n" );
+		Warning("\t!!! WARNING: Can't swap the physcollide lump!\n" );
 		return;
 	}
 
@@ -1782,12 +1787,12 @@ void ValidateLump( int lump, int length, int size, int forceVersion )
 {
 	if ( length % size )
 	{
-		Error( "ValidateLump: odd size for lump %d", lump );
+		Error( "\tValidateLump: odd size for lump %d", lump );
 	}
 
 	if ( forceVersion >= 0 && forceVersion != g_pBSPHeader->lumps[lump].version )
 	{
-		Error( "ValidateLump: old version for lump %d in map!", lump );
+		Error( "\tValidateLump: old version for lump %d in map!", lump );
 	}
 }
 
@@ -1985,7 +1990,7 @@ int LoadLeafs( void )
 			int size = sizeof( dleaf_version_0_t );
 			if ( length % size )
 			{
-				Error( "odd size for LUMP_LEAFS\n" );
+				Error( "\todd size for LUMP_LEAFS\n" );
 			}
 			int count = length / size;
 
@@ -2023,7 +2028,7 @@ int LoadLeafs( void )
 
 	default:
 		Assert( 0 );
-		Error( "Unknown LUMP_LEAFS version\n" );
+		Error( "\tUnknown LUMP_LEAFS version\n" );
 		return 0;
 	}
 }
@@ -2114,11 +2119,11 @@ void ValidateHeader( const char *filename, const dheader_t *pHeader )
 {
 	if ( pHeader->ident != IDBSPHEADER )
 	{
-		Error ("%s is not a IBSP file", filename);
+		Error ("\t%s is not a IBSP file", filename);
 	}
 	if ( pHeader->version < MINBSPVERSION || pHeader->version > BSPVERSION )
 	{
-		Error ("%s is version %i, not %i", filename, pHeader->version, BSPVERSION);
+		Error ("\t%s is version %i, not %i", filename, pHeader->version, BSPVERSION);
 	}
 }
 
@@ -2573,7 +2578,7 @@ void WriteBSPFile( const char *filename, char *pUnused )
 {		
 	if ( texinfo.Count() > MAX_MAP_TEXINFO )
 	{
-		Error( "Map has too many texinfos (has %d, can have at most %d)\n", texinfo.Count(), MAX_MAP_TEXINFO );
+		Error( "\tMap has too many texinfos (has %d, can have at most %d)\n", texinfo.Count(), MAX_MAP_TEXINFO );
 		return;
 	}
 
@@ -2707,7 +2712,7 @@ void WriteLumpToFile( char *filename, int lump )
 	char lumppre[MAX_PATH];	
 	if ( !GenerateNextLumpFileName( filename, lumppre, MAX_PATH ) )
 	{
-		Warning( "Failed to find valid lump filename for bsp %s.\n", filename );
+		Warning("\tFailed to find valid lump filename for bsp %s.\n", filename );
 		return;
 	}
 
@@ -2715,7 +2720,7 @@ void WriteLumpToFile( char *filename, int lump )
 	FileHandle_t lumpfile = g_pFileSystem->Open(lumppre, "wb");
 	if ( !lumpfile )
 	{
-		Error ("Error opening %s! (Check for write enable)\n",filename);
+		Error ("\tError opening %s! (Check for write enable)\n",filename);
 		return;
 	}
 
@@ -2740,7 +2745,7 @@ void	WriteLumpToFile( char *filename, int lump, int nLumpVersion, void *pBuffer,
 	char lumppre[MAX_PATH];	
 	if ( !GenerateNextLumpFileName( filename, lumppre, MAX_PATH ) )
 	{
-		Warning( "Failed to find valid lump filename for bsp %s.\n", filename );
+		Warning("\tFailed to find valid lump filename for bsp %s.\n", filename );
 		return;
 	}
 
@@ -2748,7 +2753,7 @@ void	WriteLumpToFile( char *filename, int lump, int nLumpVersion, void *pBuffer,
 	FileHandle_t lumpfile = g_pFileSystem->Open(lumppre, "wb");
 	if ( !lumpfile )
 	{
-		Error ("Error opening %s! (Check for write enable)\n",filename);
+		Error ("\tError opening %s! (Check for write enable)\n",filename);
 		return;
 	}
 
@@ -2899,7 +2904,14 @@ void PrintBSPFileSizes (void)
 		// face tris = numedges - 2
 		triangleCount += dfaces[i].numedges - 2;
 	}
+
+#ifdef MAPBASE
+	Msg("Total triangle count ");
+	ColorSpewMessage(SPEW_MESSAGE, &magenta, "[%d]\n", triangleCount);
+#else
 	Msg("Total triangle count: %d\n", triangleCount );
+#endif
+
 
 	// UNDONE: 
 	// areaportals, portals, texdata, clusters, worldlights, portalverts
@@ -2948,12 +2960,12 @@ epair_t *ParseEpair (void)
 	memset (e, 0, sizeof(epair_t));
 	
 	if (strlen(token) >= MAX_KEY-1)
-		Error ("ParseEpar: token too long");
+		Error ("\tParseEpar: token too long");
 	e->key = copystring(token);
 
 	GetToken (false);
 	if (strlen(token) >= MAX_VALUE-1)
-		Error ("ParseEpar: token too long");
+		Error ("\tParseEpar: token too long");
 	e->value = copystring(token);
 
 	// strip trailing spaces
@@ -2978,10 +2990,10 @@ qboolean	ParseEntity (void)
 		return false;
 
 	if (Q_stricmp (token, "{") )
-		Error ("ParseEntity: { not found");
+		Error ("\tParseEntity: { not found");
 	
 	if (num_entities == MAX_MAP_ENTITIES)
-		Error ("num_entities == MAX_MAP_ENTITIES");
+		Error ("\tnum_entities == MAX_MAP_ENTITIES");
 
 	mapent = &entities[num_entities];
 	num_entities++;
@@ -2989,7 +3001,7 @@ qboolean	ParseEntity (void)
 	do
 	{
 		if (!GetToken (true))
-			Error ("ParseEntity: EOF without closing brace");
+			Error ("\tParseEntity: EOF without closing brace");
 		if (!Q_stricmp (token, "}") )
 			break;
 		e = ParseEpair ();
@@ -3198,7 +3210,7 @@ void TriStripToTriList(
 	*pTriListIndices = new unsigned short[ nMaxTriListIndices ];
 	*pnTriListIndices = 0;
 
-	for( int i=0; i < nTriStripIndices - 2; i++ )
+	for( int i = 0; i < nTriStripIndices - 2; i++ )
 	{
 		if( pTriStripIndices[i]   == pTriStripIndices[i+1] || 
 			pTriStripIndices[i]   == pTriStripIndices[i+2] ||
@@ -3232,7 +3244,7 @@ void CalcTextureCoordsAtPoints(
 	int const nPoints,
 	Vector2D *pCoords )
 {
-	for( int i=0; i < nPoints; i++ )
+	for( int i = 0; i < nPoints; i++ )
 	{
 		for( int iCoord=0; iCoord < 2; iCoord++ )
 		{
@@ -3305,10 +3317,10 @@ void CalcFaceExtents(dface_t *s, int lightmapTextureMinsInLuxels[2], int lightma
 				e = dsurfedges[s->firstedge+j];
 				v = (e<0)?dvertexes + dedges[-e].v[1] : dvertexes + dedges[e].v[0];
 				point += v->point;
-				Warning( "Bad surface extents point: %f %f %f\n", v->point.x, v->point.y, v->point.z );
+				Warning("\tBad surface extents point: %f %f %f\n", v->point.x, v->point.y, v->point.z );
 			}
 			point *= 1.0f/s->numedges;
-			Error( "Bad surface extents - surface is too big to have a lightmap\n\tmaterial %s around point (%.1f %.1f %.1f)\n\t(dimension: %d, %d>%d)\n", 
+			Error( "\tBad surface extents - surface is too big to have a lightmap\n\tmaterial %s around point (%.1f %.1f %.1f)\n\t(dimension: %d, %d>%d)\n", 
 				TexDataStringTable_GetString( dtexdata[texinfo[s->texinfo].texdata].nameStringTableID ), 
 				point.x, point.y, point.z,
 				( int )i,
@@ -3322,7 +3334,7 @@ void CalcFaceExtents(dface_t *s, int lightmapTextureMinsInLuxels[2], int lightma
 
 void UpdateAllFaceLightmapExtents()
 {
-	for( int i=0; i < numfaces; i++ )
+	for( int i = 0; i < numfaces; i++ )
 	{
 		dface_t *pFace = &dfaces[i];
 
@@ -3902,7 +3914,7 @@ void ConvertPakFileContents( const char *pInFilename )
 		bool bOK = ReadFileFromPak( GetPakFile(), relativeName, false, sourceBuf );
 		if ( !bOK )
 		{
-			Warning( "Failed to load '%s' from lump pak for conversion or copy in '%s'.\n", relativeName, pInFilename );
+			Warning("\tFailed to load '%s' from lump pak for conversion or copy in '%s'.\n", relativeName, pInFilename );
 			continue;
 		}
 
@@ -3911,7 +3923,7 @@ void ConvertPakFileContents( const char *pInFilename )
 			bOK = g_pVTFConvertFunc( relativeName, sourceBuf, targetBuf, g_pCompressFunc );
 			if ( !bOK )
 			{
-				Warning( "Failed to convert '%s' in '%s'.\n", relativeName, pInFilename );
+				Warning("\tFailed to convert '%s' in '%s'.\n", relativeName, pInFilename );
 				continue;
 			}
 	
@@ -3927,7 +3939,7 @@ void ConvertPakFileContents( const char *pInFilename )
 				const char *pModelName = ResolveStaticPropToModel( relativeName );
 				if ( !pModelName )
 				{
-					Warning( "Static Prop '%s' failed to resolve actual model in '%s'.\n", relativeName, pInFilename );
+					Warning("\tStatic Prop '%s' failed to resolve actual model in '%s'.\n", relativeName, pInFilename );
 					continue;
 				}
 
@@ -3935,7 +3947,7 @@ void ConvertPakFileContents( const char *pInFilename )
 				bOK = g_pVHVFixupFunc( relativeName, pModelName, sourceBuf, tempBuffer );
 				if ( !bOK )
 				{
-					Warning( "Failed to convert '%s' in '%s'.\n", relativeName, pInFilename );
+					Warning("\tFailed to convert '%s' in '%s'.\n", relativeName, pInFilename );
 					continue;
 				}
 			}
@@ -3951,7 +3963,7 @@ void ConvertPakFileContents( const char *pInFilename )
 			bOK = SwapVHV( targetBuf.Base(), tempBuffer.Base() );
 			if ( !bOK )
 			{
-				Warning( "Failed to swap '%s' in '%s'.\n", relativeName, pInFilename );
+				Warning("\tFailed to swap '%s' in '%s'.\n", relativeName, pInFilename );
 				continue;
 			}
 			targetBuf.SeekPut( CUtlBuffer::SEEK_HEAD, tempBuffer.TellPut() );
@@ -4004,7 +4016,7 @@ void ConvertPakFileContents( const char *pInFilename )
 	}
 
 	// strip ldr version of hdr files
-	for ( int i=0; i<hdrFiles.Count(); i++ )
+	for ( int i = 0; i<hdrFiles.Count(); i++ )
 	{
 		char ldrFileName[MAX_PATH];
 
@@ -4307,7 +4319,7 @@ void BuildStaticPropNameTable()
 
 		if ( nVersion != 4 && nVersion != 5 && nVersion != 6 )
 		{
-			Error( "Unknown Static Prop Lump version %d!\n", nVersion );
+			Error( "\tUnknown Static Prop Lump version %d!\n", nVersion );
 		}
 
 		byte *pGameLumpData = (byte *)g_GameLumps.GetGameLump( hGameLump );
@@ -4583,20 +4595,20 @@ bool SwapBSPFile( const char *pInFilename, const char *pOutFilename, bool bSwapO
 
 	if ( !g_pFileSystem->FileExists( pInFilename ) )
 	{
-		Warning( "Error! Couldn't open input file %s - BSP swap failed!\n", pInFilename ); 
+		Warning("\tError! Couldn't open input file %s - BSP swap failed!\n", pInFilename ); 
 		return false;
 	}
 
 	g_hBSPFile = SafeOpenWrite( pOutFilename );
 	if ( !g_hBSPFile )
 	{
-		Warning( "Error! Couldn't open output file %s - BSP swap failed!\n", pOutFilename ); 
+		Warning("\tError! Couldn't open output file %s - BSP swap failed!\n", pOutFilename ); 
 		return false;
 	}
 
 	if ( !pVTFConvertFunc )
 	{
-		Warning( "Error! Missing VTF Conversion function\n" ); 
+		Warning("\tError! Missing VTF Conversion function\n" ); 
 		return false;
 	}
 	g_pVTFConvertFunc = pVTFConvertFunc;
@@ -4620,7 +4632,7 @@ bool SwapBSPFile( const char *pInFilename, const char *pOutFilename, bool bSwapO
 	CRC32_Init(&mapCRC);
 	if ( !CRC_MapFile( &mapCRC, pInFilename ) )
 	{
-		Warning( "Failed to CRC the bsp\n" );
+		Warning("\tFailed to CRC the bsp\n" );
 		return false;
 	}
 
@@ -4739,7 +4751,7 @@ bool SwapBSPFile( const char *pInFilename, const char *pOutFilename, bool bSwapO
 		if ( HasLump( i ) && !g_Lumps.bLumpParsed[i] )
 		{
 			// a new lump got added that needs to have a swap function
-			Warning( "BSP: '%s', %s has no swap or copy function. Discarding!\n", pInFilename, GetLumpName(i) );
+			Warning("\tBSP: '%s', %s has no swap or copy function. Discarding!\n", pInFilename, GetLumpName(i) );
 
 			// the data didn't get copied, so don't reference garbage
 			g_pBSPHeader->lumps[i].filelen = 0;
@@ -4768,21 +4780,21 @@ bool SwapBSPFile( const char *pInFilename, const char *pOutFilename, bool bSwapO
 		CUtlBuffer inputBuffer;
 		if ( !g_pFileSystem->ReadFile( pOutFilename, NULL, inputBuffer ) )
 		{
-			Warning( "Error! Couldn't read file %s - final BSP compression failed!\n", pOutFilename ); 
+			Warning("\tError! Couldn't read file %s - final BSP compression failed!\n", pOutFilename ); 
 			return false;
 		}
 
 		CUtlBuffer outputBuffer;
 		if ( !CompressBSP( inputBuffer, outputBuffer, pCompressFunc ) )
 		{
-			Warning( "Error! Failed to compress BSP '%s'!\n", pOutFilename ); 
+			Warning("\tError! Failed to compress BSP '%s'!\n", pOutFilename ); 
 			return false;
 		}
 	
 		g_hBSPFile = SafeOpenWrite( pOutFilename );
 		if ( !g_hBSPFile )
 		{
-			Warning( "Error! Couldn't open output file %s - BSP swap failed!\n", pOutFilename ); 
+			Warning("\tError! Couldn't open output file %s - BSP swap failed!\n", pOutFilename ); 
 			return false;
 		}
 		SafeWrite( g_hBSPFile, outputBuffer.Base(), outputBuffer.TellPut() );
@@ -4803,7 +4815,7 @@ bool GetPakFileLump( const char *pBSPFilename, void **pPakData, int *pPakSize )
 
 	if ( !g_pFileSystem->FileExists( pBSPFilename ) )
 	{
-		Warning( "Error! Couldn't open file %s!\n", pBSPFilename ); 
+		Warning("\tError! Couldn't open file %s!\n", pBSPFilename ); 
 		return false;
 	}
 
@@ -4890,7 +4902,7 @@ bool SetPakFileLump( const char *pBSPFilename, const char *pNewFilename, void *p
 {
 	if ( !g_pFileSystem->FileExists( pBSPFilename ) )
 	{
-		Warning( "Error! Couldn't open file %s!\n", pBSPFilename ); 
+		Warning("\tError! Couldn't open file %s!\n", pBSPFilename ); 
 		return false;
 	}
 
@@ -4922,7 +4934,7 @@ bool SetPakFileLump( const char *pBSPFilename, const char *pNewFilename, void *p
 	// lumps must be reserialized in same relative offset order
 	// build sorted order table
 	int readOrder[HEADER_LUMPS];
-	for ( int i=0; i<HEADER_LUMPS; i++ )
+	for ( int i = 0; i<HEADER_LUMPS; i++ )
 	{
 		readOrder[i] = i;
 	}
@@ -4978,7 +4990,7 @@ bool GetBSPDependants( const char *pBSPFilename, CUtlVector< CUtlString > *pList
 {
 	if ( !g_pFileSystem->FileExists( pBSPFilename ) )
 	{
-		Warning( "Error! Couldn't open file %s!\n", pBSPFilename ); 
+		Warning("\tError! Couldn't open file %s!\n", pBSPFilename ); 
 		return false;
 	}
 
@@ -5006,7 +5018,7 @@ bool GetBSPDependants( const char *pBSPFilename, CUtlVector< CUtlString > *pList
 	}
 
 	// get all the world materials
-	for ( int i=0; i<numtexdata; i++ )
+	for ( int i = 0; i<numtexdata; i++ )
 	{
 		const char *pName = TexDataStringTable_GetString( dtexdata[i].nameStringTableID );
 		V_ComposeFileName( "materials", pName, szFilename, sizeof( szFilename ) );
@@ -5025,7 +5037,7 @@ bool GetBSPDependants( const char *pBSPFilename, CUtlVector< CUtlString > *pList
 			pGameLumpData += sizeof( int );
 
 			StaticPropDictLump_t *pStaticPropDictLump = (StaticPropDictLump_t *)pGameLumpData;
-			for ( int i=0; i<count; i++ )
+			for ( int i = 0; i<count; i++ )
 			{
 				pList->AddToTail( pStaticPropDictLump[i].m_Name );
 			}
@@ -5043,7 +5055,7 @@ bool GetBSPDependants( const char *pBSPFilename, CUtlVector< CUtlString > *pList
 			pGameLumpData += sizeof( int );
 
 			DetailObjectDictLump_t *pDetailObjectDictLump = (DetailObjectDictLump_t *)pGameLumpData;
-			for ( int i=0; i<count; i++ )
+			for ( int i = 0; i<count; i++ )
 			{
 				pList->AddToTail( pDetailObjectDictLump[i].m_Name );
 			}

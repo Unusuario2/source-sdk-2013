@@ -1,4 +1,4 @@
-//========= Copyright Valve Corporation, All rights reserved. ============//
+//============= Copyright Valve Corporation, All rights reserved. =============//
 //
 // Purpose: 
 //
@@ -18,6 +18,10 @@
 #include "utlrbtree.h"
 #include "tier0/fasttimer.h"
 #include "disp_vrad.h"
+
+#ifdef MAPBASE
+#include "../common/StandartColorFormat.h" //this control the color of the console.
+#endif 
 
 class CBSPDispRayDistanceEnumerator;
 
@@ -513,11 +517,21 @@ void CVRadDispMgr::MakePatches( void )
 	}
 
 	// Print stats.
-	qprintf( "%i Displacements\n", nTreeCount );
-	qprintf( "%i Square Feet [%.2f Square Inches]\n", ( int )( flTotalArea / 144.0f ), flTotalArea );
+#ifdef MAPBASE
+	Msg("Number of displacements ");
+	ColorSpewMessage(SPEW_MESSAGE, &magenta, "[%i]\n", nTreeCount);	
+	Msg("Square Feet ");
+	ColorSpewMessage(SPEW_MESSAGE, &magenta, "[%i] [%.2f Square Inches]\n", (int)(flTotalArea / 144.0f), flTotalArea);
+#else
+	qprintf("%i Displacements\n", nTreeCount);
+	qprintf("%i Square Feet [%.2f Square Inches]\n", (int)(flTotalArea / 144.0f), flTotalArea);
+#endif
+
 }
+
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
+
 void CVRadDispMgr::SubdividePatch( int iPatch )
 {
 	// Get the current patch to subdivide.
@@ -1179,7 +1193,7 @@ void CVRadDispMgr::RadialLuxelAddPatch( int ndxFace, Vector const &luxelPt,
 									    CUtlVector<CPatch*> &interestingPatches )
 {
 #ifdef SAMPLEHASH_QUERY_ONCE
-	for ( int i=0; i < interestingPatches.Count(); i++ )
+	for ( int i = 0; i < interestingPatches.Count(); i++ )
 	{
 		CPatch *pPatch = interestingPatches[i];	
 		bool bNeighborBump = texinfo[g_pFaces[pPatch->faceNumber].texinfo].flags & SURF_BUMPLIGHT ? true : false;
@@ -1257,7 +1271,7 @@ void CVRadDispMgr::GetInterestingPatchesForLuxels(
 	// Get the max bounds of all voxels that these luxels touch.
 	Vector vLuxelMin( FLT_MAX, FLT_MAX, FLT_MAX );
 	Vector vLuxelMax( -FLT_MAX, -FLT_MAX, -FLT_MAX );
-	for ( int i=0; i < pFaceLight->numluxels; i++ )
+	for ( int i = 0; i < pFaceLight->numluxels; i++ )
 	{
 		VectorMin( pFaceLight->luxel[i], vLuxelMin, vLuxelMin );
 		VectorMax( pFaceLight->luxel[i], vLuxelMax, vLuxelMax );
@@ -1277,7 +1291,7 @@ void CVRadDispMgr::GetInterestingPatchesForLuxels(
 	voxelBits.SetSize( ((allVoxelSize[0] * allVoxelSize[1] * allVoxelSize[2]) + 7) / 8 );
 	memset( voxelBits.Base(), 0, voxelBits.Count() );
 	
-	for ( int i=0; i < pFaceLight->numluxels; i++ )
+	for ( int i = 0; i < pFaceLight->numluxels; i++ )
 	{
 		int voxelMin[3], voxelMax[3];
 		for ( int axis=0; axis < 3; axis++ )
@@ -1550,7 +1564,11 @@ void CVRadDispMgr::EndTimer( void )
 	CCycleCount duration = m_Timer.GetDuration();
 	double seconds = duration.GetSeconds();
 
+#ifdef MAPBASE
+	ColorSpewMessage(SPEW_MESSAGE, &green, "done (%1.4lf)\n", seconds);
+#else
 	Msg( "Done<%1.4lf sec>\n", seconds );
+#endif
 }
 
 

@@ -1,4 +1,4 @@
-//========= Copyright Valve Corporation, All rights reserved. ============//
+//============= Copyright Valve Corporation, All rights reserved. =============//
 //
 // Purpose: 
 //
@@ -23,6 +23,10 @@
 #include "disp_ivp.h"
 #include "materialpatch.h"
 #include "bitvec.h"
+
+#ifdef MAPBASE
+#include "../common/StandartColorFormat.h" //this control the color of the console.
+#endif
 
 // bit per leaf
 typedef CBitVec<MAX_MAP_LEAFS> leafbitarray_t;
@@ -521,7 +525,7 @@ CPhysConvex *CPlaneList::BuildConvexForBrush( int brushnumber, float shrink, CPh
 			if ( fabs(thick) < shrinkMinimum )
 			{
 #if _DEBUG
-				Warning("Can't shrink brush %d, plane %d (%.2f, %.2f, %.2f)\n", brushnumber, pside->planenum, pplane->normal[0], pplane->normal[1], pplane->normal[2] );
+				Warning("\tCan't shrink brush %d, plane %d (%.2f, %.2f, %.2f)\n", brushnumber, pside->planenum, pplane->normal[0], pplane->normal[1], pplane->normal[2] );
 #endif
 				shrinkThisPlane = 0;
 			}
@@ -668,10 +672,8 @@ static void VisitLeaves_r( CPlaneList &planes, int node )
 		int leafIndex = -1 - node;
 		if ( planes.IsLeafReferenced(leafIndex) )
 		{
-			int i;
-
 			// Add the solids in the "empty" leaf
-			for ( i = 0; i < dleafs[leafIndex].numleafbrushes; i++ )
+			for (int i = 0; i < dleafs[leafIndex].numleafbrushes; i++ )
 			{
 				int brushIndex = dleafbrushes[dleafs[leafIndex].firstleafbrush + i];
 				planes.ReferenceBrush( brushIndex );
@@ -872,12 +874,12 @@ int FindOrCreateWaterTexInfo( texinfo_t *pBaseInfo, float depth )
 }
 
 extern node_t *dfacenodes[MAX_MAP_FACES];
+
+
 static void WriteFogVolumeIDs( dmodel_t *pModel )
-{
-	int i;
-	
+{	
 	// write fog volume ID to each face in this model
-	for( i = pModel->firstface; i < pModel->firstface + pModel->numfaces; i++ )
+	for(int i = pModel->firstface; i < pModel->firstface + pModel->numfaces; i++ )
 	{
 		dface_t *pFace = &dfaces[i];
 		node_t *pFaceNode = dfacenodes[i];
@@ -923,8 +925,7 @@ static bool PortalCrossesWater( waterleaf_t &baseleaf, portal_t *portal )
 
 static int FindOrCreateLeafWaterData( float surfaceZ, float minZ, int surfaceTexInfoID )
 {
-	int i;
-	for( i = 0; i < numleafwaterdata; i++ )
+	for(int i = 0; i < numleafwaterdata; i++ )
 	{
 		dleafwaterdata_t *pLeafWaterData = &dleafwaterdata[i];
 		if( pLeafWaterData->surfaceZ == surfaceZ &&
@@ -1112,8 +1113,7 @@ void EmitWaterVolumesForBSP( dmodel_t *pModel, node_t *node )
 	// make a sorted list to flood fill
 	CUtlVector<waterleaf_t>	list;
 	
-	int i;
-	for ( i = 0; i < leafListAnyWater.Count(); i++ )
+	for (int i = 0; i < leafListAnyWater.Count(); i++ )
 	{
 		waterleaf_t waterLeaf;
 		BuildWaterLeaf( leafListAnyWater[i], waterLeaf );
@@ -1122,7 +1122,7 @@ void EmitWaterVolumesForBSP( dmodel_t *pModel, node_t *node )
 
 	leafbitarray_t visited;
 	CUtlVector<node_t *> waterAreaList;
-	for ( i = 0; i < list.Count(); i++ )
+	for (int i = 0; i < list.Count(); i++ )
 	{
 		Flood_FindConnectedWaterVolumes_r( waterAreaList, list[i].pNode, list[i], visited );
 
@@ -1319,7 +1319,7 @@ static void BuildWorldPhysModel( CUtlVector<CPhysCollisionEntry *> &collisionLis
 
 	if ( !g_bNoVirtualMesh && Disp_HasPower4Displacements() )
 	{
-		Warning("WARNING: Map using power 4 displacements, terrain physics cannot be compressed, map will need additional memory and CPU.\n");
+		Warning("\tWARNING: Map using power 4 displacements, terrain physics cannot be compressed, map will need additional memory and CPU.\n");
 		g_bNoVirtualMesh = true;
 	}
 
@@ -1474,9 +1474,7 @@ static void ConvertModelToPhysCollide( CUtlVector<CPhysCollisionEntry *> &collis
 
 static void ClearLeafWaterData( void )
 {
-	int i;
-
-	for( i = 0; i < numleafs; i++ )
+	for(int i = 0; i < numleafs; i++ )
 	{
 		dleafs[i].leafWaterDataID = -1;
 		dleafs[i].contents &= ~CONTENTS_TESTFOGVOLUME;
@@ -1507,7 +1505,7 @@ void EmitPhysCollision()
 
 	if ( !physcollision )
 	{
-		Warning("!!! WARNING: Can't build collision data!\n" );
+		Warning("\t!!! WARNING: Can't build collision data!\n" );
 		return;
 	}
 
@@ -1518,7 +1516,11 @@ void EmitPhysCollision()
 
 	int start = Plat_FloatTime();
 
-	Msg("Building Physics collision data...\n" );
+#ifdef MAPBASE
+		Msg("Building Physics collision data...");
+#else 
+	Msg("Building Physics collision data...\n");
+#endif 
 
 	int i, j;
 	for ( i = 0; i < nummodels; i++ )
@@ -1650,7 +1652,12 @@ void EmitPhysCollision()
 	memcpy( ptr, &model, sizeof(model) );
 	ptr += sizeof(model);
 	Assert( (ptr-g_pPhysCollide) == g_PhysCollideSize);
-	Msg("done (%d) (%d bytes)\n", (int)(Plat_FloatTime() - start), g_PhysCollideSize );
 
+#ifdef MAPBASE
+	ColorSpewMessage(SPEW_MESSAGE, &magenta, " (%d bytes)", g_PhysCollideSize);
+	ColorSpewMessage(SPEW_MESSAGE, &green, " done(%d)\n", (int)(Plat_FloatTime() - start));
+#else
+	Msg("done (%d)\n", (int)(Plat_FloatTime() - start));
+#endif
 	// UNDONE: Collision models (collisionList) memory leak!
 }

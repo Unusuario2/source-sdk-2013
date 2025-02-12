@@ -1,4 +1,4 @@
-//========= Copyright Valve Corporation, All rights reserved. ============//
+//============= Copyright Valve Corporation, All rights reserved. =============//
 //
 // Purpose: 
 //
@@ -31,11 +31,9 @@ int g_TraceClusterStop = -1;
 
 int CountBits (byte *bits, int numbits)
 {
-	int		i;
-	int		c;
+	int		c = 0;
 
-	c = 0;
-	for (i=0 ; i<numbits ; i++)
+	for (int i=0 ; i<numbits ; i++)
 		if ( CheckBit( bits, i ) )
 			c++;
 
@@ -55,16 +53,14 @@ extern bool g_bVMPIEarlyExit;
 
 void CheckStack (leaf_t *leaf, threaddata_t *thread)
 {
-	pstack_t	*p, *p2;
-
-	for (p=thread->pstack_head.next ; p ; p=p->next)
+	for (pstack_t *p=thread->pstack_head.next ; p ; p=p->next)
 	{
 //		Msg ("=");
 		if (p->leaf == leaf)
-			Error ("CheckStack: leaf recursion");
-		for (p2=thread->pstack_head.next ; p2 != p ; p2=p2->next)
+			Error ("\tCheckStack: leaf recursion");
+		for (pstack_t *p2=thread->pstack_head.next ; p2 != p ; p2=p2->next)
 			if (p2->leaf == p->leaf)
-				Error ("CheckStack: late leaf recursion");
+				Error ("\tCheckStack: late leaf recursion");
 	}
 //	Msg ("\n");
 }
@@ -72,9 +68,7 @@ void CheckStack (leaf_t *leaf, threaddata_t *thread)
 
 winding_t *AllocStackWinding (pstack_t *stack)
 {
-	int		i;
-
-	for (i=0 ; i<3 ; i++)
+	for (int i=0 ; i<3 ; i++)
 	{
 		if (stack->freewindings[i])
 		{
@@ -82,8 +76,7 @@ winding_t *AllocStackWinding (pstack_t *stack)
 			return &stack->windings[i];
 		}
 	}
-
-	Error ("Out of memory. AllocStackWinding: failed");
+	Error ("\tOut of memory. AllocStackWinding: failed");
 
 	return NULL;
 }
@@ -98,7 +91,7 @@ void FreeStackWinding (winding_t *w, pstack_t *stack)
 		return;		// not from local
 
 	if (stack->freewindings[i])
-		Error ("FreeStackWinding: allready free");
+		Error ("\tFreeStackWinding: allready free");
 	stack->freewindings[i] = 1;
 }
 
@@ -382,11 +375,10 @@ public:
 
 void WindingCenter (winding_t *w, Vector &center)
 {
-	int		i;
 	float	scale;
 
 	VectorCopy (vec3_origin, center);
-	for (i=0 ; i<w->numpoints ; i++)
+	for (int i=0 ; i<w->numpoints ; i++)
 		VectorAdd (w->points[i], center, center);
 
 	scale = 1.0/w->numpoints;
@@ -416,7 +408,7 @@ void DumpPortalTrace( pstack_t *pStack )
 	if ( g_PortalTrace.m_list.Count() )
 		return;
 
-	Warning("Dumped cluster trace!!!\n");
+	Warning("\tDumped cluster trace!!!\n");
 	Vector	mid;
 	mid = ClusterCenter( g_TraceClusterStart );
 	g_PortalTrace.m_list.AddToTail(mid);
@@ -449,14 +441,14 @@ void WritePortalTrace( const char *source )
 
 	if ( !g_PortalTrace.m_list.Count() )
 	{
-		Warning("No trace generated from %d to %d\n", g_TraceClusterStart, g_TraceClusterStop );
+		Warning("\tNo trace generated from %d to %d\n", g_TraceClusterStart, g_TraceClusterStop );
 		return;
 	}
 
 	sprintf (filename, "%s.lin", source);
 	linefile = fopen (filename, "w");
 	if (!linefile)
-		Error ("Couldn't open %s\n", filename);
+		Error ("\tCouldn't open %s\n", filename);
 
 	for ( int i = 0; i < g_PortalTrace.m_list.Count(); i++ )
 	{
@@ -464,7 +456,7 @@ void WritePortalTrace( const char *source )
 		fprintf (linefile, "%f %f %f\n", p[0], p[1], p[2]);
 	}
 	fclose (linefile);
-	Warning("Wrote %s!!!\n", filename);
+	Warning("\tWrote %s!!!\n", filename);
 }
 
 /*
@@ -825,7 +817,6 @@ void RecursiveLeafBitFlow (int leafnum, byte *mightsee, byte *cansee)
 {
 	portal_t	*p;
 	leaf_t 		*leaf;
-	int			i, j;
 	long		more;
 	int			pnum;
 	byte		newmight[MAX_PORTALS/8];
@@ -833,7 +824,7 @@ void RecursiveLeafBitFlow (int leafnum, byte *mightsee, byte *cansee)
 	leaf = &leafs[leafnum];
 	
 // check all portals for flowing into other leafs	
-	for (i=0 ; i<leaf->portals.Count(); i++)
+	for (int i=0 ; i<leaf->portals.Count(); i++)
 	{
 		p = leaf->portals[i];
 		pnum = p - portals;
@@ -844,7 +835,7 @@ void RecursiveLeafBitFlow (int leafnum, byte *mightsee, byte *cansee)
 
 		// if this portal can see some portals we mightsee, recurse
 		more = 0;
-		for (j=0 ; j<portallongs ; j++)
+		for (int j=0 ; j<portallongs ; j++)
 		{
 			((long *)newmight)[j] = ((long *)mightsee)[j] 
 				& ((long *)p->portalflood)[j];

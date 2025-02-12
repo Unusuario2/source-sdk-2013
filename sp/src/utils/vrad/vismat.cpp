@@ -1,4 +1,4 @@
-//========= Copyright Valve Corporation, All rights reserved. ============//
+//============= Copyright Valve Corporation, All rights reserved. =============//
 //
 // Purpose: 
 //
@@ -149,7 +149,7 @@ void PvsForOrigin (Vector& org, byte *pvs)
 	}
 
 	if (visofs == -1)
-		Error ("visofs == -1");
+		Error ("\tvisofs == -1");
 
 	DecompressVis (&dvisdata[visofs], pvs);
 }
@@ -305,7 +305,7 @@ Calc vis bits from a single patch
 */
 void BuildVisRow (int patchnum, byte *pvs, int head, transfer_t *transfers, CTransferMaker &transferMaker, int iThread )
 {
-	int		j, k, l, leafIndex;
+	int		l;
 	CPatch	*patch;
 	dleaf_t	*leaf;
 	byte	face_tested[MAX_MAP_FACES];
@@ -316,18 +316,18 @@ void BuildVisRow (int patchnum, byte *pvs, int head, transfer_t *transfers, CTra
 	memset( face_tested, 0, numfaces ) ;
 	memset( disp_tested, 0, numfaces );
 
-	for (j=0; j<dvis->numclusters; j++)
+	for (int j = 0; j<dvis->numclusters; j++)
 	{
 		if ( ! ( pvs[(j)>>3] & (1<<((j)&7)) ) )
 		{
 			continue;		// not in pvs
 		}
 
-		for ( leafIndex = 0; leafIndex < g_ClusterLeaves[j].leafCount; leafIndex++ )
+		for (int leafIndex = 0; leafIndex < g_ClusterLeaves[j].leafCount; leafIndex++ )
 		{
 			leaf = dleafs + g_ClusterLeaves[j].leafs[leafIndex];
 
-			for (k=0 ; k<leaf->numleaffaces; k++)
+			for (int k=0 ; k<leaf->numleaffaces; k++)
 			{
 				l = dleaffaces[leaf->firstleafface + k];
 				// faces can be marksurfed by multiple leaves, but
@@ -375,7 +375,6 @@ BuildVisLeafs
   This is run by multiple threads
 ===========
 */
-
 transfer_t* BuildVisLeafs_Start()
 {
 	return (transfer_t *)calloc( 1,  MAX_PATCHES * sizeof( transfer_t ) );

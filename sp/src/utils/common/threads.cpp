@@ -1,4 +1,4 @@
-//========= Copyright Valve Corporation, All rights reserved. ============//
+//============= Copyright Valve Corporation, All rights reserved. =============//
 //
 // Purpose: 
 //
@@ -18,6 +18,10 @@
 #define NO_THREAD_NAMES
 #include "threads.h"
 #include "pacifier.h"
+
+#ifdef MAPBASE
+#include "../common/StandartColorFormat.h" //this control the color of the console.
+#endif 
 
 #ifdef MAPBASE
 // This was suggested in that Source 2013 pull request that fixed Vrad.
@@ -146,7 +150,11 @@ void ThreadSetDefault (void)
 			numthreads = 1;
 	}
 
-	Msg ("%i threads\n", numthreads);
+#ifdef MAPBASE
+	ColorSpewMessage(SPEW_MESSAGE, &cyan, "(Threads: %i)\n", numthreads);
+#else
+	Msg ("%i threads \n", numthreads);
+#endif
 }
 
 
@@ -156,7 +164,7 @@ void ThreadLock (void)
 		return;
 	EnterCriticalSection (&crit);
 	if (enter)
-		Error ("Recursive ThreadLock\n");
+		Error ("\tRecursive ThreadLock\n");
 	enter = 1;
 }
 
@@ -165,7 +173,7 @@ void ThreadUnlock (void)
 	if (!threaded)
 		return;
 	if (!enter)
-		Error ("ThreadUnlock without lock\n");
+		Error ("\tThreadUnlock without lock\n");
 	enter = 0;
 	LeaveCriticalSection (&crit);
 }
@@ -188,7 +196,7 @@ void RunThreads_Start( RunThreadsFn fn, void *pUserData, ERunThreadsPriority ePr
 	if ( numthreads > MAX_TOOL_THREADS )
 		numthreads = MAX_TOOL_THREADS;
 
-	for ( int i=0; i < numthreads ;i++ )
+	for ( int i = 0; i < numthreads ;i++ )
 	{
 		g_RunThreadsData[i].m_iThread = i;
 		g_RunThreadsData[i].m_pUserData = pUserData;
@@ -219,7 +227,7 @@ void RunThreads_Start( RunThreadsFn fn, void *pUserData, ERunThreadsPriority ePr
 void RunThreads_End()
 {
 	WaitForMultipleObjects( numthreads, g_ThreadHandles, TRUE, INFINITE );
-	for ( int i=0; i < numthreads; i++ )
+	for ( int i = 0; i < numthreads; i++ )
 		CloseHandle( g_ThreadHandles[i] );
 
 	threaded = false;
@@ -246,17 +254,19 @@ void RunThreadsOn( int workcnt, qboolean showpacifier, RunThreadsFn fn, void *pU
 	(*func)( 0 );
 	return;
 #endif
-
 	
 	RunThreads_Start( fn, pUserData );
 	RunThreads_End();
-
 
 	end = Plat_FloatTime();
 	if (pacifier)
 	{
 		EndPacifier(false);
+#ifdef MAPBASE
+		printf("] (%i)\n", end - start);
+#else
 		printf (" (%i)\n", end-start);
+#endif
 	}
 }
 

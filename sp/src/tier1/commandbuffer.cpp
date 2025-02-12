@@ -1,4 +1,4 @@
-//========= Copyright Valve Corporation, All rights reserved. ============//
+//============= Copyright Valve Corporation, All rights reserved. =============//
 //
 // Purpose: 
 //
@@ -121,7 +121,7 @@ bool CCommandBuffer::InsertCommand( const char *pArgS, int nCommandSize, int nTi
 {
 	if ( nCommandSize >= CCommand::MaxCommandLength() )
 	{
-		Warning( "WARNING: Command too long... ignoring!\n%s\n", pArgS );
+		Warning("\tWARNING: Command too long... ignoring!\n%s\n", pArgS );
 		return false;
 	}
 

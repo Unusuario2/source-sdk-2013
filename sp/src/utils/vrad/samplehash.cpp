@@ -1,4 +1,4 @@
-//========= Copyright Valve Corporation, All rights reserved. ============//
+//============= Copyright Valve Corporation, All rights reserved. =============//
 //
 // Purpose: 
 //
@@ -157,7 +157,7 @@ unsigned short IncrementPatchIterationKey()
 	if ( g_PatchIterationKey == 0xFFFF )
 	{
 		g_PatchIterationKey = 1;
-		for ( int i=0; i < g_Patches.Count(); i++ )
+		for ( int i = 0; i < g_Patches.Count(); i++ )
 			g_Patches[i].m_IterationKey = 0;
 	}
 	else

@@ -1,4 +1,4 @@
-//========= Copyright Valve Corporation, All rights reserved. ============//
+//============= Copyright Valve Corporation, All rights reserved. =============//
 //
 // Purpose: 
 //
@@ -24,7 +24,7 @@ textureref_t	textureref[MAX_MAP_TEXTURES];
 
 bool g_bHasWater = false;
 
-extern qboolean onlyents;
+extern bool		 onlyents;
 
 dtexdata_t *GetTexData( int index )
 {
@@ -63,7 +63,7 @@ int	FindMiptex (const char *name)
 		}
 	}
 	if (nummiptex == MAX_MAP_TEXTURES)
-		Error ("Too many unique textures, max %d", MAX_MAP_TEXTURES);
+		Error ("\tToo many unique textures, max %d", MAX_MAP_TEXTURES);
 	strcpy (textureref[i].name, name);
 
 	textureref[i].lightmapWorldUnitsPerLuxel = 0.0f;
@@ -77,7 +77,7 @@ int	FindMiptex (const char *name)
 	}
 
 	if (!found)
-		Warning("Material not found!: %s\n", name );
+		Warning("\tMaterial not found!: %s\n", name );
 
 	// HANDLE ALL OF THE STUFF THAT ISN'T RENDERED WITH THE MATERIAL THAT IS ONE IT.
 	
@@ -261,7 +261,7 @@ int	FindMiptex (const char *name)
 		if ( !bKeepLighting && !Q_strncasecmp( pShaderName, "water", 5 ) || !Q_strncasecmp( pShaderName, "UnlitGeneric", 12 ) )
 		{
 			//if ( !(textureref[i].flags & SURF_NOLIGHT) )
-			//	Warning("Forcing lit materal %s to nolight\n", name );
+			//	Warning("\tForcing lit materal %s to nolight\n", name );
 			textureref[i].flags |= SURF_NOLIGHT;
 		}
 
@@ -411,12 +411,12 @@ int FindAliasedTexData( const char *pName_, dtexdata_t *sourceTexture )
 	char *pName = ( char * )_alloca( strlen( pName_ ) + 1 );
 	strcpy( pName, pName_ );
 	strlwr( pName );
-	int i, output;
+	int output;
 	bool found;
 	dtexdata_t *pTexData;
 	MaterialSystemMaterial_t matID;
 
-	for ( i = 0; i < numtexdata; i++ )
+	for (int i = 0; i < numtexdata; i++ )
 	{
 		if ( !strcmp( pName, TexDataStringTable_GetString( GetTexData( i )->nameStringTableID ) ) )
 			return i;
@@ -426,7 +426,7 @@ int FindAliasedTexData( const char *pName_, dtexdata_t *sourceTexture )
 	output = numtexdata;
 	if ( numtexdata >= MAX_MAP_TEXDATA )
 	{
-		Error( "Too many unique texture mappings, max = %d\n", MAX_MAP_TEXDATA );
+		Error( "\tToo many unique texture mappings, max = %d\n", MAX_MAP_TEXDATA );
 	}
 	pTexData = GetTexData( output );
 	numtexdata++;
@@ -488,7 +488,7 @@ int FindOrCreateTexData( const char *pName_ )
 	nOutput = numtexdata;
 	if ( numtexdata >= MAX_MAP_TEXDATA )
 	{
-		Error( "Too many unique texture mappings, max = %d\n", MAX_MAP_TEXDATA );
+		Error( "\tToo many unique texture mappings, max = %d\n", MAX_MAP_TEXDATA );
 	}
 	dtexdata_t *pTexData = GetTexData( nOutput );
 	numtexdata++;
@@ -569,7 +569,7 @@ int FindOrCreateTexInfo( const texinfo_t &searchTexInfo )
 
 	if ( onlyents )
 	{
-		Error( "FindOrCreateTexInfo:  Tried to create new texinfo during -onlyents compile!\nMust compile without -onlyents" );
+		Error( "\tFindOrCreateTexInfo:  Tried to create new texinfo during -onlyents compile!\nMust compile without -onlyents" );
 	}
 
 	return i;

@@ -1,4 +1,4 @@
-//========= Copyright Valve Corporation, All rights reserved. ============//
+//============= Copyright Valve Corporation, All rights reserved. =============//
 //
 // Purpose: Implements an interface for reading and writing heirarchical
 //			text files of key value pairs. The format of the file is as follows:
@@ -620,7 +620,7 @@ ChunkFileResult_t CChunkFile::ReadChunk(KeyHandler_t pfnKeyHandler, void *pData)
 	//
 	if ((eResult != ChunkFile_Ok) && (eResult != ChunkFile_EOF))
 	{
-		//HandleError("chunkname", eResult);
+		//HandleError("\tchunkname", eResult);
 	}
 
 	return(eResult);

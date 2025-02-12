@@ -1,4 +1,4 @@
-//========= Copyright Valve Corporation, All rights reserved. ============//
+//============= Copyright Valve Corporation, All rights reserved. =============//
 //
 // Purpose: 
 //
@@ -55,7 +55,7 @@ int GetAllNeighbors( const CCoreDispInfo *pDisp, int (&iNeighbors)[512] )
 	{
 		const CDispCornerNeighbors *pCorner = pDisp->GetCornerNeighbors( iCorner );
 
-		for ( int i=0; i < pCorner->m_nNeighbors; i++ )
+		for ( int i = 0; i < pCorner->m_nNeighbors; i++ )
 		{
 			if ( nNeighbors < ARRAYSIZE( iNeighbors ) )
 				iNeighbors[nNeighbors++] = pCorner->m_Neighbors[i];
@@ -66,7 +66,7 @@ int GetAllNeighbors( const CCoreDispInfo *pDisp, int (&iNeighbors)[512] )
 	{
 		const CDispNeighbor *pEdge = pDisp->GetEdgeNeighbor( iEdge );
 
-		for ( int i=0; i < 2; i++ )
+		for ( int i = 0; i < 2; i++ )
 		{
 			if ( pEdge->m_SubNeighbors[i].IsValid() )
 				if ( nNeighbors < 512 )
@@ -279,13 +279,13 @@ void BlendEdges( CCoreDispInfo **ppListBase, int listSize )
 #if defined( USE_SCRATCHPAD )
 	void ScratchPad_DrawOriginalNormals( const CCoreDispInfo *pListBase, int listSize )
 	{
-		for ( int i=0; i < listSize; i++ )
+		for ( int i = 0; i < listSize; i++ )
 		{
 			const CCoreDispInfo *pDisp = &pListBase[i];
 			const CPowerInfo *pPowerInfo = pDisp->GetPowerInfo();
 
 			// Draw the triangles.
-			for ( int iTri=0; iTri < pPowerInfo->GetNumTriInfos(); iTri++ )
+			for ( int iTri = 0; iTri < pPowerInfo->GetNumTriInfos(); iTri++ )
 			{
 				const CTriInfo *pTriInfo = pPowerInfo->GetTriInfo( iTri );
 			

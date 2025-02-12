@@ -1,4 +1,4 @@
-//========= Copyright Valve Corporation, All rights reserved. ============//
+//============= Copyright Valve Corporation, All rights reserved. =============//
 //
 // The copyright to the contents herein is the property of Valve, L.L.C.
 // The contents may be used and/or copied only with the written permission of
@@ -17,9 +17,7 @@
 
 
 bool CImagePacker::Reset( int maxLightmapWidth, int maxLightmapHeight )
-{
-	int i;
-	
+{	
 	Assert( maxLightmapWidth <= MAX_MAX_LIGHTMAP_WIDTH );
 	
 	m_MaxLightmapWidth = maxLightmapWidth;
@@ -30,7 +28,7 @@ bool CImagePacker::Reset( int maxLightmapWidth, int maxLightmapHeight )
 
 	m_AreaUsed = 0;
 	m_MinimumHeight = -1;
-	for( i = 0; i < m_MaxLightmapWidth; i++ )
+	for(int i = 0; i < m_MaxLightmapWidth; i++ )
     {
 		m_pLightmapWavefront[i] = -1;
     }
@@ -127,11 +125,8 @@ bool CImagePacker::AddBlock( int width, int height, int *returnX, int *returnY )
 		m_MinimumHeight = *returnY + height;
 	
 	// Update the wavefront info.
-	int x;
-	for( x = bestX; x < bestX + width; x++ )
-    {
+	for(int x = bestX; x < bestX + width; x++ )
 		m_pLightmapWavefront[x] = outerMinY + height;
-    }
 	
 	//  AddBlockToLightmapImage( *returnX, *returnY, width, height );
 	m_AreaUsed += width * height;

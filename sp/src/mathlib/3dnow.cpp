@@ -1,4 +1,4 @@
-//========= Copyright Valve Corporation, All rights reserved. ============//
+//============= Copyright Valve Corporation, All rights reserved. =============//
 //
 // Purpose: 3DNow Math primitives.
 //
@@ -16,6 +16,7 @@
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
+
 #if !defined(COMPILER_MSVC64) && !defined(LINUX)
 // Implement for 64-bit Windows if needed.
 // Clang hits "fatal error: error in backend:" and other errors when trying
@@ -24,6 +25,7 @@
 
 #pragma warning(disable:4244)   // "conversion from 'const int' to 'float', possible loss of data"
 #pragma warning(disable:4730)	// "mixing _m64 and floating point expressions may result in incorrect code"
+
 
 //-----------------------------------------------------------------------------
 // 3D Now Implementations of optimized routines:
@@ -60,6 +62,7 @@ float _3DNow_Sqrt(float x)
 
 	return root;
 }
+
 
 // NJS FIXME: Need to test Recripricol squareroot performance and accuraccy
 // on AMD's before using the specialized instruction.
@@ -193,5 +196,4 @@ float _3DNow_InvRSquared(const float* v)
 
 	return r2;
 }
-
 #endif // COMPILER_MSVC64 

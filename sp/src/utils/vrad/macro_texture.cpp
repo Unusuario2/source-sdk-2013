@@ -1,4 +1,4 @@
-//========= Copyright Valve Corporation, All rights reserved. ============//
+//============= Copyright Valve Corporation, All rights reserved. =============//
 //
 // Purpose: 
 //
@@ -61,7 +61,7 @@ CMacroTextureData* LoadMacroTextureFile( const char *pFilename )
 	// Now make a texture out of it.
 	IVTFTexture *pTex = CreateVTFTexture();
 	if ( !pTex->Unserialize( buf ) )
-		Error( "IVTFTexture::Unserialize( %s ) failed.", pFilename );
+		Error("\tIVTFTexture::Unserialize( %s ) failed.", pFilename );
 
 	pTex->ConvertImageFormat( IMAGE_FORMAT_RGBA8888, false );	// Get it in a format we like.
 
@@ -97,10 +97,9 @@ void InitMacroTexture( const char *pBSPFilename )
 
 	if ( i == num_entities )
 	{
-		Warning( "MaskOnMacroTexture: can't find worldspawn" );
+		Warning("\tMaskOnMacroTexture: can't find worldspawn" );
 		return;
 	}
-
 
 	// Load the macro texture that is mapped onto everything.
 	char mapName[512], vtfFilename[512];
@@ -108,7 +107,6 @@ void InitMacroTexture( const char *pBSPFilename )
 	Q_snprintf( vtfFilename, sizeof( vtfFilename ), "materials/macro/%s/base.vtf", mapName );
 	g_pGlobalMacroTextureData = LoadMacroTextureFile( vtfFilename );
 
-	
 	// Now load the macro texture for each face.
 	g_FaceMacroTextures.SetSize( numfaces );
 	for ( int iFace=0; iFace < numfaces; iFace++ )

@@ -1,4 +1,4 @@
-//========= Copyright Valve Corporation, All rights reserved. ============//
+//============= Copyright Valve Corporation, All rights reserved. =============//
 #ifndef GLMDEBUG_H
 #define	GLMDEBUG_H
 
