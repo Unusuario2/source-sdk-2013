@@ -23,9 +23,7 @@
 #include "bitmap/imageformat.h"
 #include "coordsize.h"
 
-#ifdef MAPBASE
-#include "../common/StandartColorFormat.h" //this control the color of the console.
-#endif 
+
 
 enum
 {
