@@ -21,7 +21,7 @@
 #include "ViewerSettings.h"
 #include "bone_setup.h"
 #include "UtlMemory.h"
-#include "mx/mx.h"
+#include <mx/mx.h>
 #include "filesystem.h"
 #include "IStudioRender.h"
 #include "materialsystem/IMaterialSystemHardwareConfig.h"

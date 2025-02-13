@@ -1854,7 +1854,6 @@ void StudioModel::DrawModel( bool mergeBones )
 	}
 	else
 	{
-
 		// Draw the model normally (may include normal and/or tangent line segments)
 		if ( m_pStudioHdr->flags() & STUDIOHDR_FLAGS_STATIC_PROP )
 			g_pStudioRender->DrawModelStaticProp(g_DrawModelInfo, *g_pBoneToWorld);
@@ -1876,9 +1875,7 @@ void StudioModel::DrawModel( bool mergeBones )
 				g_pStudioRender->DrawModel(nullptr, g_DrawModelInfo, g_pBoneToWorld, g_flexdescweight, g_flexdescweight2, m_origin);
 
 			// Restore the studio render config
-			UpdateStudioRenderConfig( g_viewerSettings.renderMode == RM_WIREFRAME, false,
-										g_viewerSettings.showNormals,
-										g_viewerSettings.showTangentFrame );
+			UpdateStudioRenderConfig( g_viewerSettings.renderMode == RM_WIREFRAME, false,g_viewerSettings.showNormals,g_viewerSettings.showTangentFrame );
 		}
 
 	}
@@ -1945,7 +1942,6 @@ void StudioModel::DrawModel( bool mergeBones )
 		float one[4] = { 1, 1, 1, 1 };
 		g_pStudioRender->SetColorModulation( one );
 	}
-
 }
 
 

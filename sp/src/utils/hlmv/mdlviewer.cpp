@@ -57,7 +57,7 @@
 bool g_bOldFileDialogs = false;
 
 MDLViewer *g_MDLViewer = 0;
-char g_appTitle[] = "Half-Life Model Viewer v1.22 - Tweaked";
+char g_appTitle[] = "Half-Life Model Viewer";
 static char recentFiles[8][256] = { "", "", "", "", "", "", "", "" };
 extern int g_dxlevel;
 bool g_bInError = false;
@@ -112,8 +112,7 @@ void UnloadFileSystemDialogModule()
 
 
 
-void
-MDLViewer::initRecentFiles ()
+void MDLViewer::initRecentFiles ()
 {
 	for (int i = 0; i < 8; i++)
 	{
@@ -131,8 +130,7 @@ MDLViewer::initRecentFiles ()
 
 
 
-void
-MDLViewer::loadRecentFiles ()
+void MDLViewer::loadRecentFiles ()
 {
 	char path[256];
 	strcpy (path, mx::getApplicationPath ());
@@ -147,8 +145,7 @@ MDLViewer::loadRecentFiles ()
 
 
 
-void
-MDLViewer::saveRecentFiles ()
+void MDLViewer::saveRecentFiles ()
 {
 	char path[256];
 
