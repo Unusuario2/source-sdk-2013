@@ -16,6 +16,10 @@
 #include <mx/mxEvent.h>
 #include <mx/mxWindow.h>
 
+#ifdef MAPBASE
+#pragma warning(disable:4100)
+#pragma warning(disable:4189)
+#endif
 
 class mxLineEdit_i
 {

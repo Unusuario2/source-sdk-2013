@@ -16,9 +16,7 @@
 #include <stdlib.h>
 
 
-
-mxImage *
-mxPcxRead (const char *filename)
+mxImage *mxPcxRead (const char *filename)
 {
     FILE *file = fopen (filename, "rb");
     if (!file)
@@ -66,7 +64,7 @@ mxPcxRead (const char *filename)
     (void) fseek(file, sizeof (mxPcxHeader), SEEK_SET);
     int ptr = 0;
 	int ch, rep;
-	byte *data = (byte *) image->data;
+	int *data = (int *) image->data; //before was a byte
 	int size = w * h;
     while (ptr < size)
 	{
@@ -89,10 +87,9 @@ mxPcxRead (const char *filename)
 	return image;
 }
 
-
-
-bool
-mxPcxWrite (const char *filename, mxImage *image)
+#if 0 //We dont use this.
+bool mxPcxWrite (const char *filename, mxImage *image)
 {
 	return false;
 }
+#endif

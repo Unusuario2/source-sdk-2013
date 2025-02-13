@@ -42,6 +42,7 @@ struct collisionpair_t
 	collisionpair_t *pNext;
 };
 
+
 class CStudioPhysics : public IStudioPhysics
 {
 public:
@@ -129,6 +130,7 @@ IStudioPhysics *LoadPhysics( MDLHandle_t mdlHandle )
 	return pPhysics;
 }
 
+
 void DestroyPhysics( IStudioPhysics *pStudioPhysics )
 {
 	CStudioPhysics *pPhysics = static_cast<CStudioPhysics*>( pStudioPhysics );
@@ -137,6 +139,7 @@ void DestroyPhysics( IStudioPhysics *pStudioPhysics )
 		delete pPhysics;
 	}
 }
+
 
 void CStudioPhysics::Load( MDLHandle_t mdlHandle )
 {
@@ -237,6 +240,7 @@ public:
 	}
 };
 
+
 class CRagdollCollisionRulesParse : public IVPhysicsKeyHandler
 {
 public:
@@ -277,6 +281,7 @@ private:
 	CStudioPhysics *m_pStudio;
 };
 
+
 class CSolidParse : public IVPhysicsKeyHandler
 {
 public:
@@ -298,6 +303,7 @@ public:
 		pSolid->massBias = 1.0;
 	}
 };
+
 
 void CStudioPhysics::ParseKeydata( void )
 {
@@ -366,7 +372,6 @@ int FindPhysprop( const char *pPropname )
 	}
 	return 0;
 }
-
 
 
 class CTextBuffer
@@ -449,6 +454,7 @@ static T FindCommonValue( void *pStructArray, int arrayCount, int structSize, in
 	return maxVal;
 }
 
+
 static void CalcDefaultProperties( CPhysmesh *pList, int listCount, physdefaults_t &defs )
 {
 	defs.surfacePropIndex = FindCommonValue<int>( pList, listCount, sizeof(CPhysmesh), offsetof(CPhysmesh, m_solid.surfacePropIndex) );
@@ -456,6 +462,7 @@ static void CalcDefaultProperties( CPhysmesh *pList, int listCount, physdefaults
 	defs.damping = FindCommonValue<float>( pList, listCount, sizeof(CPhysmesh), offsetof(CPhysmesh, m_solid.params.damping) );
 	defs.rotdamping = FindCommonValue<float>( pList, listCount, sizeof(CPhysmesh), offsetof(CPhysmesh, m_solid.params.rotdamping) );
 }
+
 
 static void DumpModelProperties( CTextBuffer &out, float mass, physdefaults_t &defs )
 {
@@ -469,6 +476,7 @@ static void DumpModelProperties( CTextBuffer &out, float mass, physdefaults_t &d
 	sprintf( tmpbuf, "\t$rotdamping %.2f\r\n", defs.rotdamping );
 	out.WriteText( tmpbuf );
 }
+
 
 char *CStudioPhysics::DumpQC( void )
 {
@@ -592,7 +600,9 @@ char *CStudioPhysics::DumpQC( void )
 	return NULL;
 }
 
+
 static const char *pMaterialFilename = "scripts/surfaceproperties.txt";
+
 
 bool LoadPhysicsProperties( void )
 {

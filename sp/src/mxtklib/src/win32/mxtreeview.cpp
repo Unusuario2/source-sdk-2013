@@ -15,7 +15,9 @@
 #include <windows.h>
 #include <commctrl.h>
 
-
+#ifdef MAPBASE
+#pragma warning(disable:4100)
+#endif
 
 class mxTreeView_i
 {
@@ -141,9 +143,7 @@ mxTreeView::setUserData (mxTreeViewItem *item, void *userData)
 }
 
 
-
-void
-mxTreeView::setOpen (mxTreeViewItem *item, bool b)
+void mxTreeView::setOpen (mxTreeViewItem *item, bool b)
 {
 	if (!d_this)
 		return;
@@ -153,9 +153,7 @@ mxTreeView::setOpen (mxTreeViewItem *item, bool b)
 }
 
 
-
-void
-mxTreeView::setSelected (mxTreeViewItem *item, bool b)
+void mxTreeView::setSelected (mxTreeViewItem *item, bool b)
 {
 	if (!d_this)
 		return;
@@ -165,9 +163,7 @@ mxTreeView::setSelected (mxTreeViewItem *item, bool b)
 }
 
 
-
-mxTreeViewItem*
-mxTreeView::getFirstChild (mxTreeViewItem *item) const
+mxTreeViewItem* mxTreeView::getFirstChild (mxTreeViewItem *item) const
 {
 	if (!d_this)
 		return 0;
@@ -176,9 +172,7 @@ mxTreeView::getFirstChild (mxTreeViewItem *item) const
 }
 
 
-
-mxTreeViewItem*
-mxTreeView::getNextChild (mxTreeViewItem *item) const
+mxTreeViewItem* mxTreeView::getNextChild (mxTreeViewItem *item) const
 {
 	if (!d_this)
 		return 0;

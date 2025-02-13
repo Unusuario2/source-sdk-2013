@@ -28,12 +28,15 @@
 #include "MDLViewer.h"
 #include "optimize.h"
 
-extern char g_appTitle[];
-Vector *StudioModel::m_AmbientLightColors;
-
 #pragma warning( disable : 4244 ) // double to float
 
+#ifdef MAPBASE
+#pragma warning(disable:4302)
+#pragma warning(disable:4189)
+#endif
 
+extern char g_appTitle[];
+Vector *StudioModel::m_AmbientLightColors;
 static StudioModel g_studioModel;
 static StudioModel *g_pActiveModel;
 
@@ -41,11 +44,13 @@ static StudioModel *g_pActiveModel;
 StudioModel *g_pStudioModel = &g_studioModel;
 StudioModel *g_pStudioExtraModel[4];
 
+
 StudioModel::StudioModel()
 {
 	m_MDLHandle = MDLHANDLE_INVALID;
 	m_vecEyeTarget.Init( 0, 0, 0 );
 }
+
 
 void StudioModel::Init()
 {
@@ -57,11 +62,13 @@ void StudioModel::Init()
 							  g_viewerSettings.showTangentFrame );
 }
 
+
 void StudioModel::Shutdown( void )
 {
 	g_pStudioModel->FreeModel( false );
 	delete [] m_AmbientLightColors;
 }
+
 
 void StudioModel::SetCurrentModel()
 {
@@ -69,10 +76,12 @@ void StudioModel::SetCurrentModel()
 	g_pActiveModel = this;
 }
 
+
 void StudioModel::ReleaseStudioModel()
 {
 	g_pStudioModel->FreeModel( true ); 
 }
+
 
 void StudioModel::RestoreStudioModel()
 {
@@ -81,7 +90,6 @@ void StudioModel::RestoreStudioModel()
 		g_pStudioModel->PostLoadModel( g_pStudioModel->m_pModelName );
 	}
 }
-
 
 
 //-----------------------------------------------------------------------------
@@ -116,12 +124,14 @@ void StudioModel::FreeModel( bool bReleasing )
 	m_pPhysics = NULL;
 }
 
+
 void *StudioModel::operator new( size_t stAllocateBlock )
 {
 	// call into engine to get memory
 	Assert( stAllocateBlock != 0 );
 	return calloc( 1, stAllocateBlock );
 }
+
 
 void StudioModel::operator delete( void *pMem )
 {
@@ -134,6 +144,7 @@ void StudioModel::operator delete( void *pMem )
 	// get the engine to free the memory
 	free( pMem );
 }
+
 
 bool StudioModel::LoadModel( const char *pModelName )
 {
@@ -253,7 +264,6 @@ bool StudioModel::LoadModel( const char *pModelName )
 }
 
 
-
 bool StudioModel::PostLoadModel( const char *modelname )
 {
 	MDLCACHE_CRITICAL_SECTION_( g_pMDLCache );
@@ -317,6 +327,7 @@ int StudioModel::GetSequence( )
 	return m_sequence;
 }
 
+
 int StudioModel::SetSequence( int iSequence )
 {
 	CStudioHdr *pStudioHdr = GetStudioHdr();
@@ -337,16 +348,19 @@ int StudioModel::SetSequence( int iSequence )
 	return m_sequence;
 }
 
+
 void StudioModel::ClearOverlaysSequences( void )
 {
 	ClearAnimationLayers( );
 	memset( m_Layer, 0, sizeof( m_Layer ) );
 }
 
+
 void StudioModel::ClearAnimationLayers( void )
 {
 	m_iActiveLayers = 0;
 }
+
 
 int	StudioModel::GetNewAnimationLayer( int iPriority )
 {
@@ -364,6 +378,7 @@ int	StudioModel::GetNewAnimationLayer( int iPriority )
 
 	return m_iActiveLayers++;
 }
+
 
 int StudioModel::SetOverlaySequence( int iLayer, int iSequence, float flWeight )
 {
@@ -389,6 +404,7 @@ int StudioModel::SetOverlaySequence( int iLayer, int iSequence, float flWeight )
 
 	return iSequence;
 }
+
 
 float StudioModel::SetOverlayRate( int iLayer, float flCycle, float flPlaybackRate )
 {
@@ -451,16 +467,19 @@ int StudioModel::LookupSequence( const char *szSequence )
 	return -1;
 }
 
+
 int StudioModel::SetSequence( const char *szSequence )
 {
 	return SetSequence( LookupSequence( szSequence ) );
 }
+
 
 void StudioModel::StartBlending( void )
 {
 	// Switch back to old sequence ( this will oscillate between this one and the last one )
 	SetSequence( m_prevsequence );
 }
+
 
 void StudioModel::SetBlendTime( float blendtime )
 {
@@ -469,6 +488,7 @@ void StudioModel::SetBlendTime( float blendtime )
 		m_blendtime = blendtime;
 	}
 }
+
 
 float StudioModel::GetTransitionAmount( void )
 {
@@ -482,6 +502,7 @@ float StudioModel::GetTransitionAmount( void )
 
 	return 0.0f;
 }
+
 
 LocalFlexController_t StudioModel::LookupFlexController( const char *szName )
 {
@@ -504,6 +525,7 @@ void StudioModel::SetFlexController( const char *szName, float flValue )
 {
 	SetFlexController( LookupFlexController( szName ), flValue );
 }
+
 
 void StudioModel::SetFlexController( LocalFlexController_t iFlex, float flValue )
 {
@@ -537,10 +559,12 @@ void StudioModel::SetFlexControllerRaw( LocalFlexController_t iFlex, float flVal
 	}
 }
 
+
 float StudioModel::GetFlexController( const char *szName )
 {
 	return GetFlexController( LookupFlexController( szName ) );
 }
+
 
 float StudioModel::GetFlexController( LocalFlexController_t iFlex )
 {
@@ -578,10 +602,12 @@ float StudioModel::GetFlexControllerRaw( LocalFlexController_t iFlex )
 	return 0.0;
 }
 
+
 int StudioModel::GetNumLODs() const
 {
 	return g_pStudioRender->GetNumLODs( *GetHardwareData() );
 }
+
 
 float StudioModel::GetLODSwitchValue( int lod ) const
 {
@@ -591,6 +617,7 @@ float StudioModel::GetLODSwitchValue( int lod ) const
 	return g_pStudioRender->GetLODSwitchValue( *GetHardwareData(), lod );
 }
 
+
 void StudioModel::SetLODSwitchValue( int lod, float switchValue )
 {
 	int numLODs = GetNumLODs();
@@ -599,6 +626,7 @@ void StudioModel::SetLODSwitchValue( int lod, float switchValue )
 
 	g_pStudioRender->SetLODSwitchValue( *GetHardwareData(), lod, switchValue );
 }
+
 
 void StudioModel::ExtractBbox( Vector &mins, Vector &maxs )
 {
@@ -628,7 +656,6 @@ void StudioModel::ExtractBbox( Vector &mins, Vector &maxs )
 }
 
 
-
 void StudioModel::GetSequenceInfo( int iSequence, float *pflFrameRate, float *pflGroundSpeed )
 {
 	float t = GetDuration( iSequence );
@@ -644,10 +671,12 @@ void StudioModel::GetSequenceInfo( int iSequence, float *pflFrameRate, float *pf
 	*pflGroundSpeed = GetGroundSpeed( iSequence );
 }
 
+
 void StudioModel::GetSequenceInfo( float *pflFrameRate, float *pflGroundSpeed )
 {
 	GetSequenceInfo( m_sequence, pflFrameRate, pflGroundSpeed );
 }
+
 
 float StudioModel::GetFPS( int iSequence )
 {
@@ -658,10 +687,12 @@ float StudioModel::GetFPS( int iSequence )
 	return Studio_FPS( pStudioHdr, iSequence, m_poseparameter );
 }
 
+
 float StudioModel::GetFPS( void )
 {
 	return GetFPS( m_sequence );
 }
+
 
 float StudioModel::GetDuration( int iSequence )
 {
@@ -684,6 +715,7 @@ int StudioModel::GetNumFrames( int iSequence )
 	return Studio_MaxFrame( pStudioHdr, iSequence, m_poseparameter );
 }
 
+
 static int GetSequenceFlags( CStudioHdr *pstudiohdr, int sequence )
 {
 	if ( !pstudiohdr || 
@@ -697,6 +729,7 @@ static int GetSequenceFlags( CStudioHdr *pstudiohdr, int sequence )
 
 	return seqdesc.flags;
 }
+
 
 //-----------------------------------------------------------------------------
 // Purpose: 
@@ -713,6 +746,7 @@ bool StudioModel::GetSequenceLoops( int iSequence )
 	bool looping = flags & STUDIO_LOOPING ? true : false;
 	return looping;
 }
+
 
 float StudioModel::GetDuration( )
 {
@@ -781,6 +815,7 @@ void StudioModel::GetMovement( int iSequence, float prevCycle, float nextCycle, 
 	return;
 }
 
+
 //-----------------------------------------------------------------------------
 // Purpose: Returns the ground speed of the specifed sequence.
 //-----------------------------------------------------------------------------
@@ -800,7 +835,6 @@ float StudioModel::GetGroundSpeed( int iSequence )
 
 	return flGroundSpeed;
 }
-
 
 
 //-----------------------------------------------------------------------------
@@ -841,7 +875,6 @@ bool StudioModel::IsHidden( int iSequence )
 }
 
 
-
 void StudioModel::GetSeqAnims( int iSequence, mstudioanimdesc_t *panim[4], float *weight )
 {
 	CStudioHdr *pStudioHdr = GetStudioHdr();
@@ -868,7 +901,6 @@ float StudioModel::SetController( int iController, float flValue )
 }
 
 
-
 int	StudioModel::LookupPoseParameter( char const *szName )
 {
 	CStudioHdr *pStudioHdr = GetStudioHdr();
@@ -885,10 +917,12 @@ int	StudioModel::LookupPoseParameter( char const *szName )
 	return -1;
 }
 
+
 float StudioModel::SetPoseParameter( char const *szName, float flValue )
 {
 	return SetPoseParameter( LookupPoseParameter( szName ), flValue );
 }
+
 
 float StudioModel::SetPoseParameter( int iParameter, float flValue )
 {
@@ -899,10 +933,12 @@ float StudioModel::SetPoseParameter( int iParameter, float flValue )
 	return Studio_SetPoseParameter( pStudioHdr, iParameter, flValue, m_poseparameter[iParameter] );
 }
 
+
 float StudioModel::GetPoseParameter( char const *szName )
 {
 	return GetPoseParameter( LookupPoseParameter( szName ) );
 }
+
 
 float StudioModel::GetPoseParameter( int iParameter )
 {
@@ -912,6 +948,7 @@ float StudioModel::GetPoseParameter( int iParameter )
 
 	return Studio_GetPoseParameter( pStudioHdr, iParameter, m_poseparameter[iParameter] );
 }
+
 
 bool StudioModel::GetPoseParameterRange( int iParameter, float *pflMin, float *pflMax )
 {
@@ -933,6 +970,7 @@ bool StudioModel::GetPoseParameterRange( int iParameter, float *pflMin, float *p
 	return true;
 }
 
+
 int StudioModel::LookupAttachment( char const *szName )
 {
 	CStudioHdr *pStudioHdr = GetStudioHdr();
@@ -948,7 +986,6 @@ int StudioModel::LookupAttachment( char const *szName )
 	}
 	return -1;
 }
-
 
 
 int StudioModel::SetBodygroup( int iGroup, int iValue )
@@ -988,7 +1025,6 @@ int StudioModel::SetSkin( int iValue )
 
 	return iValue;
 }
-
 
 
 void StudioModel::scaleMeshes (float scale)
@@ -1053,7 +1089,6 @@ void StudioModel::scaleMeshes (float scale)
 }
 
 
-
 void StudioModel::scaleBones (float scale)
 {
 	CStudioHdr *pStudioHdr = GetStudioHdr();
@@ -1067,6 +1102,7 @@ void StudioModel::scaleBones (float scale)
 		pbones[i].posscale *= scale;
 	}	
 }
+
 
 int	StudioModel::Physics_GetBoneCount( void )
 {
@@ -1103,6 +1139,7 @@ void StudioModel::Physics_GetData( int boneIndex, hlmvsolid_t *psolid, constrain
 	}
 }
 
+
 void StudioModel::Physics_SetData( int boneIndex, const hlmvsolid_t *psolid, const constraint_ragdollparams_t *pConstraint )
 {
 	CPhysmesh *pMesh = m_pPhysics->GetMesh( boneIndex );
@@ -1127,6 +1164,7 @@ float StudioModel::Physics_GetMass( void )
 	return m_pPhysics->GetMass();
 }
 
+
 void StudioModel::Physics_SetMass( float mass )
 {
 	m_physMass = mass;
@@ -1137,6 +1175,7 @@ char *StudioModel::Physics_DumpQC( void )
 {
 	return m_pPhysics->DumpQC();
 }
+
 
 // Ozxy: This already has a body?
 #if 0
@@ -1152,6 +1191,7 @@ const mstudio_modelvertexdata_t *mstudiomodel_t::GetVertexData(void* pModelData)
 	return &vertexdata;
 }
 #endif
+
 
 const vertexFileHeader_t* mstudiomodel_t::CacheVertexData(void* pModelData)
 {
@@ -1223,6 +1263,7 @@ const vertexFileHeader_t* mstudiomodel_t::CacheVertexData(void* pModelData)
 	return pVvdHdr;
 }
 
+
 //-----------------------------------------------------------------------------
 // FIXME: This trashy glue code is really not acceptable. Figure out a way of making it unnecessary.
 //-----------------------------------------------------------------------------
@@ -1233,20 +1274,24 @@ const studiohdr_t *studiohdr_t::FindModel( void **cache, char const *pModelName 
 	return g_pMDLCache->GetStudioHdr( handle );
 }
 
+
 virtualmodel_t *studiohdr_t::GetVirtualModel( void ) const
 {
 	return g_pMDLCache->GetVirtualModel( (MDLHandle_t)virtualModel );
 }
+
 
 byte *studiohdr_t::GetAnimBlock( int i ) const
 {
 	return g_pMDLCache->GetAnimBlock( (MDLHandle_t)virtualModel, i );
 }
 
+
 int studiohdr_t::GetAutoplayList( unsigned short **pOut ) const
 {
 	return g_pMDLCache->GetAutoplayList( (MDLHandle_t)virtualModel, pOut );
 }
+
 
 const studiohdr_t *virtualgroup_t::GetStudioHdr( void ) const
 {

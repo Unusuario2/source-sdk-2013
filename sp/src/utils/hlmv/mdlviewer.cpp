@@ -828,8 +828,7 @@ MDLViewer::handleEvent (mxEvent *event)
 
 
 
-void
-MDLViewer::redraw ()
+void MDLViewer::redraw ()
 {
 	/*
 	mxEvent event;

@@ -15,6 +15,9 @@
 #include <windows.h>
 //#include <ostream.h>
 
+#ifdef MAPBASE
+#pragma warning(disable:4100)
+#endif
 
 class mxMatSysWindow_i
 {
@@ -57,16 +60,13 @@ mxMatSysWindow::~mxMatSysWindow ()
 
 
 
-int
-mxMatSysWindow::handleEvent (mxEvent *event)
+int mxMatSysWindow::handleEvent (mxEvent *event)
 {
 	return 0;
 }
 
 
-
-void
-mxMatSysWindow::redraw ()
+void mxMatSysWindow::redraw ()
 {
 	// makeCurrent ();
 	if (d_drawFunc)
@@ -77,34 +77,26 @@ mxMatSysWindow::redraw ()
 }
 
 
-
-void
-mxMatSysWindow::draw ()
+void mxMatSysWindow::draw ()
 {
 }
 
 
-
-int
-mxMatSysWindow::makeCurrent ()
+int mxMatSysWindow::makeCurrent ()
 {
 	return 1;
 }
 
 
 
-int
-mxMatSysWindow::swapBuffers ()
+int mxMatSysWindow::swapBuffers ()
 {
 	return 0;
 }
 
 
 
-void
-mxMatSysWindow::setDrawFunc (void (*func) (void))
+void mxMatSysWindow::setDrawFunc (void (*func) (void))
 {
 	d_drawFunc = func;
 }
-
-

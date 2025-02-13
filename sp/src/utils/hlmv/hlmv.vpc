@@ -152,10 +152,10 @@ $Project "HLMV"
 	$Folder	"Resources"
 	{
 		$File "hlmv.rc"
-		$File "icon1.ico"
+		$File "icons/icon1.ico"
 	}
 	
-	$Folder	"Libraries"
+	$Folder	"Link Libraries"
 	{
 		$Lib "appframework"
 		$Lib "bitmap"

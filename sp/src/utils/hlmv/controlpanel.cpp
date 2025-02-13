@@ -46,6 +46,10 @@
 #include "tier0/icommandline.h"
 #include "camera.h"
 
+#ifdef MAPBASE
+#pragma warning(disable:4189)
+#endif
+
 extern char g_appTitle[];
 extern IPhysicsSurfaceProps *physprop;
 extern bool LoadPhysicsProperties( void );

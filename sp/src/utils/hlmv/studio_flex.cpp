@@ -33,12 +33,12 @@ int LocalLinearToTexture( float v )
 	return pow( v, 1.0f / 2.2f ) * 255;
 }
 
+
 // hack!  Should probably use the gamma stuff in mathlib since we already linking it.
 float LocalTextureToLinear( int c )
 {
 	return pow( c / 255.0, 2.2 );
 }
-
 
 
 #define sign( a ) (((a) < 0) ? -1 : (((a) > 0) ? 1 : 0 ))
@@ -137,5 +137,3 @@ int StudioModel::FlexVerts( mstudiomesh_t *pmesh )
 	return flextag++;
 	// Con_DPrintf("\n" );
 }
-
-

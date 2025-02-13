@@ -15,7 +15,10 @@
 #include <windows.h>
 #include <commctrl.h>
 
-
+#ifdef MAPBASE
+#pragma warning(disable:4189)
+#pragma warning(disable:4244)
+#endif
 
 class mxListView_i
 {

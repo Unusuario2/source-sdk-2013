@@ -119,6 +119,7 @@ bool RegReadVector( HKEY hKey, const char *szSubKey, Vector& value )
 	return true;
 }
 
+
 bool RegReadQAngle( HKEY hKey, const char *szSubKey, QAngle& value )
 {
 	Vector tmp;
@@ -181,6 +182,7 @@ bool RegWriteVector( HKEY hKey, const char *szSubKey, Vector& value )
 	return true;
 }
 
+
 bool RegWriteQAngle( HKEY hKey, const char *szSubKey, QAngle& value )
 {
 	Vector tmp;
@@ -212,6 +214,7 @@ bool RegWriteColor( HKEY hKey, const char *szSubKey, float value[4] )
 	return true;
 }
 
+
 bool RegReadBool( HKEY hKey, const char *szSubKey, bool *value )
 {
 	LONG lResult;           // Registry function result code
@@ -240,6 +243,7 @@ bool RegReadBool( HKEY hKey, const char *szSubKey, bool *value )
 
 	return true;
 }
+
 
 bool RegReadInt( HKEY hKey, const char *szSubKey, int *value )
 {
@@ -287,8 +291,6 @@ bool RegWriteInt( HKEY hKey, const char *szSubKey, int value )
 
 	return true;
 }
-
-
 
 
 bool RegReadFloat( HKEY hKey, const char *szSubKey, float *value )
@@ -341,7 +343,6 @@ bool RegWriteFloat( HKEY hKey, const char *szSubKey, float value )
 }
 
 
-
 bool RegReadString( HKEY hKey, const char *szSubKey, char *string, int size )
 {
 	LONG lResult;           // Registry function result code
@@ -390,13 +391,6 @@ bool RegWriteString( HKEY hKey, const char *szSubKey, char *string )
 }
 
 
-
-
-
-
-
-
-
 LONG RegViewerSettingsKey( const char *filename, PHKEY phKey, LPDWORD lpdwDisposition )
 {
 	if (strlen( filename ) == 0)
@@ -429,6 +423,7 @@ LONG RegViewerSettingsKey( const char *filename, PHKEY phKey, LPDWORD lpdwDispos
 		lpdwDisposition);    // Type of creation
 }
 
+
 bool LoadViewerSettingsInt( char const *keyname, int *value )
 {
 	LONG lResult;           // Registry function result code
@@ -452,6 +447,7 @@ bool LoadViewerSettingsInt( char const *keyname, int *value )
 	return true;
 }
 
+
 bool SaveViewerSettingsInt ( const char *keyname, int value )
 {
 	LONG lResult;           // Registry function result code
@@ -466,6 +462,7 @@ bool SaveViewerSettingsInt ( const char *keyname, int value )
 	RegWriteInt( hModelKey, keyname, value );
 	return true;
 }
+
 
 bool LoadViewerSettings (const char *filename, StudioModel *pModel )
 {
@@ -558,7 +555,6 @@ bool LoadViewerSettings (const char *filename, StudioModel *pModel )
 
 	return true;
 }
-
 
 
 bool SaveViewerSettings (const char *filename, StudioModel *pModel )

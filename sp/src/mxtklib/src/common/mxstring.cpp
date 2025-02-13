@@ -18,9 +18,13 @@
 #include <ctype.h>
 
 
+#ifdef MAPBASE
+#pragma warning(disable:4242)
+#pragma warning(disable:4244)
+#endif
 
-int
-mx_strncasecmp (const char *s1, const char *s2, int count)
+
+int mx_strncasecmp (const char *s1, const char *s2, int count)
 {
 #ifdef WIN32
 	return _strnicmp (s1, s2, count);
@@ -30,9 +34,7 @@ mx_strncasecmp (const char *s1, const char *s2, int count)
 }
 
 
-
-int
-mx_strcasecmp (const char *s1, const char *s2)
+int mx_strcasecmp (const char *s1, const char *s2)
 {
 #ifdef WIN32
 	return _stricmp (s1, s2);
@@ -42,13 +44,10 @@ mx_strcasecmp (const char *s1, const char *s2)
 }
 
 
-
-
-char *
-mx_strlower (char *str)
+char *mx_strlower (char *str)
 {
-	int i;
-	for (i = strlen (str) - 1; i >= 0; i--)
+	for (int i = strlen (str) - 1; i >= 0; i--)
 		str[i] = tolower (str[i]);
+	
 	return str;
 }

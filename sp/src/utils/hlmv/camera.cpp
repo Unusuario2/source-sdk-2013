@@ -1,5 +1,11 @@
+//========= Copyright ? 1996-2005, Valve Corporation, All rights reserved. ============//
+//
+// Purpose: 
+//
+//=============================================================================//
 #include "camera.h"
 #include "vmatrix.h"
+
 
 CCamera::CCamera()
 {
@@ -10,15 +16,18 @@ CCamera::CCamera()
 
 }
 
+
 void CCamera::GetViewMatrix(VMatrix& viewMatrix)
 {
 	ComputeViewMatrix(&viewMatrix, m_cam);
 }
 
+
 void CCamera::GetProjectionMatrix(VMatrix& projMatrix, float w, float h)
 {
 	ComputeProjectionMatrix(&projMatrix, m_cam, w, h);
 }
+
 
 void CCamera::UpdateView()
 {

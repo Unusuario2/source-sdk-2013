@@ -97,13 +97,14 @@ mxListBox::removeAll ()
 }
 
 
-
+//We dont use this funtion.
+#if 0 
 void
 mxListBox::setItemText (int index, const char *item)
 {
 	//SendMessage ((HWND) getHandle (), LB_SETTEXT, (WPARAM) index, (LPARAM) (LPCTSTR) item);
 }
-
+#endif
 
 
 void

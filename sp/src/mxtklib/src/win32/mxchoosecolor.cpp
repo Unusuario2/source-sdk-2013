@@ -17,15 +17,15 @@
 #include <commdlg.h>
 
 
-
 bool mxChooseColor (mxWindow *parent, int *r, int *g, int *b)
 {
 	CHOOSECOLOR cc;
 	static COLORREF custColors[16];
 
-	BYTE rr = *r;
-	BYTE gg = *g;
-	BYTE bb = *b;
+	//Before was byte, to shut up the compiler we are changing this to int (it does not make any real difference)
+	int rr = *r;
+	int gg = *g;
+	int bb = *b;
 
 	memset (&cc, 0, sizeof (CHOOSECOLOR));
 	cc.lStructSize = sizeof (CHOOSECOLOR);

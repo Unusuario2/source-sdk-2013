@@ -32,4 +32,3 @@ void Sys_CopyStringToClipboard( const char *pOut )
 
 	CloseClipboard();
 }
-

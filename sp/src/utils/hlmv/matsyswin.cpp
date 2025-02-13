@@ -587,8 +587,6 @@ void DrawGroundPlane()
 }
 
 
-
-
 void DrawMovementBoxes()
 {
 	if (!g_viewerSettings.showMovement)
@@ -637,7 +635,6 @@ void DrawMovementBoxes()
 	}
 
 }
-
 
 
 char const *HLMV_TranslateSoundName( char const *soundname, StudioModel *model )
@@ -795,9 +792,7 @@ void PlaySounds( StudioModel *pStudioModel )
 }
 
 
-
-void
-MatSysWindow::draw ()
+void MatSysWindow::draw ()
 {
 	MDLCACHE_CRITICAL_SECTION_( g_pMDLCache );
 
@@ -897,10 +892,8 @@ MatSysWindow::draw ()
 }
 
 
-
-/*
-int
-MatSysWindow::loadTexture (const char *filename, int name)
+#if 0
+int MatSysWindow::loadTexture (const char *filename, int name)
 {
 	if (!filename || !strlen (filename))
 	{
@@ -963,11 +956,10 @@ MatSysWindow::loadTexture (const char *filename, int name)
 
 	return 0;
 }
-*/
+#endif
 
 
-void
-MatSysWindow::dumpViewport (const char *filename)
+void MatSysWindow::dumpViewport (const char *filename)
 {
 	redraw ();
 	int w = w2 ();

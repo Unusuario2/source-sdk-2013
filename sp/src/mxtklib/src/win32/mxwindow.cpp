@@ -14,10 +14,11 @@
 #include <mx/mxWindow.h>
 #include <windows.h>
 
-
+#ifdef MAPBASE
+#pragma warning(disable:4100)
+#endif
 
 extern mxWindow *g_mainWindow;
-
 
 
 class mxWindow_i
