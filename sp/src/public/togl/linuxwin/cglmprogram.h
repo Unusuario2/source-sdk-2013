@@ -1,4 +1,4 @@
-//========= Copyright Valve Corporation, All rights reserved. ============//
+//============= Copyright Valve Corporation, All rights reserved. =============//
 //
 // cglmprogram.h
 //	GLMgr programs (ARBVP/ARBfp)
