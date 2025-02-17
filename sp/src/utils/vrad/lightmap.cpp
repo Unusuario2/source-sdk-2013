@@ -1340,8 +1340,11 @@ bool CanLeafTraceToSky( int iLeaf )
 
 	return false;
 }
-
+#ifdef MAPBASE
+void BuildVisForLightEnvironment( directlight_t *pSkyLight, directlight_t *pAmbient = NULL )
+#else
 void BuildVisForLightEnvironment( void )
+#endif
 {
 	// Create the vis.
 	for ( int iLeaf = 0; iLeaf < numleafs; ++iLeaf )
@@ -1363,8 +1366,14 @@ void BuildVisForLightEnvironment( void )
 				{
 					dleafs[iLeaf].flags |= LEAF_FLAGS_SKY;
 				}
+#ifdef MAPBASE
+				MergeDLightVis( pSkyLight, dleafs[iLeaf].cluster );
+				if ( pAmbient )
+					MergeDLightVis( pAmbient, dleafs[iLeaf].cluster );
+#else
 				MergeDLightVis( gSkyLight, dleafs[iLeaf].cluster );
 				MergeDLightVis( gAmbient, dleafs[iLeaf].cluster );
+#endif
 				break;
 			}
 		}
@@ -1479,7 +1488,8 @@ static void ParseLightEnvironment( entity_t* e, directlight_t* dl )
 	dl = AllocDLight( dest, false );
 
 	ParseLightGeneric( e, dl );
-
+	
+#ifndef MAPBASE
 	char *angle_str=ValueForKeyWithDefault( e, "SunSpreadAngle" );
 	if (angle_str)
 	{
@@ -1487,8 +1497,23 @@ static void ParseLightEnvironment( entity_t* e, directlight_t* dl )
 		g_SunAngularExtent=sin((M_PI/180.0)*g_SunAngularExtent);
 		printf("sun extent from map=%f\n",g_SunAngularExtent);
 	}
+#endif
+
 	if ( !gSkyLight )
 	{
+#ifdef MAPBASE
+		char *angle_str = ValueForKeyWithDefault( e, "SunSpreadAngle" );
+		if ( angle_str )
+		{
+			dl->flSkyLightAngularExtent = atof( angle_str );
+			dl->flSkyLightAngularExtent = sin( ( M_PI / 180.0 ) * dl->flSkyLightAngularExtent );
+			printf( "sun extent from map=%f\n", dl->flSkyLightAngularExtent );
+			if ( g_SunAngularExtent == -1.0f )
+			{
+				g_SunAngularExtent = dl->flSkyLightAngularExtent;
+			}
+		}
+#endif
 		// Sky light.
 		gSkyLight = dl;
 		dl->light.type = emit_skylight;
@@ -1510,14 +1535,40 @@ static void ParseLightEnvironment( entity_t* e, directlight_t* dl )
 						 FloatForKeyWithDefault( e, "_AmbientScaleHDR", 1.0 ), 
 						 gAmbient->light.intensity );
 		}
-		
+#ifdef MAPBASE
+		BuildVisForLightEnvironment( gSkyLight, gAmbient );
+#else
 		BuildVisForLightEnvironment();
+#endif
  
 		// Add sky and sky ambient lights to the list.
 		AddDLightToActiveList( gSkyLight );
 		AddDLightToActiveList( gAmbient );
 	}
 }
+
+#ifdef MAPBASE
+static void ParseLightDirectional( entity_t* e, directlight_t* dl )
+{
+	Vector dest;
+	GetVectorForKey (e, "origin", dest );
+	dl = AllocDLight( dest, false );
+
+	ParseLightGeneric( e, dl );
+
+	char *angle_str=ValueForKeyWithDefault( e, "SunSpreadAngle" );
+	if ( angle_str )
+	{
+		dl->flSkyLightAngularExtent = atof( angle_str );
+		dl->flSkyLightAngularExtent = sinf( ( M_PI / 180.0 ) * dl->flSkyLightAngularExtent );
+	}
+
+	dl->light.type = emit_skylight;
+	dl->bUseSkyLightAngularExtent = true;
+
+	BuildVisForLightEnvironment( dl );
+}
+#endif
 
 static void ParseLightPoint( entity_t* e, directlight_t* dl )
 {
@@ -1603,6 +1654,12 @@ void CreateDirectLights (void)
 		{
 			ParseLightEnvironment( e, dl );
 		}
+#ifdef MAPBASE
+		else if (!strcmp(name, "light_directional")) 
+		{
+			ParseLightDirectional( e, dl );
+		}
+#endif
 		else if (!strcmp(name, "light")) 
 		{
 			ParseLightPoint( e, dl );
@@ -1690,8 +1747,19 @@ void GatherSampleSkyLightSSE( SSE_sampleLightOutput_t &out, directlight_t *dl, i
 	if (zeroMask == 0xF)
 		return;
 
+#ifdef MAPBASE
+	float flSkyLightAngularExtent = g_SunAngularExtent;
+	if ( dl->bUseSkyLightAngularExtent )
+		flSkyLightAngularExtent = dl->flSkyLightAngularExtent;
+#endif
+
 	int nsamples = 1;
+
+#ifdef MAPBASE
+	if ( flSkyLightAngularExtent > 0.0f )
+#else
 	if ( g_SunAngularExtent > 0.0f )
+#endif
 	{
 		nsamples = NSAMPLES_SUN_AREA_LIGHT;
 		if ( do_fast || force_fast )
@@ -1713,7 +1781,12 @@ void GatherSampleSkyLightSSE( SSE_sampleLightOutput_t &out, directlight_t *dl, i
 		{
 			// jitter light source location
 			Vector ofs = sampler.NextValue();
+#ifdef MAPBASE
+			ofs *= MAX_TRACE_LENGTH * flSkyLightAngularExtent;
+#else
 			ofs *= MAX_TRACE_LENGTH * g_SunAngularExtent;
+#endif
+			
 			delta += ofs;
 		}
 		FourVectors delta4;

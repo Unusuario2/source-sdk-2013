@@ -81,6 +81,11 @@ struct directlight_t
 	float	soffset;
 	float	toffset;
 
+#ifdef MAPBASE
+	bool	bUseSkyLightAngularExtent;
+	float	flSkyLightAngularExtent;
+#endif
+
 	int		dorecalc; // position, vector, spot angle, etc.
 	IncrementalLightID	m_IncrementalID;
 
