@@ -111,10 +111,12 @@ static void Compute3DSkyboxAreas( node_t *headnode, CUtlVector<int>& areas );
 
 /*
 ============
-BlockTree
+
+
 
 ============
-*/
+*/ //REMOVE
+#if 0
 node_t	*BlockTree (int xl, int yl, int xh, int yh)
 {
 	node_t	*node;
@@ -163,7 +165,7 @@ node_t	*BlockTree (int xl, int yl, int xh, int yh)
 
 	return node;
 }
-
+#endif
 /*
 ============
 ProcessBlock_Thread
