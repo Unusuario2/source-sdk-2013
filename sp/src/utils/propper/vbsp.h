@@ -166,9 +166,17 @@ struct mapdispinfo_t
 
 };
 
+extern int              nummapdispinfo;
 extern mapdispinfo_t    mapdispinfo[MAX_MAP_DISPINFO];
 
+extern float			g_defaultLuxelSize;
+extern float			g_luxelScale;
+extern float			g_minLuxelScale;
+extern bool				g_BumpAll;
 extern int				g_nDXLevel;
+
+int GetDispInfoEntityNum( mapdispinfo_t *pDisp );
+void ComputeBoundsNoSkybox( );
 
 struct bspbrush_t
 {
@@ -279,12 +287,12 @@ public:
 
 	void				CheckForInstances( const char *pszFileName );
 	void				MergeInstance( entity_t *pInstanceEntity, CMapFile *Instance );
-	//void				MergePlanes( entity_t *pInstanceEntity, CMapFile *Instance, Vector &InstanceOrigin, QAngle &InstanceAngle, matrix3x4_t &InstanceMatrix );
-	//void				MergeBrushes( entity_t *pInstanceEntity, CMapFile *Instance, Vector &InstanceOrigin, QAngle &InstanceAngle, matrix3x4_t &InstanceMatrix );
-	//void				MergeBrushSides( entity_t *pInstanceEntity, CMapFile *Instance, Vector &InstanceOrigin, QAngle &InstanceAngle, matrix3x4_t &InstanceMatrix );
+	void				MergePlanes( entity_t *pInstanceEntity, CMapFile *Instance, Vector &InstanceOrigin, QAngle &InstanceAngle, matrix3x4_t &InstanceMatrix );
+	void				MergeBrushes( entity_t *pInstanceEntity, CMapFile *Instance, Vector &InstanceOrigin, QAngle &InstanceAngle, matrix3x4_t &InstanceMatrix );
+	void				MergeBrushSides( entity_t *pInstanceEntity, CMapFile *Instance, Vector &InstanceOrigin, QAngle &InstanceAngle, matrix3x4_t &InstanceMatrix );
 	void				ReplaceInstancePair( epair_t *pPair, entity_t *pInstanceEntity );
-	//void				MergeEntities( entity_t *pInstanceEntity, CMapFile *Instance, Vector &InstanceOrigin, QAngle &InstanceAngle, matrix3x4_t &InstanceMatrix );
-	//void				MergeOverlays( entity_t *pInstanceEntity, CMapFile *Instance, Vector &InstanceOrigin, QAngle &InstanceAngle, matrix3x4_t &InstanceMatrix );
+	void				MergeEntities( entity_t *pInstanceEntity, CMapFile *Instance, Vector &InstanceOrigin, QAngle &InstanceAngle, matrix3x4_t &InstanceMatrix );
+	void				MergeOverlays( entity_t *pInstanceEntity, CMapFile *Instance, Vector &InstanceOrigin, QAngle &InstanceAngle, matrix3x4_t &InstanceMatrix );
 
 	static int	m_InstanceCount;
 	static int	c_areaportals;
@@ -339,6 +347,28 @@ extern CUtlVector< CMapFile * > g_Maps;
 
 extern	int			g_nMapFileVersion;
 
+extern	qboolean	noprune;
+extern	qboolean	nodetail;
+extern	qboolean	fulldetail;
+extern	qboolean	nomerge;
+extern	qboolean	nomergewater;
+extern	qboolean	nosubdiv;
+extern	qboolean	nowater;
+extern	qboolean	noweld;
+extern	qboolean	noshare;
+extern	qboolean	notjunc;
+extern	qboolean	nocsg;
+extern	qboolean	noopt;
+extern  qboolean	dumpcollide;
+extern	qboolean	nodetailcuts;
+extern  qboolean	g_DumpStaticProps;
+extern	qboolean	g_bSkyVis;
+extern	vec_t		microvolume;
+extern	bool		g_snapAxialPlanes;
+extern	bool		g_NodrawTriggers;
+extern	bool		g_DisableWaterLighting;
+extern	bool		g_bAllowDetailCracks;
+extern	bool		g_bNoVirtualMesh;
 extern	char		outbase[32];
 
 extern	char	source[1024];
@@ -523,6 +553,11 @@ extern char FixdTextures[1048576];
 
 bool 	LoadMapFile( const char *pszFileName );
 int		GetVertexnum( Vector& v );
+bool Is3DSkyboxArea( int area );
+
+//=============================================================================
+
+// textures.c
 
 struct textureref_t
 {
@@ -534,6 +569,42 @@ struct textureref_t
 
 extern	textureref_t	textureref[MAX_MAP_TEXTURES];
 
+int	FindMiptex (const char *name);
+
+int TexinfoForBrushTexture (plane_t *plane, brush_texture_t *bt, const Vector& origin);
+int GetSurfaceProperties2( MaterialSystemMaterial_t matID, const char *pMatName );
+
+extern int g_SurfaceProperties[MAX_MAP_TEXDATA];
+void LoadSurfaceProperties( void );
+
+int PointLeafnum ( dmodel_t* pModel, const Vector& p );
+
+//=============================================================================
+
+void FindGCD (int *v);
+
+mapbrush_t *Brush_LoadEntity (entity_t *ent);
+int	PlaneTypeForNormal (Vector& normal);
+qboolean MakeBrushPlanes (mapbrush_t *b);
+int		FindIntPlane (int *inormal, int *iorigin);
+void	CreateBrush (int brushnum);
+
+
+//=============================================================================
+// detail objects
+//=============================================================================
+
+void LoadEmitDetailObjectDictionary( char const* pGameDir );
+void EmitDetailObjects();
+
+//=============================================================================
+// static props
+//=============================================================================
+
+void EmitStaticProps();
+bool LoadStudioModel( char const* pFileName, char const* pEntityType, CUtlBuffer& buf );
+
+//=============================================================================
 //=============================================================================
 // procedurally created .vmt files
 //=============================================================================
@@ -546,6 +617,15 @@ extern Vector	draw_mins, draw_maxs;
 extern bool g_bLightIfMissing;
 
 void Draw_ClearWindow (void);
+void DrawWinding (winding_t *w);
+
+void GLS_BeginScene (void);
+void GLS_Winding (winding_t *w, int code);
+void GLS_EndScene (void);
+
+//=============================================================================
+
+// csg
 
 enum detailscreen_e
 {
@@ -553,6 +633,205 @@ enum detailscreen_e
 	ONLY_DETAIL = 1,
 	NO_DETAIL	= 2,
 };
+
+#define TRANSPARENT_CONTENTS	(CONTENTS_GRATE|CONTENTS_WINDOW)
+	
+#include "csg.h"
+
+//=============================================================================
+
+// brushbsp
+
+void WriteBrushList (char *name, bspbrush_t *brush, qboolean onlyvis);
+
+bspbrush_t *CopyBrush (bspbrush_t *brush);
+
+void SplitBrush (bspbrush_t *brush, int planenum,
+	bspbrush_t **front, bspbrush_t **back);
+
+tree_t *AllocTree (void);
+node_t *AllocNode (void);
+bspbrush_t *AllocBrush (int numsides);
+int	CountBrushList (bspbrush_t *brushes);
+void FreeBrush (bspbrush_t *brushes);
+vec_t BrushVolume (bspbrush_t *brush);
+node_t *NodeForPoint (node_t *node, Vector& origin);
+
+void BoundBrush (bspbrush_t *brush);
+void FreeBrushList (bspbrush_t *brushes);
+node_t	*PointInLeaf (node_t *node, Vector& point);
+
+tree_t *BrushBSP (bspbrush_t *brushlist, Vector& mins, Vector& maxs);
+
+#define	PSIDE_FRONT			1
+#define	PSIDE_BACK			2
+#define	PSIDE_BOTH			(PSIDE_FRONT|PSIDE_BACK)
+#define	PSIDE_FACING		4
+int BrushBspBoxOnPlaneSide (const Vector& mins, const Vector& maxs, dplane_t *plane);
+extern qboolean WindingIsTiny (winding_t *w);
+
+//=============================================================================
+
+// portals.c
+
+int VisibleContents (int contents);
+
+void MakeHeadnodePortals (tree_t *tree);
+void MakeNodePortal (node_t *node);
+void SplitNodePortals (node_t *node);
+
+qboolean	Portal_VisFlood (portal_t *p);
+
+qboolean FloodEntities (tree_t *tree);
+void FillOutside (node_t *headnode);
+void FloodAreas (tree_t *tree);
+void MarkVisibleSides (tree_t *tree, int start, int end, int detailScreen);
+void MarkVisibleSides (tree_t *tree, mapbrush_t **ppBrushes, int nCount );
+void FreePortal (portal_t *p);
+void EmitAreaPortals (node_t *headnode);
+
+void MakeTreePortals (tree_t *tree);
+
+//=============================================================================
+
+// glfile.c
+
+void OutputWinding (winding_t *w, FileHandle_t glview);
+void OutputWindingColor (winding_t *w, FileHandle_t glview, int r, int g, int b);
+void WriteGLView (tree_t *tree, char *source);
+void WriteGLViewFaces (tree_t *tree, const char *source);
+void WriteGLViewBrushList( bspbrush_t *pList, const char *pName );
+//=============================================================================
+
+// leakfile.c
+
+void LeakFile (tree_t *tree);
+void AreaportalLeakFile( tree_t *tree, portal_t *pStartPortal, portal_t *pEndPortal, node_t *pStart );
+
+//=============================================================================
+
+// prtfile.c
+
+void AddVisCluster( entity_t *pFuncVisCluster );
+void WritePortalFile (tree_t *tree);
+
+//=============================================================================
+
+// writebsp.c
+
+void SetModelNumbers (void);
+void SetLightStyles (void);
+
+void BeginBSPFile (void);
+void WriteBSP (node_t *headnode, face_t *pLeafFaceList);
+void EndBSPFile (void);
+void BeginModel (void);
+void EndModel (void);
+
+extern	int firstmodeledge;
+extern	int	firstmodelface;
+
+//=============================================================================
+
+// faces.c
+
+void MakeFaces (node_t *headnode);
+void MakeDetailFaces (node_t *headnode);
+face_t *FixTjuncs( node_t *headnode, face_t *pLeafFaceList );
+
+face_t	*AllocFace (void);
+void FreeFace (face_t *f);
+void FreeFaceList( face_t *pFaces );
+
+void MergeFaceList(face_t **pFaceList);
+void SubdivideFaceList(face_t **pFaceList);
+
+extern face_t		*edgefaces[MAX_MAP_EDGES][2];
+
+
+//=============================================================================
+
+// tree.c
+
+void FreeTree (tree_t *tree);
+void FreeTree_r (node_t *node);
+void PrintTree_r (node_t *node, int depth);
+void FreeTreePortals_r (node_t *node);
+void PruneNodes_r (node_t *node);
+void PruneNodes (node_t *node);
+
+// Returns true if the entity is a func_occluder
+bool IsFuncOccluder( int entity_num );
+
+
+//=============================================================================
+// ivp.cpp
+class CPhysCollide;
+void EmitPhysCollision();
+void DumpCollideToGlView( CPhysCollide *pCollide, const char *pFilename );
+void EmitWaterVolumesForBSP( dmodel_t *pModel, node_t *headnode );
+
+//=============================================================================
+// find + find or create the texdata 
+int FindTexData( const char *pName );
+int FindOrCreateTexData( const char *pName );
+// Add a clone of an existing texdata with a new name
+int AddCloneTexData( dtexdata_t *pExistingTexData, char const *cloneTexDataName );
+int FindOrCreateTexInfo( const texinfo_t &searchTexInfo );
+int FindAliasedTexData( const char *pName, dtexdata_t *sourceTexture );
+int FindTexInfo( const texinfo_t &searchTexInfo );
+
+//=============================================================================
+// normals.c
+void SaveVertexNormals( void );
+
+//=============================================================================
+// cubemap.cpp
+void Cubemap_InsertSample( const Vector& origin, int size );
+void Cubemap_CreateDefaultCubemaps( void );
+void Cubemap_SaveBrushSides( const char *pSideListStr );
+void Cubemap_FixupBrushSidesMaterials( void );
+void Cubemap_AttachDefaultCubemapToSpecularSides( void );
+// Add skipped cubemaps that are referenced by the engine
+void Cubemap_AddUnreferencedCubemaps( void );
+
+//=============================================================================
+// overlay.cpp
+#define OVERLAY_MAP_STRLEN			256
+
+struct mapoverlay_t
+{
+	int					nId;
+	unsigned short		m_nRenderOrder;
+	char				szMaterialName[OVERLAY_MAP_STRLEN];
+	float				flU[2];
+	float				flV[2];
+	float				flFadeDistMinSq;
+	float				flFadeDistMaxSq;
+	Vector				vecUVPoints[4];
+	Vector				vecOrigin;
+	Vector				vecBasis[3];
+	CUtlVector<int>		aSideList;
+	CUtlVector<int>		aFaceList;
+};
+
+extern CUtlVector<mapoverlay_t>	g_aMapOverlays;
+extern CUtlVector<mapoverlay_t> g_aMapWaterOverlays;
+
+int Overlay_GetFromEntity( entity_t *pMapEnt );
+void Overlay_UpdateSideLists( int StartIndex );
+void Overlay_AddFaceToLists( int iFace, side_t *pSide );
+void Overlay_EmitOverlayFaces( void );
+void OverlayTransition_UpdateSideLists( int StartIndex );
+void OverlayTransition_AddFaceToLists( int iFace, side_t *pSide );
+void OverlayTransition_EmitOverlayFaces( void );
+void Overlay_Translate( mapoverlay_t *pOverlay, Vector &OriginOffset, QAngle &AngleOffset, matrix3x4_t &Matrix );
+
+//=============================================================================
+
+void RemoveAreaPortalBrushes_R( node_t *node );
+
+dtexdata_t *GetTexData( int index );
 
 #endif
 
