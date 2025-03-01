@@ -14,7 +14,7 @@
 #include "fmtstr.h"
 
 #ifdef MAPBASE
-#include "../common/StandardColorFormat.h" //this control the color of the console.
+#include "../common/StandardColorFormat.h" // Controls the color formatting of the console output.
 #endif 
 
 int		c_active_portals;

@@ -24,7 +24,7 @@
 #include "byteswap.h"
 
 #ifdef MAPBASE
-#include "../common/StandardColorFormat.h" //this control the color of the console.
+#include "../common/StandardColorFormat.h" // Controls the color formatting of the console output.
 #endif 
 
 int			g_numportals;
@@ -1019,6 +1019,12 @@ int ParseCommandLine( int argc, char **argv )
 		{
 			// nothing to do here, but don't bail on this option
 		}
+#if MAPBASE
+		else if (!Q_stricmp(argv[i], "-NoColorHighlighting"))
+		{
+			DisableColorHighlighting();
+		}
+#endif
 		// NOTE: the -mpi checks must come last here because they allow the previous argument 
 		// to be -mpi as well. If it game before something else like -game, then if the previous
 		// argument was -mpi and the current argument was something valid like -game, it would skip it.
@@ -1087,6 +1093,9 @@ void PrintUsage( int argc, char **argv )
 		"  -FullMinidumps  : Write large minidumps on crash.\n"
 		"  -x360		   : Generate Xbox360 version of vsp\n"
 		"  -nox360		   : Disable generation Xbox360 version of vsp (default)\n"
+#ifdef MAPBASE
+		"  -NoColorHighlighting: Disables all highlighted colors in the console, except for warnings and errors.\n"
+#endif
 		"\n"
 #if 1 // Disabled for the initial SDK release with VMPI so we can get feedback from selected users.
 		);

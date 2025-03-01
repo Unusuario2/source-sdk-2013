@@ -21,16 +21,8 @@
 #include "worldvertextransitionfixup.h"
 
 #ifdef MAPBASE
-#include "../common/StandardColorFormat.h" //this control the color of the console.
+#include "../common/StandardColorFormat.h" // Controls the color formatting of the console output.
 #endif 
-
-/*
-#ifdef MAPBASE
-#ifdef _WIN32 //This is for having ANSI colors in the console on Windows.
-#include <windows.h> 
-#endif 
-#endif 
-*/
 
 #ifdef MAPBASE_VSCRIPT
 #include "vscript/ivscript.h"
@@ -1239,6 +1231,10 @@ int RunVBSP( int argc, char **argv )
 		{
 			g_bPropperStripEntities = true;
 		}
+		else if ( !Q_stricmp( argv[i], "-NoColorHighlighting" ) )
+		{
+			DisableColorHighlighting();
+		}
 #endif
 #ifdef MAPBASE_VSCRIPT
 		else if ( !Q_stricmp( argv[i], "-scripting" ) )
@@ -1390,6 +1386,9 @@ int RunVBSP( int argc, char **argv )
 				"  -replacematerials : Substitute materials according to materialsub.txt in content\\maps\n"
 				"  -FullMinidumps  : Write large minidumps on crash.\n"
 				"  -nohiddenmaps   : Exclude manifest maps if they are currently hidden.\n"
+#ifdef MAPBASE
+				"  -NoColorHighlighting: Disables all highlighted colors in the console, except for warnings and errors.\n"
+#endif
 				);
 			}
 

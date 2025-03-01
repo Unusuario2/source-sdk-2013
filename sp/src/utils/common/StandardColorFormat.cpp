@@ -17,27 +17,27 @@
 //	- Cyan: Only for header strings.
 
 // +--------------------+------------------+
-// |       Color        | ANSI Code       |
+// |       Color        | ANSI Code        |
 // +--------------------+------------------+
-// | Black              | \033[30m        |
-// | Red                | \033[31m        |
-// | Green              | \033[32m        |
-// | Yellow             | \033[33m        |
-// | Blue               | \033[34m        |
-// | Magenta            | \033[35m        |
-// | Cyan               | \033[36m        |
-// | White              | \033[37m        |
+// | Black              | \033[30m         |
+// | Red                | \033[31m         |
+// | Green              | \033[32m         |
+// | Yellow             | \033[33m         |
+// | Blue               | \033[34m         |
+// | Magenta            | \033[35m         |
+// | Cyan               | \033[36m         |
+// | White              | \033[37m         |
 // +--------------------+------------------+
-// | Bright Black       | \033[90m        |
-// | Bright Red         | \033[91m        |
-// | Bright Green       | \033[92m        |
-// | Bright Yellow      | \033[93m        |
-// | Bright Blue        | \033[94m        |
-// | Bright Magenta     | \033[95m        |
-// | Bright Cyan        | \033[96m        |
-// | Bright White       | \033[97m        |
+// | Bright Black       | \033[90m         |
+// | Bright Red         | \033[91m         |
+// | Bright Green       | \033[92m         |
+// | Bright Yellow      | \033[93m         |
+// | Bright Blue        | \033[94m         |
+// | Bright Magenta     | \033[95m         |
+// | Bright Cyan        | \033[96m         |
+// | Bright White       | \033[97m         |
 // +--------------------+------------------+
-// | Reset              | \033[0m         |
+// | Reset              | \033[0m          |
 // +--------------------+------------------+
 
 // Ansi Color Codes in valve format.
@@ -54,7 +54,7 @@ Color magenta(255, 0, 255, 255);		// Magenta, Number
 Color cyan(0, 255, 255, 255);			// Cyan, Header
 Color white(255, 255, 255, 255);		// White, Standard
 
-#if 0 //These seen to dont work so will we use the standard colors.
+#if 0 //These seems to dont work so we will use the standard colors.
 // Bright Colors (High Intensity)
 Color bright_black(85, 85, 85, 255);    // Bright Black (Gray)
 Color bright_red(255, 85, 85, 255);     // Bright Red
@@ -67,4 +67,10 @@ Color bright_white(255, 255, 255, 255); // Bright White}
 
 // Dark Colors (Low Intensity)
 Color dark_yellow(100, 100, 0, 255);	// Custom
-#endif //0	
+#endif //0
+
+void DisableColorHighlighting()
+{
+	red = white;		green = white;		yellow = white;
+	blue = white;		magenta = white;	cyan = white;
+}

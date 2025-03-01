@@ -21,7 +21,7 @@
 #include "byteswap.h"
 
 #ifdef MAPBASE
-#include "../common/StandardColorFormat.h" //this control the color of the console.
+#include "../common/StandardColorFormat.h" // Controls the color formatting of the console output.
 #endif 
 
 
@@ -2750,7 +2750,12 @@ int ParseCommandLine( int argc, char **argv, bool *onlydetail )
 				return 1;
 			}
 		}
-
+#if MAPBASE
+		else if (!Q_stricmp(argv[i], "-NoColorHighlighting"))
+		{
+			DisableColorHighlighting();
+		}
+#endif
 #if ALLOWDEBUGOPTIONS
 		else if (!Q_stricmp(argv[i],"-scale"))
 		{
@@ -2925,6 +2930,9 @@ void PrintUsage( int argc, char **argv )
 		"  -textureshadows : Allows texture alpha channels to block light - rays intersecting alpha surfaces will sample the texture\n"
 		"  -noskyboxrecurse : Turn off recursion into 3d skybox (skybox shadows on world)\n"
 		"  -nossprops      : Globally disable self-shadowing on static props\n"
+#ifdef MAPBASE
+		"  -NoColorHighlighting: Disables all highlighted colors in the console, except for warnings and errors.\n"
+#endif
 		"\n"
 #if 1 // Disabled for the initial SDK release with VMPI so we can get feedback from selected users.
 		);
