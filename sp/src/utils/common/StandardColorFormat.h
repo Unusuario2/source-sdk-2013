@@ -6,12 +6,15 @@
 //
 // $NoKeywords: $
 //=============================================================================
+
+#ifndef STANDARDCOLORFORMAT_H
+#define STANDARDCOLORFORMAT_H
+
+#ifdef _WIN32
 #pragma once
+#endif
 
 #include "Color.h"
-
-// Insted of using ansi values, we the valve implementation of the color format.
-// So we dont have issues with standard hammer compile window/log format & linux.
 
 // We will use the next color format in the tools.
 //	- Green: process done.
@@ -54,6 +57,7 @@ extern Color magenta;			// Magenta
 extern Color cyan;				// Cyan
 extern Color white;				// White
 
+#if 0 //these do not work in all the console windows. 
 // Bright Colors (High Intensity)
 extern Color bright_black;      // Bright Black (Gray)
 extern Color bright_red;        // Bright Red
@@ -66,3 +70,5 @@ extern Color bright_white;      // Bright White
 
 // Dark Colors (Low Intensity)
 extern Color dark_yellow;		// Custom
+#endif //0
+#endif //STANDARDCOLORFORMAT_H

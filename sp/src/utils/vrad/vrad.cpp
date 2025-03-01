@@ -21,7 +21,7 @@
 #include "byteswap.h"
 
 #ifdef MAPBASE
-#include "../common/StandartColorFormat.h" //this control the color of the console.
+#include "../common/StandardColorFormat.h" //this control the color of the console.
 #endif 
 
 
@@ -947,7 +947,7 @@ void SubdividePatches (void)
 
 	unsigned int uiPatchCount = g_Patches.Size();
 #ifdef MAPBASE
-	Msg("Pacthes before subdivision ");
+	Msg("Patches before subdivision ");
 	ColorSpewMessage(SPEW_MESSAGE, &magenta, "[%i]\n", g_Patches.Size());
 #else
 	qprintf ("%i patches before subdivision\n", g_Patches.Size());
@@ -2960,8 +2960,8 @@ void PrintUsage( int argc, char **argv )
 int RunVRAD( int argc, char **argv )
 {
 #if defined(_MSC_VER) && ( _MSC_VER >= 1310 )
-	#ifdef MAPBASE
-		ColorSpewMessage(SPEW_MESSAGE, &cyan, "Valve Software - vrad.exe (Build: pc32 %s)", __DATE__);
+	#if defined (MAPBASE) && defined (_WIN32)
+		ColorSpewMessage(SPEW_MESSAGE, &cyan, "Valve Software - Valve Radiosity Simulator (vrad.exe) (Build: pc32 %s)", __DATE__);
 	#else
 		Msg("Valve Software - vrad.exe (" __DATE__ ")\n" );
 	#endif
@@ -2969,7 +2969,7 @@ int RunVRAD( int argc, char **argv )
 	Msg("Valve Software - vrad.exe (" __DATE__ ")\n" );
 #endif
 
-	//Msg("\n      Valve Radiosity Simulator     \n"); //no need to have this.
+	//Msg("\n      Valve Radiosity Simulator     \n");
 
 	verbose = true;  // Originally FALSE
 

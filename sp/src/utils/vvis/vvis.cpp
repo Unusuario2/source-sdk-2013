@@ -24,16 +24,8 @@
 #include "byteswap.h"
 
 #ifdef MAPBASE
-#include "../common/StandartColorFormat.h" //this control the color of the console.
+#include "../common/StandardColorFormat.h" //this control the color of the console.
 #endif 
-
-/*
-#ifdef MAPBASE
-	#ifdef _WIN32 //This is for having ANSI colors in the console on Windows.
-	#include <windows.h> 
-	#endif 
-#endif 
-*/
 
 int			g_numportals;
 int			portalclusters;
@@ -68,23 +60,6 @@ double		g_VisRadius = 4096.0f * 4096.0f;
 bool		g_bLowPriority = false;
 
 //=============================================================================
-
-/*
-//-------------------------------------------
-// Windows stuff for colors in the console
-//-------------------------------------------
-#ifdef MAPBASE
-	#ifdef _WIN32
-	void EnableANSI() {
-		HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
-		DWORD dwMode = 0;
-		if (hOut != INVALID_HANDLE_VALUE && GetConsoleMode(hOut, &dwMode)) {
-			SetConsoleMode(hOut, dwMode | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
-		}
-	}
-	#endif
-#endif
-*/
 
 void PlaneFromWinding (winding_t *w, plane_t *plane)
 {
@@ -1151,7 +1126,7 @@ int RunVVis( int argc, char **argv )
 	double		start, end;
 
 
-#ifdef MAPBASE
+#if defined (MAPBASE) && defined(_WIN32)
 	ColorSpewMessage(SPEW_MESSAGE, &cyan, "Valve Software - vvis.exe (Build: pc32 %s)", __DATE__);
 #else
 	Msg("Valve Software - vvis.exe (%s)\n", __DATE__);
@@ -1159,8 +1134,7 @@ int RunVVis( int argc, char **argv )
 
 	verbose = false;
 
-	ThreadSetDefault(); //It does not change the behaviour of vvis, of ThreadSetDefault
-						//to be in the line 1117 (aprox) or in the line 1155 (aprox).
+	ThreadSetDefault();
 
 	Q_StripExtension( argv[ argc - 1 ], source, sizeof( source ) );
 	CmdLib_InitFileSystem( argv[ argc - 1 ] );
@@ -1326,14 +1300,6 @@ main
 int main (int argc, char **argv)
 {
 	CommandLine()->CreateCmdLine( argc, argv );
-/*
-#ifdef MAPBASE
-	#ifdef _WIN32
-		EnableANSI();
-	#endif 
-#endif 
-*/
-
 	MathLib_Init( 2.2f, 2.2f, 0.0f, 1.0f, false, false, false, false );
 	InstallAllocationFunctions();
 	InstallSpewFunction();

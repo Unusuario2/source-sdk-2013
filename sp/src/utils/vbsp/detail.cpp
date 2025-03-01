@@ -11,7 +11,7 @@
 #include <assert.h>
 
 #ifdef MAPBASE
-#include "../common/StandartColorFormat.h" //this control the color of the console.
+#include "../common/StandardColorFormat.h" //this control the color of the console.
 #endif 
 
 
@@ -247,13 +247,12 @@ void TryMergeFaceList( face_t **pFaceList )
 	if ( merged )
 	{
 #ifdef MAPBASE
-		#ifdef _WIN32
-		Msg("\nMerged \033[1;35m[%d]\033[0m detail faces... \033[32m done(0)\033[0m\n", merged );
-	#else
-		Msg("Merged %d detail faces... done(0)\n", merged );
-	#endif	
+	Msg("\nMerged");
+	ColorSpewMessage(SPEW_MESSAGE, &magenta, " [%d] ", merged);
+	Msg("detail faces... ");
+	ColorSpewMessage(SPEW_MESSAGE, &green, "done (0)\n");
 #else
-	Msg("\nMerged %d detail faces... done(0)\n", merged );
+	Msg("Merged %d detail faces... done(0)\n", merged );
 #endif 
 	}
 	delete[] pPlaneList;

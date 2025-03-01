@@ -23,7 +23,7 @@
 #endif
 
 #ifdef MAPBASE
-#include "../common/StandartColorFormat.h" //this control the color of the console.
+#include "../common/StandardColorFormat.h" //this control the color of the console.
 #endif 
 
 
@@ -2101,13 +2101,9 @@ void CMapFile::CheckForInstances( const char *pszFileName )
 	if ( !GameInfoKV )
 	{
 #ifdef MAPBASE
-	#ifdef _WIN32
-			Warning("\tCould not locate gameinfo.txt for Instance Remapping at \033[33m%s\033[0m\n", GameInfoPath);
-	#else
-			Warning("\tCould not locate gameinfo.txt for Instance Remapping at %s\n", GameInfoPath);
-	#endif
+	Warning("\tCould not locate gameinfo.txt for Instance Remapping at: +- %s\033\n", GameInfoPath);
 #else
-		Warning("\tCould not locate gameinfo.txt for Instance Remapping at %s\n", GameInfoPath);
+	Warning("\tCould not locate gameinfo.txt for Instance Remapping at %s\n", GameInfoPath);
 #endif 
 		return;
 	}

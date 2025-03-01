@@ -20,7 +20,7 @@
 #include "disp_vrad.h"
 
 #ifdef MAPBASE
-#include "../common/StandartColorFormat.h" //this control the color of the console.
+#include "../common/StandardColorFormat.h" //this control the color of the console.
 #endif 
 
 class CBSPDispRayDistanceEnumerator;

@@ -21,7 +21,7 @@
 #include "worldvertextransitionfixup.h"
 
 #ifdef MAPBASE
-#include "../common/StandartColorFormat.h" //this control the color of the console.
+#include "../common/StandardColorFormat.h" //this control the color of the console.
 #endif 
 
 /*
@@ -113,20 +113,6 @@ int			entity_num;
 
 
 node_t		*block_nodes[BLOCKS_SPACE+2][BLOCKS_SPACE+2];
-
-/*
-#ifdef MAPBASE
-	#ifdef _WIN32
-	void EnableANSI() {
-		HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
-		DWORD dwMode = 0;
-		if (hOut != INVALID_HANDLE_VALUE && GetConsoleMode(hOut, &dwMode)) {
-			SetConsoleMode(hOut, dwMode | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
-		}
-	}
-	#endif
-#endif
-*/
 
 //-----------------------------------------------------------------------------
 // Assign occluder areas (must happen *after* the world model is processed)
@@ -975,8 +961,8 @@ int RunVBSP( int argc, char **argv )
 
 	LoadCmdLineFromFile( argc, argv, mapbase, "vbsp" );
 
-#ifdef MAPBASE
-	ColorSpewMessage(SPEW_MESSAGE, &cyan, "Valve Software - vbsp.exe (Build: pc32 % s)", __DATE__ );
+#if defined (MAPBASE) && defined (_WIN32)
+	ColorSpewMessage(SPEW_MESSAGE, &cyan, "Valve Software - vbsp.exe (Build: pc32 %s)", __DATE__ );
 #else
 	Msg( "Valve Software - vbsp.exe (%s)\n", __DATE__ );
 #endif
@@ -1614,14 +1600,6 @@ main
 int main(int argc, char** argv)
 {
 	// Install an exception handler.
-
-/*
-#ifdef MAPBASE
-	#ifdef _WIN32
-		EnableANSI();
-	#endif 
-#endif
-*/ 
 	SetupDefaultToolsMinidumpHandler();
 	return RunVBSP( argc, argv );
 }

@@ -24,7 +24,7 @@
 #include "KeyValues.h"
 
 #ifdef MAPBASE
-#include "../common/StandartColorFormat.h" //this control the color of the console.
+#include "../common/StandardColorFormat.h" //this control the color of the console.
 #endif
 
 static void SetCurrentModel( studiohdr_t *pStudioHdr );
@@ -569,16 +569,7 @@ static void SetLumpData( )
 
 void EmitStaticProps()
 {
-#ifdef MAPBASE
-	#ifdef _WIN32
-		Msg("Placing static props... ");
-	#else
-		Msg("Placing static props...\n");
-	#endif
-#else
-	Msg("Placing static props...\n");
-#endif
-
+	Msg("Placing static props... ");
 
 	CreateInterfaceFn physicsFactory = GetPhysicsFactory();
 	if ( physicsFactory )

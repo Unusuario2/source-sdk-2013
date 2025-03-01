@@ -7,12 +7,7 @@
 // $NoKeywords: $
 //=============================================================================
 
-#pragma once
-
-#include "StandartColorFormat.h"
-
-// Insted of using ansi values, we the valve implementation of the color format.
-// So we dont have issues with standard hammer compile window/log format & linux.
+#include "StandardColorFormat.h"
 
 // We will use the next color format in the tools.
 //	- Green: process done.
@@ -59,7 +54,7 @@ Color magenta(255, 0, 255, 255);		// Magenta, Number
 Color cyan(0, 255, 255, 255);			// Cyan, Header
 Color white(255, 255, 255, 255);		// White, Standard
 
-//These seen to dont work so will we use the standard colors.
+#if 0 //These seen to dont work so will we use the standard colors.
 // Bright Colors (High Intensity)
 Color bright_black(85, 85, 85, 255);    // Bright Black (Gray)
 Color bright_red(255, 85, 85, 255);     // Bright Red
@@ -72,6 +67,4 @@ Color bright_white(255, 255, 255, 255); // Bright White}
 
 // Dark Colors (Low Intensity)
 Color dark_yellow(100, 100, 0, 255);	// Custom
-
-//Common funtions:
-// ColorSpewMessage( SPEW_MESSAGE, &green, "done (%d)");	
+#endif //0	
