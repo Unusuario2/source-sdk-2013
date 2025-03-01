@@ -15,7 +15,7 @@ $Configuration
 	$Compiler
 	{
 		$AdditionalIncludeDirectories		"$BASE,..\common,..\vmpi,..\vmpi\mysql\include"
-		$PreprocessorDefinitions			"$BASE;MPI;PROTECTED_THINGS_DISABLE"
+		$PreprocessorDefinitions			"$BASE;MPI;PROTECTED_THINGS_DISABLE;SDK_TOOLS"
 	}
 
 	$Linker
@@ -97,7 +97,7 @@ $Project "Vvis_dll"
 
 	$Folder	"Link Libraries"
 	{
-		$Lib mathlib
+		$Lib mathlib_sdktools
 		$Lib tier2
 		$Lib vmpi
 	}

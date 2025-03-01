@@ -684,7 +684,11 @@ I  CUtlRBTree<T, I, L, M>::NewNode()
 			Assert( m_Elements.IsValidIterator( it ) );
 			if ( !m_Elements.IsValidIterator( it ) )
 			{
+#if defined(MAPBASE) && defined(SDK_TOOLS) // For the tooling, we use a different printing format
 				Error("\tCUtlRBTree overflow!\n" );
+#else
+				Error( "CUtlRBTree overflow!\n" );
+#endif
 			}
 		}
 		m_LastAlloc = it;

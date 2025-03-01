@@ -399,7 +399,11 @@ I CUtlMultiList<T,I>::Alloc( )
 		// We can overflow before the utlmemory overflows, since we have have I != int
 		if ( !IndexInRange( m_MaxElementIndex ) )
 		{
-			ExecuteNTimes( 10, Warning("\tCUtlMultiList overflow! (exhausted index range)\n" ) );
+#if defined(MAPBASE) && defined(SDK_TOOLS) // For the tooling, we use a different printing format
+			ExecuteNTimes( 10, Warning( "\tCUtlMultiList overflow! (exhausted index range)\n" ) );
+#else
+			ExecuteNTimes( 10, Warning( "CUtlMultiList overflow! (exhausted index range)\n" ) );
+#endif
 			return InvalidIndex();
 		}
 
@@ -413,7 +417,11 @@ I CUtlMultiList<T,I>::Alloc( )
 			
 			if ( m_MaxElementIndex >= m_Memory.NumAllocated() )
 			{
-				ExecuteNTimes( 10, Warning("\tCUtlMultiList overflow! (exhausted memory allocator)\n" ) );
+#if defined(MAPBASE) && defined(SDK_TOOLS) // For the tooling, we use a different printing format
+		 		ExecuteNTimes( 10, Warning( "\tCUtlMultiList overflow! (exhausted memory allocator)\n" ) );
+#else
+				ExecuteNTimes( 10, Warning( "CUtlMultiList overflow! (exhausted memory allocator)\n" ) );
+#endif
 				return InvalidIndex();
 			}
 		}

@@ -270,7 +270,11 @@ void CUtlBlockMemory<T,I>::ChangeSize( int nBlocks )
 
 	if ( !m_pMemory )
 	{
+#if defined(MAPBASE) && defined(SDK_TOOLS) // For the tooling, we use a different printing format
 		Error("\tCUtlBlockMemory overflow!\n" );
+#else
+		Error( "CUtlBlockMemory overflow!\n" );
+#endif
 	}
 
 	// allocate new blocks if growing

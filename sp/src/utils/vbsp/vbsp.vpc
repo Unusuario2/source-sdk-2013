@@ -17,7 +17,7 @@ $Configuration
 		$AdditionalIncludeDirectories		"$BASE,..\common,..\vmpi"
 		$PreprocessorDefinitions			"$BASE;MACRO_MATHLIB;PROTECTED_THINGS_DISABLE"
 		
-		$PreprocessorDefinitions			"$BASE;MAPBASE_VSCRIPT"	[$MAPBASE_VSCRIPT]
+		$PreprocessorDefinitions			"$BASE;MAPBASE_VSCRIPT;SDK_TOOLS"	[$MAPBASE_VSCRIPT]
 	}
 
 	$Linker
@@ -188,7 +188,7 @@ $Project "Vbsp"
 	{
 		$Lib bitmap
 		$Lib fgdlib
-		$Lib mathlib
+		$Lib mathlib_sdktools
 		$Lib tier2
 		$Lib vtf
 		$Lib vscript [$MAPBASE_VSCRIPT]

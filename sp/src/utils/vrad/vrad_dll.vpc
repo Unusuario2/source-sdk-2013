@@ -15,7 +15,7 @@ $Configuration
 	$Compiler
 	{
 		$AdditionalIncludeDirectories		"$BASE,..\common,..\vmpi,..\vmpi\mysql\mysqlpp\include,..\vmpi\mysql\include"
-		$PreprocessorDefinitions			"$BASE;MPI;PROTECTED_THINGS_DISABLE;VRAD"
+		$PreprocessorDefinitions			"$BASE;MPI;PROTECTED_THINGS_DISABLE;VRAD;SDK_TOOLS"
 	}
 
 	$Linker
@@ -217,7 +217,7 @@ $Project "Vrad_dll"
 	$Folder	"Link Libraries"
 	{
 		$Lib bitmap
-		$Lib mathlib
+		$Lib mathlib_sdktools
 		$Lib raytrace
 		$Lib tier2
 		$Lib vmpi

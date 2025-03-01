@@ -375,7 +375,11 @@ void *CDataManagerBase::GetForFreeByIndex( unsigned short memoryIndex )
 		unsigned size = GetRealSize( mem.pStore );
 		if ( size > m_memUsed )
 		{
+#if defined(MAPBASE) && defined (SDK_TOOLS) //for the tooling we use a different printig format
 			ExecuteOnce( Warning("\tData manager 'used' memory incorrect\n" ) );
+#else
+			ExecuteOnce( Warning( "Data manager 'used' memory incorrect\n" ) );
+#endif
 			size = m_memUsed;
 		}
 		m_memUsed -= size;

@@ -121,7 +121,11 @@ bool CCommandBuffer::InsertCommand( const char *pArgS, int nCommandSize, int nTi
 {
 	if ( nCommandSize >= CCommand::MaxCommandLength() )
 	{
+#if defined(MAPBASE) && defined (SDK_TOOLS) //for the tooling we use a different printig format
 		Warning("\tWARNING: Command too long... ignoring!\n%s\n", pArgS );
+#else
+		Warning( "WARNING: Command too long... ignoring!\n%s\n", pArgS );
+#endif
 		return false;
 	}
 

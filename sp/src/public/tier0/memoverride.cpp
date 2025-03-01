@@ -602,7 +602,11 @@ ALLOC_CALL void *__cdecl _aligned_realloc_base( void *ptr, size_t size, size_t a
 
 ALLOC_CALL void *__cdecl _aligned_recalloc_base( void *ptr, size_t size, size_t align )
 {
+#if defined(MAPBASE) && defined(SDK_TOOLS) // For the tooling, we use a different printing format
 	Error("\tUnsupported function\n" );
+#else
+	Error( "Unsupported function\n" );
+#endif
 	return NULL;
 }
 

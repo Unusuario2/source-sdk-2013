@@ -405,7 +405,7 @@ bool CCommand::Tokenize( const char *pCommand, characterset_t *pBreakSet )
 	int nLen = Q_strlen( pCommand );
 	if ( nLen >= COMMAND_MAX_LENGTH - 1 )
 	{
-		Warning("\tCCommand::Tokenize: Encountered command which overflows the tokenizer buffer.. Skipping!\n" );
+		Warning( "CCommand::Tokenize: Encountered command which overflows the tokenizer buffer.. Skipping!\n" );
 		return false;
 	}
 
@@ -455,7 +455,7 @@ bool CCommand::Tokenize( const char *pCommand, characterset_t *pBreakSet )
 		m_ppArgv[ m_nArgc++ ] = pArgvBuf;
 		if( m_nArgc >= COMMAND_MAX_ARGC )
 		{
-			Warning("\tCCommand::Tokenize: Encountered command which overflows the argument buffer.. Clamped!\n" );
+			Warning( "CCommand::Tokenize: Encountered command which overflows the argument buffer.. Clamped!\n" );
 		}
 
 		nArgvBufferSize += nSize + 1;

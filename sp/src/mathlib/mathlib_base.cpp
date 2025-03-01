@@ -737,10 +737,14 @@ void FloorDivMod (double numer, double denom, int *quotient,
 
 #ifdef PARANOID
 	if (denom <= 0.0)
+#if defined(MAPBASE) && defined(SDK_TOOLS) // For the tooling, we use a different printing format
 		Sys_Error ("\tFloorDivMod: bad denominator %d\n", denom);
+#else
+		Sys_Error ("FloorDivMod: bad denominator %d\n", denom);
+#endif
 
 //	if ((floor(numer) != numer) || (floor(denom) != denom))
-//		Sys_Error ("\tFloorDivMod: non-integer numer or denom %f %f\n",
+//		Sys_Error ("FloorDivMod: non-integer numer or denom %f %f\n",
 //				numer, denom);
 #endif
 

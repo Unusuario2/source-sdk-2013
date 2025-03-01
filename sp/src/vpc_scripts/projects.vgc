@@ -56,6 +56,11 @@ $Project "mathlib"
 	"mathlib\mathlib.vpc" [$WINDOWS||$X360||$POSIX]
 }
 
+$Project "mathlib_sdktools"
+{
+	"mathlib\mathlib_sdktools.vpc" [$WINDOWS||$X360||$POSIX]
+}
+
 $Project "motionmapper"
 {
 	"utils\motionmapper\motionmapper.vpc" [$WIN32]
