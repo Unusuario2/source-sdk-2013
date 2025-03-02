@@ -7,6 +7,8 @@
 // $NoKeywords: $
 //=======================================================================================//
 
+// For a detailed understanding of the garbage collection system, go to propper_garbagecollector.cpp
+
 #ifndef PROPPER_GARBAGECOLLECTOR_H
 #define PROPPER_GARBAGECOLLECTOR_H
 
@@ -28,7 +30,6 @@ extern qboolean	glview;
 extern qboolean	nodetail;
 extern qboolean	fulldetail;
 extern qboolean	onlyents;
-extern bool		onlyprops;
 extern qboolean	nomerge;
 extern qboolean	nomergewater;
 extern qboolean	nowater;
@@ -43,7 +44,8 @@ extern qboolean	verboseentities;
 extern qboolean	dumpcollide;
 extern qboolean	g_bLowPriority;
 extern qboolean	g_DumpStaticProps;
-extern qboolean	g_bSkyVis;			
+extern qboolean	g_bSkyVis;	
+extern bool		onlyprops;
 extern bool		g_bLightIfMissing;
 extern bool		g_snapAxialPlanes;
 extern bool		g_bKeepStaleZip;
@@ -51,22 +53,24 @@ extern bool		g_NodrawTriggers;
 extern bool		g_DisableWaterLighting;
 extern bool		g_bAllowDetailCracks;
 extern bool		g_bNoVirtualMesh;
-
-extern float	g_defaultLuxelSize;
-extern float	g_luxelScale;
-extern float	g_minLuxelScale;
 extern bool		g_BumpAll;
 extern bool		g_bNoHiddenManifestMaps;
-
-extern int			g_nDXLevel; 
-extern CUtlVector<int> g_SkyAreas;
-
 extern bool		g_bNoDefaultCubemaps;
 extern bool		g_bSkyboxCubemaps;
 extern bool		g_bPropperInsertAllAsStatic;
 extern bool		g_bPropperStripEntities;
+extern float	g_defaultLuxelSize;
+extern float	g_luxelScale;
+extern float	g_minLuxelScale;
 extern int		g_iDefaultCubemapSize;
+extern int		g_nDXLevel; 
 extern int		noleaktest;
+extern int		g_nMapFileVersion;
+extern char		source[1024];
+extern char		mapbase[64];
+extern char		outbase[32];
+
+extern CUtlVector<int> g_SkyAreas;
 
 
 bool Is3DSkyboxArea(int area);

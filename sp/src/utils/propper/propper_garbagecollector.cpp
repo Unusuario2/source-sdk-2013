@@ -26,7 +26,6 @@ qboolean	glview;
 qboolean	nodetail;
 qboolean	fulldetail;
 qboolean	onlyents;
-bool		onlyprops;
 qboolean	nomerge;
 qboolean	nomergewater = false;
 qboolean	nowater;
@@ -42,6 +41,7 @@ qboolean	dumpcollide = false;
 qboolean	g_bLowPriority = false;
 qboolean	g_DumpStaticProps = false;
 qboolean	g_bSkyVis = false;			// skybox vis is off by default, toggle this to enable it
+bool		onlyprops;
 bool		g_bLightIfMissing = false;
 bool		g_snapAxialPlanes = false;
 bool		g_bKeepStaleZip = false;
@@ -49,22 +49,20 @@ bool		g_NodrawTriggers = false;
 bool		g_DisableWaterLighting = false;
 bool		g_bAllowDetailCracks = false;
 bool		g_bNoVirtualMesh = false;
-
-float		g_defaultLuxelSize = DEFAULT_LUXEL_SIZE;
-float		g_luxelScale = 1.0f;
-float		g_minLuxelScale = 1.0f;
 bool		g_BumpAll = false;
 bool		g_bNoHiddenManifestMaps = false;
-
-int			g_nDXLevel = 0; // default dxlevel if you don't specify it on the command-line.
-CUtlVector<int> g_SkyAreas;
-
 bool		g_bNoDefaultCubemaps = true;
 bool		g_bSkyboxCubemaps = false;
 bool		g_bPropperInsertAllAsStatic = false;
 bool		g_bPropperStripEntities = false;
 int			g_iDefaultCubemapSize = 32;
 int			noleaktest = true;
+int			g_nDXLevel = 0; // default dxlevel if you don't specify it on the command-line.
+float		g_defaultLuxelSize = DEFAULT_LUXEL_SIZE;
+float		g_luxelScale = 1.0f;
+float		g_minLuxelScale = 1.0f;
+
+CUtlVector<int> g_SkyAreas;
 
 
 bool Is3DSkyboxArea(int area)

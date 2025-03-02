@@ -25,9 +25,224 @@
 #include "utilmatlib.h"
 #include "ChunkFile.h"
 
-extern char		mapbase[64];
-extern char		outbase[32];
 
+//--------------------------------+----------------+-------------------------------------//
+//--------------------------------| propper.h code |-------------------------------------//
+//--------------------------------+----------------+-------------------------------------//
+#define SMOOTH_NO 0
+#define SMOOTH_DEFAULT 1
+#define SMOOTH_GROUPSONLY 2
+#define CENTER_NO 0
+#define CENTER_AUTO 1
+#define CENTER_ORIGIN 2
+#define MAX_SMD_TRIS 10922
+#define MAX_SMD_VERTS 32766
+
+extern bool		logging;
+extern bool		dobodygroup;
+extern bool		objExport;
+extern bool		studioCompile;
+extern bool		fixMaterials;
+extern bool		mat_nonormal;
+extern int		smdmaterials;
+extern int		num_models;
+extern char*	sourcefolder;
+extern char		targetPath[1024];
+extern char		FixdTextures[1048576]; //1048576 why???
+
+
+struct smd_point_t 
+{
+	Vector p, n;
+	double u, v;
+	int smooth;//what group of verts will this smooth with
+	int weld;
+	int brush;
+	unsigned int wcSmooth;//smoothing in Hammer. This is a bitmask. 32 bits.
+};
+//leave [0] blank. Why? Ive slept since I wrote this...
+//Oh, it's so we can have a smooth value of zero I think.
+
+//TODO: get rid of this and put it in scope of makeSMD 
+//Actually don't do that because it causes stack overflow
+extern smd_point_t smd_pts[MAX_SMD_VERTS + 1];
+
+struct smd_triangle_t
+{
+	int		brush;
+	int p[3];
+	char	material[128];
+};
+
+extern smd_triangle_t smd_tris[MAX_SMD_TRIS];
+
+
+struct phys_data_t 
+{
+	char* model;
+	const char* base;
+	int health;
+	int physicsmode;
+	bool flammable;
+	bool ignite;
+	bool explosive_resist;
+	float explosive_damage;
+	float explosive_radius;
+	const char* breakable_model;
+	int breakable_count;
+	int breakable_skin;
+};
+
+
+struct phys_interactions_t 
+{
+	Vector angles;
+	bool preferred_carryangles;
+	bool stick;
+	bool bloodsplat;
+	bool break_;
+	bool paintsplat;
+	bool impale;
+	const char* onlaunch;
+	bool explode_fire;
+};
+
+
+struct skins_t 
+{
+	const char* mat[15];
+	int suffix[15];
+};
+
+
+struct gibs_t 
+{
+	const char* gibmodel;
+	const char* ragdoll;
+	int debris;
+	int burst;
+	int fadetime;
+	int fademindist;
+	int fademaxdist;
+};
+
+
+struct lods_t 
+{
+	//	const char* entname;
+	int entnum;
+	float weldvertices;
+	int distance;
+	bool written;
+};
+
+
+struct particles_t 
+{
+	const char* name;
+	const char* attachment_type;
+	const char* attachment_point;
+};
+
+
+struct cables_t 
+{
+	const char* start;
+	const char* end;
+	const char* mat;
+	int width;
+	int segments;
+	int length;
+};
+
+
+struct attachments_t 
+{
+	const char* name;
+	Vector angles;
+	Vector origin;
+};
+
+
+struct bodygroups_t 
+{
+	char* groupname;
+	int body_ents[16];
+};
+
+extern bodygroups_t bodygroups;
+
+
+struct model_t 
+{ 
+	char* ent_name;
+	char* qc_cdmaterials;
+	char* qc_surfaceprop;
+	float qc_scale;
+	char* qc_modelname;
+	char basename[128];
+	int phys_entnum;
+	int ref_entnum;
+	int smoothing;
+	int smoothangle;
+	bool qc_concave;
+	bool qc_autocenter;
+	bool snaptogrid;
+	float ref_weldvertices;
+	char* phys_entname;
+	bool dophysmodel;
+	bool disp_nowarp;
+	bool physicsprop;
+	bool phys_interactions;
+	float mass;
+	Vector origin;
+	phys_data_t* phy;
+	phys_interactions_t* phys_int;
+	skins_t skins[MAX_PROPPER_ENTITIES_PER_MAP/8]; //This is hardcoded to 16!
+	int num_skinfamilies;
+	int num_gibs;
+	gibs_t gibs[MAX_PROPPER_ENTITIES_PER_MAP];//allocate with new [16];
+	int num_lods;
+	lods_t lods[MAX_PROPPER_ENTITIES_PER_MAP];
+	int num_particles;
+	particles_t particles[MAX_PROPPER_ENTITIES_PER_MAP];
+	int num_cables;
+	cables_t cables[MAX_PROPPER_ENTITIES_PER_MAP];
+	int num_attachments;
+	attachments_t att[MAX_PROPPER_ENTITIES_PER_MAP];
+	int num_physhulls;
+public:
+	void MakeQC();
+	void getMapProperties();
+};
+
+extern model_t propper_models[MAX_PROPPER_MODELS];
+
+
+struct smd_texture_t 
+{
+	char* texpath;
+	char* texname;
+	smd_texture_t* next;
+};
+
+extern smd_texture_t* smd_textures;
+//-----------------------------+--------------------+-------------------------------------//
+//-----------------------------| End propper.h code |------------------------------------//
+//-----------------------------+-------------------+-------------------------------------//
+
+
+
+
+//|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+//|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+
+
+
+
+//--------------------------------+---------------+--------------------------------------//
+//--------------------------------|  vbsp.h code  |--------------------------------------//
+//--------------------------------+---------------+--------------------------------------//
 class CUtlBuffer;
 
 #define	MAX_BRUSH_SIDES	128
@@ -350,220 +565,14 @@ extern CMapFile* g_LoadingMap;
 
 extern CUtlVector< CMapFile* > g_Maps;
 
-extern	int			g_nMapFileVersion;
-
-extern	qboolean	noprune;
-extern	qboolean	nodetail;
-extern	qboolean	fulldetail;
-extern	qboolean	nomerge;
-extern	qboolean	nomergewater;
-extern	qboolean	nosubdiv;
-extern	qboolean	nowater;
-extern	qboolean	noweld;
-extern	qboolean	noshare;
-extern	qboolean	notjunc;
-extern	qboolean	nocsg;
-extern	qboolean	noopt;
-extern  qboolean	dumpcollide;
-extern	qboolean	nodetailcuts;
-extern  qboolean	g_DumpStaticProps;
-extern	qboolean	g_bSkyVis;
-extern	vec_t		microvolume;
-extern	bool		g_snapAxialPlanes;
-extern	bool		g_NodrawTriggers;
-extern	bool		g_DisableWaterLighting;
-extern	bool		g_bAllowDetailCracks;
-extern	bool		g_bNoVirtualMesh;
-extern	char		outbase[32];
-
-extern	char	source[1024];
-extern char		mapbase[64];
-extern CUtlVector<int> g_SkyAreas;
-//Carl
-extern bool logging;
-extern bool dobodygroup;
-extern char* sourcefolder;
-#define SMOOTH_NO 0
-#define SMOOTH_DEFAULT 1
-#define SMOOTH_GROUPSONLY 2
-#define CENTER_NO 0
-#define CENTER_AUTO 1
-#define CENTER_ORIGIN 2
-
-extern bool objExport;
-extern bool studioCompile;
-extern bool fixMaterials;
-extern bool mat_nonormal;
-extern int smdmaterials;
-
-extern char targetPath[1024];
-
-struct smd_point_t {
-	Vector p, n;
-	double u, v;
-	int smooth;//what group of verts will this smooth with
-	int weld;
-	int brush;
-	unsigned int wcSmooth;//smoothing in Hammer. This is a bitmask. 32 bits.
-};
-#define MAX_SMD_VERTS 32766
-
-//leave [0] blank. Why? Ive slept since I wrote this...
-//Oh, it's so we can have a smooth value of zero I think.
-
-//TODO: get rid of this and put it in scope of makeSMD 
-//Actually don't do that because it causes stack overflow
-extern smd_point_t smd_pts[MAX_SMD_VERTS + 1];
-
-struct smd_triangle_t
-{
-	int		brush;
-	int p[3];
-	char	material[128];
-};
-#define MAX_SMD_TRIS 10922
-extern smd_triangle_t smd_tris[MAX_SMD_TRIS];
-
-struct phys_data_t {
-	char* model;
-	const char* base;
-	int health;
-	int physicsmode;
-	bool flammable;
-	bool ignite;
-	bool explosive_resist;
-	float explosive_damage;
-	float explosive_radius;
-	const char* breakable_model;
-	int breakable_count;
-	int breakable_skin;
-};
-struct phys_interactions_t {
-	Vector angles;
-	bool preferred_carryangles;
-	bool stick;
-	bool bloodsplat;
-	bool break_;
-	bool paintsplat;
-	bool impale;
-	const char* onlaunch;
-	bool explode_fire;
-};
-
-struct skins_t {
-	const char* mat[15];
-	int suffix[15];
-};
-
-struct gibs_t {
-	const char* gibmodel;
-	const char* ragdoll;
-	int debris;
-	int burst;
-	int fadetime;
-	int fademindist;
-	int fademaxdist;
-};
-
-struct lods_t {
-	//	const char* entname;
-	int entnum;
-	float weldvertices;
-	int distance;
-	bool written;
-};
-
-struct particles_t {
-	const char* name;
-	const char* attachment_type;
-	const char* attachment_point;
-};
-
-struct cables_t {
-	const char* start;
-	const char* end;
-	const char* mat;
-	int width;
-	int segments;
-	int length;
-};
-
-struct attachments_t {
-	const char* name;
-	Vector angles;
-	Vector origin;
-};
-
-struct bodygroups_t {
-	char* groupname;
-	int body_ents[16];
-};
-extern bodygroups_t bodygroups;
-
-struct model_t { //lol model T
-	char* ent_name;
-	char* qc_cdmaterials;
-	char* qc_surfaceprop;
-	float qc_scale;
-	char* qc_modelname;
-	char basename[128];
-	int phys_entnum;
-	int ref_entnum;
-	int smoothing;
-	int smoothangle;
-	bool qc_concave;
-	bool qc_autocenter;
-	bool snaptogrid;
-	float ref_weldvertices;
-	char* phys_entname;
-	bool dophysmodel;
-	bool disp_nowarp;
-	bool physicsprop;
-	bool phys_interactions;
-	float mass;
-	Vector origin;
-	phys_data_t* phy;
-	phys_interactions_t* phys_int;
-	skins_t skins[16];//allocate with new
-	int num_skinfamilies;
-	int num_gibs;
-	gibs_t gibs[16];//allocate with new [16];
-	int num_lods;
-	lods_t lods[16];
-	int num_particles;
-	particles_t particles[16];
-	int num_cables;
-	cables_t cables[16];
-	int num_attachments;
-	attachments_t att[16];
-	int num_physhulls;
-public:
-	void MakeQC();
-	void getMapProperties();
-};
-
-extern model_t propper_models[MAX_PROPPER_MODELS];
-
-extern int num_models;
-
-struct smd_texture_t {
-	char* texpath;
-	char* texname;
-	smd_texture_t* next;
-};
-extern smd_texture_t* smd_textures;
-
-extern char FixdTextures[1048576];
-//Carl end
-
 bool 	LoadMapFile(const char* pszFileName);
 int		GetVertexnum(Vector& v);
 bool Is3DSkyboxArea(int area);
 
+
 //=============================================================================
-
 // textures.c
-
+//=============================================================================
 struct textureref_t
 {
 	char	name[TEXTURE_NAME_LENGTH];
@@ -572,52 +581,45 @@ struct textureref_t
 	int		contents;
 };
 
-extern	textureref_t	textureref[MAX_MAP_TEXTURES];
-
 int	FindMiptex(const char* name);
-
 int TexinfoForBrushTexture(plane_t* plane, brush_texture_t* bt, const Vector& origin);
 int GetSurfaceProperties2(MaterialSystemMaterial_t matID, const char* pMatName);
-
-extern int g_SurfaceProperties[MAX_MAP_TEXDATA];
-void LoadSurfaceProperties(void);
-
 int PointLeafnum(dmodel_t* pModel, const Vector& p);
-
-//=============================================================================
-
-void FindGCD(int* v);
-
-mapbrush_t* Brush_LoadEntity(entity_t* ent);
 int	PlaneTypeForNormal(Vector& normal);
-qboolean MakeBrushPlanes(mapbrush_t* b);
-int		FindIntPlane(int* inormal, int* iorigin);
+int	FindIntPlane(int* inormal, int* iorigin);
+void LoadSurfaceProperties(void);
+void FindGCD(int* v);
 void	CreateBrush(int brushnum);
+mapbrush_t* Brush_LoadEntity(entity_t* ent);
+qboolean MakeBrushPlanes(mapbrush_t* b);
+
+extern	textureref_t	textureref[MAX_MAP_TEXTURES];
+extern int g_SurfaceProperties[MAX_MAP_TEXDATA];
 
 
 //=============================================================================
 // detail objects
 //=============================================================================
-
 void LoadEmitDetailObjectDictionary(char const* pGameDir);
 void EmitDetailObjects();
+
 
 //=============================================================================
 // static props
 //=============================================================================
-
 void EmitStaticProps();
 bool LoadStudioModel(char const* pFileName, char const* pEntityType, CUtlBuffer& buf);
 
-//=============================================================================
+
 //=============================================================================
 // procedurally created .vmt files
 //=============================================================================
-
 void EmitStaticProps();
 
-// draw.c
 
+//=============================================================================
+// draw.c
+//=============================================================================
 extern Vector	draw_mins, draw_maxs;
 extern bool g_bLightIfMissing;
 
@@ -628,10 +630,10 @@ void GLS_BeginScene(void);
 void GLS_Winding(winding_t* w, int code);
 void GLS_EndScene(void);
 
+
 //=============================================================================
-
 // csg
-
+//=============================================================================
 enum detailscreen_e
 {
 	FULL_DETAIL = 0,
@@ -643,10 +645,10 @@ enum detailscreen_e
 
 #include "..\vbsp\csg.h"
 
+
 //=============================================================================
-
 // brushbsp
-
+//=============================================================================
 bspbrush_t* CopyBrush(bspbrush_t* brush);
 
 void SplitBrush(bspbrush_t* brush, int planenum,
@@ -675,10 +677,11 @@ extern qboolean WindingIsTiny(winding_t* w);
 
 
 void SaveVertexNormals(void);
+
+
 //=============================================================================
-
 // portals.c
-
+//=============================================================================
 int VisibleContents(int contents);
 
 void MakeHeadnodePortals(tree_t* tree);
@@ -697,33 +700,34 @@ void EmitAreaPortals(node_t* headnode);
 
 void MakeTreePortals(tree_t* tree);
 
+
 //=============================================================================
-
 // glfile.c
-
+//=============================================================================
 void OutputWinding(winding_t* w, FileHandle_t glview);
 void OutputWindingColor(winding_t* w, FileHandle_t glview, int r, int g, int b);
 void WriteGLView(tree_t* tree, char* source);
 void WriteGLViewFaces(tree_t* tree, const char* source);
 void WriteGLViewBrushList(bspbrush_t* pList, const char* pName);
+
+
 //=============================================================================
-
 // leakfile.c
-
+//=============================================================================
 void LeakFile(tree_t* tree);
 void AreaportalLeakFile(tree_t* tree, portal_t* pStartPortal, portal_t* pEndPortal, node_t* pStart);
 
+
 //=============================================================================
-
 // prtfile.c
-
+//=============================================================================
 void AddVisCluster(entity_t* pFuncVisCluster);
 void WritePortalFile(tree_t* tree);
 
+
 //=============================================================================
-
 // writebsp.c
-
+//=============================================================================
 void SetModelNumbers(void);
 void SetLightStyles(void);
 
@@ -736,10 +740,10 @@ void EndModel(void);
 extern	int firstmodeledge;
 extern	int	firstmodelface;
 
+
 //=============================================================================
-
 // faces.c
-
+//=============================================================================
 void MakeFaces(node_t* headnode);
 void MakeDetailFaces(node_t* headnode);
 face_t* FixTjuncs(node_t* headnode, face_t* pLeafFaceList);
@@ -755,9 +759,8 @@ extern face_t* edgefaces[MAX_MAP_EDGES][2];
 
 
 //=============================================================================
-
 // tree.c
-
+//=============================================================================
 void FreeTree(tree_t* tree);
 void FreeTree_r(node_t* node);
 void PrintTree_r(node_t* node, int depth);
@@ -771,11 +774,11 @@ bool IsFuncOccluder(int entity_num);
 
 //=============================================================================
 // ivp.cpp
+//=============================================================================
 class CPhysCollide;
 void EmitPhysCollision();
 void DumpCollideToGlView(CPhysCollide* pCollide, const char* pFilename);
 void EmitWaterVolumesForBSP(dmodel_t* pModel, node_t* headnode);
-
 //=============================================================================
 // find + find or create the texdata 
 int FindTexData(const char* pName);
@@ -789,6 +792,7 @@ int FindTexInfo(const texinfo_t& searchTexInfo);
 
 //=============================================================================
 // cubemap.cpp
+//=============================================================================
 void Cubemap_InsertSample(const Vector& origin, int size);
 void Cubemap_CreateDefaultCubemaps(void);
 void Cubemap_SaveBrushSides(const char* pSideListStr);
@@ -797,8 +801,10 @@ void Cubemap_AttachDefaultCubemapToSpecularSides(void);
 // Add skipped cubemaps that are referenced by the engine
 void Cubemap_AddUnreferencedCubemaps(void);
 
+
 //=============================================================================
 // overlay.cpp
+//=============================================================================
 #define OVERLAY_MAP_STRLEN			256
 
 struct mapoverlay_t
@@ -834,6 +840,8 @@ void Overlay_Translate(mapoverlay_t* pOverlay, Vector& OriginOffset, QAngle& Ang
 void RemoveAreaPortalBrushes_R(node_t* node);
 
 dtexdata_t* GetTexData(int index);
-
+//--------------------------------+-------------------+----------------------------------//
+//--------------------------------|  End vbsp.h  code |----------------------------------//
+//--------------------------------+-------------------+----------------------------------//
 #endif //PROPPER_H
 

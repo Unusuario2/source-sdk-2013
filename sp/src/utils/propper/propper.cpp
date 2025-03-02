@@ -57,7 +57,6 @@ smd_triangle_t	smd_tris[MAX_SMD_TRIS];
 smd_point_t		smd_pts[MAX_SMD_VERTS+1];
 bodygroups_t	bodygroups;
 smd_texture_t*	smd_textures;
-//Propper end.
 
 
 void LoadPhysicsDLL( void )
@@ -527,8 +526,10 @@ int OutputDisp(mapdispinfo_t* pMapDisp, smd_triangle_t *tri, smd_point_t *vertic
 {
 	const char *cTexFileName;
 	int suffix = 0;
+
 	if(!pTexture) 
 		Error("Texture not found");
+
 	cTexFileName = pTexture->name;
 	MaterialSystemMaterial_t hMaterial;
 	hMaterial = FindMaterial( cTexFileName, NULL, false );
@@ -552,6 +553,7 @@ int OutputDisp(mapdispinfo_t* pMapDisp, smd_triangle_t *tri, smd_point_t *vertic
 	Vector *tVector = &pTexture->VAxis;
 	tVector->Negate();
 	Vector point;
+
 	for( int i = 0; i < nverts; i++ )
 	{
 		coreDispInfo.GetVert(i, dispVerts[i].p);
@@ -650,15 +652,18 @@ void SaveOBJ( smd_triangle_t *tri, smd_point_t *vertices, const char *OBJfilenam
 		{
 			for (int v=0; v<3; v++)
 			{
-			//f v1/vt1/vn1 v2/vt2/vn2 v3/vt3/vn3 points, uv, and normals will all be indexed the same, so don't worry.
-			//counter-clockwise, same as SMD 
-			CmdLib_FPrintf(OBJFile01, "usemap %s", tri[i].material);
-			CmdLib_FPrintf(OBJFile01, "f %i/%i/%i ", tri[i].p[0], tri[i].p[0], tri[i].p[0]);//in OBJ, vertices are 1-indexed
-			CmdLib_FPrintf(OBJFile01, "%i/%i/%i ", tri[i].p[1], tri[i].p[1], tri[i].p[1]);
-			CmdLib_FPrintf(OBJFile01, "%i/%i/%i\r\n", tri[i].p[2], tri[i].p[2], tri[i].p[2]);
+				//f v1/vt1/vn1 v2/vt2/vn2 v3/vt3/vn3 points, uv, and normals will all be indexed the same, so don't worry.
+				//counter-clockwise, same as SMD 
+				CmdLib_FPrintf(OBJFile01, "usemap %s", tri[i].material);
+				CmdLib_FPrintf(OBJFile01, "f %i/%i/%i ", tri[i].p[0], tri[i].p[0], tri[i].p[0]);//in OBJ, vertices are 1-indexed
+				CmdLib_FPrintf(OBJFile01, "%i/%i/%i ", tri[i].p[1], tri[i].p[1], tri[i].p[1]);
+				CmdLib_FPrintf(OBJFile01, "%i/%i/%i\r\n", tri[i].p[2], tri[i].p[2], tri[i].p[2]);
 			}
 		}
-		else num_tris_final--;
+		else 
+		{
+			num_tris_final--;
+		}
 	}
 	Msg("%i triangles written.\n", num_tris_final);
 	Msg("------------------------\n");
@@ -889,6 +894,7 @@ void MakeSMD(bool phys, char *SMDfilename, int ent, float weldvertices, model_t*
 	if (phys)
 	{
 		Msg("Collision model created with %i pieces.\n", m->num_physhulls);
+
 		if (m->num_physhulls > 30) 
 			Warning("That is a \"costly collision model\". Try using fewer brushes for collision to make the model more efficient.\n");
 	}
@@ -1017,8 +1023,8 @@ void model_t::getMapProperties()
 			}
 			if ( !strcmp( "propper_attachment", pClassName ) )
 			{
-				if (num_attachments == 16) 
-					Error("Too many \"propper_attachment\" entities in your map. 16 max.\n");
+				if (num_attachments == MAX_PROPPER_ENTITIES_PER_MAP)
+					Error("Too many \"propper_attachment\" entities in your map. %d max.\n", MAX_PROPPER_ENTITIES_PER_MAP);
 
 				att[num_attachments].name = ValueForKey( mapent, "targetname" );
 				GetVectorForKey( mapent, "angles", att[num_attachments].angles);
@@ -1101,8 +1107,8 @@ void model_t::getMapProperties()
 			if ( !strcmp( "propper_lod", pClassName ) )
 			{
 				//TODO2: Sort by switch metric
-				if (num_lods == 16) 
-					Error("Too many \"propper_lod\" entities in your map. 16 max.\n");
+				if (num_lods == MAX_PROPPER_ENTITIES_PER_MAP)
+					Error("Too many \"propper_lod\" entities in your map. %d max.\n", MAX_PROPPER_ENTITIES_PER_MAP);
 
 	//			lods[num_lods].entname = ValueForKey(mapent, "targetname");
 				lods[num_lods].entnum = g_MainMap->mapbrushes[mapent->firstbrush].entitynum;
@@ -1112,8 +1118,8 @@ void model_t::getMapProperties()
 			}
 			if ( !strcmp( "propper_gibs", pClassName ) )
 			{
-				if (num_gibs == 16) 
-					Error("Too many \"propper_gibs\" entities in your map. 16 max.\n");
+				if (num_gibs == MAX_PROPPER_ENTITIES_PER_MAP)
+					Error("Too many \"propper_gibs\" entities in your map. %d max.\n", MAX_PROPPER_ENTITIES_PER_MAP);
 
 				gibs[num_gibs].gibmodel = ValueForKey(mapent, "model");
 				gibs[num_gibs].ragdoll = ValueForKey(mapent, "ragdoll");
@@ -1126,8 +1132,8 @@ void model_t::getMapProperties()
 			}
 			if ( !strcmp( "propper_particles", pClassName ) )
 			{
-				if (num_particles == 16) 
-					Error("Too many \"propper_particles\" entities in your map. 16 max.\n");
+				if (num_particles == MAX_PROPPER_ENTITIES_PER_MAP)
+					Error("Too many \"propper_particles\" entities in your map. %d max.\n", MAX_PROPPER_ENTITIES_PER_MAP);
 
 				particles[num_particles].name = ValueForKey(mapent, "name");
 				particles[num_particles].attachment_type = ValueForKey(mapent, "attachment_type");
@@ -1136,8 +1142,8 @@ void model_t::getMapProperties()
 			}
 			if ( !strcmp( "propper_cables", pClassName ) )
 			{
-				if (num_cables == 16) 
-					Error("Too many \"propper_cables\" entities in your map. 16 max.\n");
+				if (num_cables == MAX_PROPPER_ENTITIES_PER_MAP)
+					Error("Too many \"propper_cables\" entities in your map. %d max.\n", MAX_PROPPER_ENTITIES_PER_MAP);
 
 				cables[num_cables].start = ValueForKey(mapent, "StartAttachment");
 				cables[num_cables].end = ValueForKey(mapent, "EndAttachment");
@@ -1149,8 +1155,8 @@ void model_t::getMapProperties()
 			}
 			if ( !strcmp( "propper_skins", pClassName ) )
 			{
-				if (num_skinfamilies == 16) 
-					Error("Too many \"propper_skins\" entities in your map. 16 max.\n");
+				if (num_skinfamilies == MAX_PROPPER_ENTITIES_PER_MAP/8) //This is hardcoded, max 16!
+					Error("Too many \"propper_skins\" entities in your map. %d max.\n", MAX_PROPPER_ENTITIES_PER_MAP/8);
 
 				skins[num_skinfamilies].mat[0] = ValueForKey(mapent, "mat0");
 				skins[num_skinfamilies].mat[1] = ValueForKey(mapent, "mat1");
@@ -1411,7 +1417,7 @@ void model_t::MakeQC()
 int RunPROPPER( int argc, char **argv )
 {
 	int		i;
-	double		start, end;
+	double	start, end;
 
 	CommandLine()->CreateCmdLine( argc, argv );
 	MathLib_Init( 2.2f, 2.2f, 0.0f, OVERBRIGHT, false, false, false, false );
@@ -1439,7 +1445,11 @@ int RunPROPPER( int argc, char **argv )
 
 	LoadCmdLineFromFile( argc, argv, mapbase, "propper" );
 
-	Msg( "Propper 0.32. Originally written by Carl Foust, fixed and compiled for SDK Base 2013 by tuxxi. Adapted from vbsp.exe by Valve Software. (%s)\n", __DATE__ );
+#if defined(_WIN32)
+	Msg("\nValve Software (Adapted from vbsp.exe) - propper.exe (Build: pc32 %s)", __DATE__);
+#else
+	Msg("Propper 0.32. Originally written by Carl Foust, fixed and compiled for SDK Base 2013 by tuxxi. Adapted from vbsp.exe by Valve Software. (%s)\n", __DATE__);
+#endif
 
 	for (i=1 ; i<argc ; i++)
 	{
@@ -1540,9 +1550,6 @@ int RunPROPPER( int argc, char **argv )
 	char platformBSPFileName[1024];
 	GetPlatformMapPath( source, platformBSPFileName, g_nDXLevel, 1024 );
 	
-	//
-	// Start from scratch
-	//
 	LoadMapFile(name);
 
 	if (!sourcefolder)
@@ -1641,16 +1648,11 @@ int RunPROPPER( int argc, char **argv )
 			STARTUPINFO si;
 			PROCESS_INFORMATION pi;
 			ZeroMemory(&si, sizeof(si));
-			si.cb = sizeof(si);
 			ZeroMemory(&pi, sizeof(pi));
+			si.cb = sizeof(si);
 
-			if (!CreateProcess(NULL, studioCommand, NULL, NULL, false, 0x00000000, NULL, NULL,
-				&si,  // Pointer to STARTUPINFO structure
-				&pi   // Pointer to PROCESS_INFORMATION structure
-			)) 
-			{
+			if (!CreateProcess(NULL, studioCommand, NULL, NULL, false, 0x00000000, NULL, NULL, &si/*Pointer to STARTUPINFO*/, &pi/*Pointer to PROCESS_INFORMATION*/)) 
 				Error("Studiomdl could not start!\n");
-			}
 
 			// Wait until child process exits.
 			WaitForSingleObject(pi.hProcess, INFINITE);
@@ -1659,7 +1661,7 @@ int RunPROPPER( int argc, char **argv )
 			CloseHandle(pi.hProcess);
 			CloseHandle(pi.hThread);
 
-			Msg("Studiomdl compile complete!\n");
+			Msg("-->Studiomdl compile complete!\n");
 		}
 	}
 
@@ -1668,7 +1670,7 @@ int RunPROPPER( int argc, char **argv )
 	
 	char str[512];
 	GetHourMinuteSecondsString( (int)( end - start ), str, sizeof( str ) );
-	Msg( "%s elapsed\n", str );
+	Msg( "%s elapsed\n\n", str );
 
 	DeleteCmdLine( argc, argv );
 	ReleasePakFileLumps();
@@ -1685,5 +1687,3 @@ int main (int argc, char **argv)
 	SetupDefaultToolsMinidumpHandler();
 	return RunPROPPER( argc, argv );
 }
-
-
