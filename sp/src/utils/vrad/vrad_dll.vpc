@@ -15,7 +15,7 @@ $Configuration
 	$Compiler
 	{
 		$AdditionalIncludeDirectories		"$BASE,..\common,..\vmpi,..\vmpi\mysql\mysqlpp\include,..\vmpi\mysql\include"
-		$PreprocessorDefinitions			"$BASE;MPI;PROTECTED_THINGS_DISABLE;VRAD"
+		$PreprocessorDefinitions			"$BASE;MPI;PROTECTED_THINGS_DISABLE;VRAD;SDK_TOOLS"
 	}
 
 	$Linker
@@ -67,6 +67,7 @@ $Project "Vrad_dll"
 			$File	"..\common\cmdlib.cpp"
 			$File	"$SRCDIR\public\DispColl_Common.cpp"
 			$File	"..\common\map_shared.cpp"
+			$File   "..\common\StandardColorFormat.cpp"
 			$File	"..\common\polylib.cpp"
 			$File	"..\common\scriplib.cpp"
 			$File	"..\common\threads.cpp"
@@ -116,6 +117,7 @@ $Project "Vrad_dll"
 			$File	"..\common\mpi_stats.h"
 			$File	"..\common\MySqlDatabase.h"
 			$File	"..\common\pacifier.h"
+			$File   "..\common\StandardColorFormat.h"
 			$File	"..\common\polylib.h"
 			$File	"..\common\scriplib.h"
 			$File	"..\vmpi\threadhelpers.h"
@@ -215,7 +217,7 @@ $Project "Vrad_dll"
 	$Folder	"Link Libraries"
 	{
 		$Lib bitmap
-		$Lib mathlib
+		$Lib mathlib_sdktools
 		$Lib raytrace
 		$Lib tier2
 		$Lib vmpi

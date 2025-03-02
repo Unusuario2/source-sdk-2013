@@ -37,6 +37,9 @@
 #include "vmpi.h"
 #include "vmpi_distribute_work.h"
 
+#ifdef MAPBASE
+#include "../common/StandardColorFormat.h" // Controls the color formatting of the console output.
+#endif 
 
 #define ALIGN_TO_POW2(x,y) (((x)+(y-1))&~(y-1))
 
@@ -292,7 +295,7 @@ bool LoadStudioModel( char const* pModelName, CUtlBuffer& buf )
 	// Construct the file name...
 	if (!LoadFile( pModelName, buf ))
 	{
-		Warning("Error! Unable to load model \"%s\"\n", pModelName );
+		Warning("\tError! Unable to load model \"%s\"\n", pModelName );
 		return false;
 	}
 
@@ -300,7 +303,7 @@ bool LoadStudioModel( char const* pModelName, CUtlBuffer& buf )
 	if (strncmp ((const char *) buf.PeekGet(), "IDST", 4) &&
 		strncmp ((const char *) buf.PeekGet(), "IDAG", 4))
 	{
-		Warning("Error! Invalid model file \"%s\"\n", pModelName );
+		Warning("\tError! Invalid model file \"%s\"\n", pModelName );
 		return false;
 	}
 
@@ -310,13 +313,13 @@ bool LoadStudioModel( char const* pModelName, CUtlBuffer& buf )
 
 	if (pHdr->version != STUDIO_VERSION)
 	{
-		Warning("Error! Invalid model version \"%s\"\n", pModelName );
+		Warning("\tError! Invalid model version \"%s\"\n", pModelName );
 		return false;
 	}
 
 	if (!IsStaticProp(pHdr))
 	{
-		Warning("Error! To use model \"%s\"\n"
+		Warning("\tError! To use model \"%s\"\n"
 			"      as a static prop, it must be compiled with $staticprop!\n", pModelName );
 		return false;
 	}
@@ -358,7 +361,11 @@ bool LoadVTXFile( char const* pModelName, const studiohdr_t *pStudioHdr, CUtlBuf
 
 	if ( !LoadFile( filename, buf ) )
 	{
-		Warning( "Error! Unable to load file \"%s\"\n", filename );
+#ifdef MAPBASE
+		Warning("\tError! Unable to load file: +- \"%s\"\n", filename );
+#else
+		Warning("Error! Unable to load file \"%s\"\n", filename );
+#endif
 		return false;
 	}
 
@@ -367,12 +374,20 @@ bool LoadVTXFile( char const* pModelName, const studiohdr_t *pStudioHdr, CUtlBuf
 	// Check that it's valid
 	if ( pVtxHdr->version != OPTIMIZED_MODEL_FILE_VERSION )
 	{
-		Warning( "Error! Invalid VTX file version: %d, expected %d \"%s\"\n", pVtxHdr->version, OPTIMIZED_MODEL_FILE_VERSION, filename );
+#ifdef MAPBASE
+		Warning("\tError! Invalid VTX file version: [%d], expected [%d]: +- \"%s\"\n", pVtxHdr->version, OPTIMIZED_MODEL_FILE_VERSION, filename );
+#else
+		Warning("\tError! Invalid VTX file version: [%d], expected [%d] \"%s\"\n", pVtxHdr->version, OPTIMIZED_MODEL_FILE_VERSION, filename );
+#endif
 		return false;
 	}
 	if ( pVtxHdr->checkSum != pStudioHdr->checksum )
 	{
-		Warning( "Error! Invalid VTX file checksum: %d, expected %d \"%s\"\n", pVtxHdr->checkSum, pStudioHdr->checksum, filename );
+#ifdef MAPBASE
+		Warning("\tError! Invalid VTX file checksum: [%d], expected [%d]: +- \"%s\"\n", pVtxHdr->checkSum, pStudioHdr->checksum, filename );
+#else
+		Warning("\tError! Invalid VTX file checksum: %d, expected %d \"%s\"\n", pVtxHdr->checkSum, pStudioHdr->checksum, filename );
+#endif
 		return false;
 	}
 
@@ -399,7 +414,13 @@ void DumpCollideToGlView( vcollide_t *pCollide, const char *pFilename )
 	if ( !pCollide )
 		return;
 
-	Msg("Writing %s...\n", pFilename );
+#ifdef MAPBASE
+	Msg("Writing: +- ");
+	ColorSpewMessage(SPEW_MESSAGE, &blue, "%s", pFilename);
+	ColorSpewMessage(SPEW_MESSAGE, &green, " done (0)\n");
+#else
+	Msg("Writing %s...\n", pFilename);
+#endif
 
 	FILE *fp = fopen( pFilename, "w" );
 	for (int i = 0; i < pCollide->solidCount; ++i)
@@ -486,7 +507,13 @@ public:
 		IVTFTexture *pTex = CreateVTFTexture();
 		if (!pTex->Unserialize( buf ))
 			return NULL;
-		Msg("Loaded alpha texture %s\n", szPath );
+#ifdef MAPBASE
+		Msg("Loaded alpha texture: +- ");
+		ColorSpewMessage(SPEW_MESSAGE, &blue, " %s", szPath);
+		ColorSpewMessage(SPEW_MESSAGE, &green, " done (0)\n");
+#else
+		Msg("Loaded alpha texture %s\n", szPath);
+#endif
 		unsigned char *pSrcImage = pTex->ImageData( 0, 0, 0, 0, 0, 0 );
 		int iWidth = pTex->Width();
 		int iHeight = pTex->Height();
@@ -884,7 +911,7 @@ void CVradStaticPropMgr::UnserializeStaticProps()
 
 	if ( g_GameLumps.GetGameLumpVersion( handle ) != GAMELUMP_STATIC_PROPS_VERSION )
 	{
-		Error( "Cannot load the static props... encountered a stale map version. Re-vbsp the map." );
+		Error( "\tCannot load the static props... encountered a stale map version. Re-vbsp the map." );
 	}
 
 	if ( g_GameLumps.GetGameLump( handle ) )
@@ -908,12 +935,12 @@ void CVradStaticPropMgr::Init()
 {
 	CreateInterfaceFn physicsFactory = GetPhysicsFactory();
 	if ( !physicsFactory )
-		Error( "Unable to load vphysics DLL." );
+		Error( "\tUnable to load vphysics DLL." );
 		
 	s_pPhysCollision = (IPhysicsCollision *)physicsFactory( VPHYSICS_COLLISION_INTERFACE_VERSION, NULL );
 	if( !s_pPhysCollision )
 	{
-		Error( "Unable to get '%s' for physics interface.", VPHYSICS_COLLISION_INTERFACE_VERSION );
+		Error( "\tUnable to get '%s' for physics interface.", VPHYSICS_COLLISION_INTERFACE_VERSION );
 		return;
 	}
 
@@ -1455,7 +1482,7 @@ void CVradStaticPropMgr::ComputeLighting( int iThread )
 		return;
 	}
 
-	StartPacifier( "Computing static prop lighting : " );
+	StartPacifier( "Computing static prop lighting -> " );
 
 	// ensure any traces against us are ignored because we have no inherit lighting contribution
 	m_bIgnoreStaticPropTrace = true;
@@ -1833,7 +1860,11 @@ void CVradStaticPropMgr::BuildTriList( CStaticProp &prop )
 						{
 							// all tris expected to be discrete tri lists
 							// must fixme if stripping ever occurs
+#ifdef MAPBASE
+							Warning( "\tUnexpected strips found\n" );
+#else
 							printf( "unexpected strips found\n" );
+#endif
 							Assert( 0 );
 							return;
 						}
@@ -1866,7 +1897,11 @@ const vertexFileHeader_t * mstudiomodel_t::CacheVertexData( void *pModelData )
 	FileHandle_t fileHandle = g_pFileSystem->Open( fileName, "rb" );
 	if ( !fileHandle )
 	{
+#ifdef MAPBASE
+		Error( "\tUnable to load vertex data: +- %s\n", fileName );
+#else
 		Error( "Unable to load vertex data \"%s\"\n", fileName );
+#endif
 	}
 
 	// Get the file size
@@ -1874,7 +1909,11 @@ const vertexFileHeader_t * mstudiomodel_t::CacheVertexData( void *pModelData )
 	if ( vvdSize == 0 )
 	{
 		g_pFileSystem->Close( fileHandle );
+#ifdef MAPBASE
+		Error( "\tBad size for vertex data: +- %s\n", fileName );
+#else
 		Error( "Bad size for vertex data \"%s\"\n", fileName );
+#endif
 	}
 
 	vertexFileHeader_t *pVvdHdr = (vertexFileHeader_t *)malloc( vvdSize );
@@ -1884,15 +1923,27 @@ const vertexFileHeader_t * mstudiomodel_t::CacheVertexData( void *pModelData )
 	// check header
 	if ( pVvdHdr->id != MODEL_VERTEX_FILE_ID )
 	{
+#ifdef MAPBASE
+		Error("\tError Vertex File: +- %s id [%d] should be [%d]\n", fileName, pVvdHdr->id, MODEL_VERTEX_FILE_ID);
+#else
 		Error("Error Vertex File %s id %d should be %d\n", fileName, pVvdHdr->id, MODEL_VERTEX_FILE_ID);
+#endif
 	}
 	if ( pVvdHdr->version != MODEL_VERTEX_FILE_VERSION )
 	{
+#ifdef MAPBASE
+		Error("\tError Vertex File: +- %s version [%d] should be [%d]\n", fileName, pVvdHdr->version, MODEL_VERTEX_FILE_VERSION);
+#else
 		Error("Error Vertex File %s version %d should be %d\n", fileName, pVvdHdr->version, MODEL_VERTEX_FILE_VERSION);
+#endif
 	}
 	if ( pVvdHdr->checksum != pActiveStudioHdr->checksum )
 	{
+#ifdef MAPBASE
+		Error("\tError Vertex File: +- %s checksum [%d] should be [%d]\n", fileName, pVvdHdr->checksum, pActiveStudioHdr->checksum);
+#else
 		Error("Error Vertex File %s checksum %d should be %d\n", fileName, pVvdHdr->checksum, pActiveStudioHdr->checksum);
+#endif
 	}
 
 	// need to perform mesh relocation fixups
@@ -1900,7 +1951,11 @@ const vertexFileHeader_t * mstudiomodel_t::CacheVertexData( void *pModelData )
 	vertexFileHeader_t *pNewVvdHdr = (vertexFileHeader_t *)malloc( vvdSize );
 	if ( !pNewVvdHdr )
 	{
+#ifdef MAPBASE
+		Error( "\tError allocating [%d] bytes for Vertex File: +- %s\n", vvdSize, fileName );
+#else
 		Error( "Error allocating %d bytes for Vertex File '%s'\n", vvdSize, fileName );
+#endif
 	}
 
 	// load vertexes and run fixups

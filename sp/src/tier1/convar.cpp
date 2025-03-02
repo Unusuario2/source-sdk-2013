@@ -1102,7 +1102,11 @@ void ConVarRef::Init( const char *pName, bool bIgnoreMissing )
 		{
 			if ( !bIgnoreMissing )
 			{
+#ifdef MAPBASE
+				Warning("\tConVarRef %s doesn't point to an existing ConVar\n", pName );
+#else
 				Warning( "ConVarRef %s doesn't point to an existing ConVar\n", pName );
+#endif
 			}
 			bFirst = false;
 		}

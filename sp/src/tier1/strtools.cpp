@@ -2162,7 +2162,11 @@ void V_AppendSlash( char *pStr, int strSize )
 	if ( len > 0 && !PATHSEPARATOR(pStr[len-1]) )
 	{
 		if ( len+1 >= strSize )
+#if defined(MAPBASE) && defined (SDK_TOOLS) //for the tooling we use a different printig format
+			Error("\tV_AppendSlash: ran out of space on %s.", pStr );
+#else
 			Error( "V_AppendSlash: ran out of space on %s.", pStr );
+#endif
 		
 		pStr[len] = CORRECT_PATH_SEPARATOR;
 		pStr[len+1] = 0;
@@ -2187,7 +2191,11 @@ void V_MakeAbsolutePath( char *pOut, int outLen, const char *pPath, const char *
 		else
 		{
 			if ( !_getcwd( pOut, outLen ) )
+#if defined(MAPBASE) && defined (SDK_TOOLS) //for the tooling we use a different printig format
+				Error("\tV_MakeAbsolutePath: _getcwd failed." );
+#else
 				Error( "V_MakeAbsolutePath: _getcwd failed." );
+#endif
 
 			if ( pStartingDir )
 			{
@@ -2202,7 +2210,11 @@ void V_MakeAbsolutePath( char *pOut, int outLen, const char *pPath, const char *
 	}
 
 	if ( !V_RemoveDotSlashes( pOut ) )
+#if defined(MAPBASE) && defined (SDK_TOOLS) //for the tooling we use a different printig format
+		Error("\tV_MakeAbsolutePath: tried to \"..\" past the root." );
+#else
 		Error( "V_MakeAbsolutePath: tried to \"..\" past the root." );
+#endif
 
 	//V_FixSlashes( pOut ); - handled by V_RemoveDotSlashes
 }

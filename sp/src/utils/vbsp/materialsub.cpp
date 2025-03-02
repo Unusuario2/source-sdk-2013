@@ -11,6 +11,10 @@
 #include "KeyValues.h"
 #include "tier1/strtools.h"
 
+#ifdef MAPBASE
+#include "../common/StandardColorFormat.h" // Controls the color formatting of the console output.
+#endif 
+
 bool g_ReplaceMaterials	= false;
 
 static KeyValues *kv			= 0;
@@ -42,10 +46,21 @@ void LoadMaterialReplacementKeys( const char *gamedir, const char *mapname )
 	// Load the keyvalues file
 	kv = new KeyValues( "MaterialReplacements" );
 
+#ifdef MAPBASE
+	Msg( "File path: +- ");
+	ColorSpewMessage(SPEW_MESSAGE, &blue, "%s", path);
+	ColorSpewMessage(SPEW_MESSAGE, &green, " done (0)\n");
+#else
 	Msg( "File path: %s", path );
+#endif
+
 	if( !kv->LoadFromFile( g_pFileSystem, path ) )
 	{
+#ifdef MAPBASE
+		Warning( "\tFailed to load KeyValues file!\n" );
+#else
 		Msg( "Failed to load KeyValues file!\n" );
+#endif
 		g_ReplaceMaterials = false;
 		kv->deleteThis();
 		kv = 0;

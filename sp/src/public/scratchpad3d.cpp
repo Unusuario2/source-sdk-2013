@@ -239,7 +239,11 @@ bool CScratchPad3D::LoadCommandsFromFile( )
 
 		if( !pCmd )
 		{
+#if defined(MAPBASE) && defined (SDK_TOOLS) //for the tooling we use a different printig format
+			Assert( !"\tLoadCommandsFromFile: invalid file" );
+#else
 			Assert( !"LoadCommandsFromFile: invalid file" );
+#endif
 			m_pFileSystem->Close( fp );
 			return false;
 		}

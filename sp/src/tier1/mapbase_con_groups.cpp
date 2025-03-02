@@ -105,7 +105,11 @@ void LoadConsoleGroupsFromFile( IBaseFileSystem *filesystem, const char *pszFile
 		}
 		else
 		{
+#if defined(MAPBASE) && defined (SDK_TOOLS) //for the tooling we use a different printig format
+			Warning("\tInvalid console group %s (new groups should be defined in the code)\n", pGroup->GetName() );
+#else
 			Warning( "Invalid console group %s (new groups should be defined in the code)\n", pGroup->GetName() );
+#endif
 		}
 	}
 

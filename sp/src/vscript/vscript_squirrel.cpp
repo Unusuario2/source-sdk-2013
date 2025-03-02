@@ -1679,7 +1679,7 @@ struct SquirrelSafeCheck
 		if ( top_ != diff )
 		{
 			Assert(!"Squirrel VM stack is not consistent");
-			Error("Squirrel VM stack is not consistent\n");
+			Error("\tSquirrel VM stack is not consistent\n");
 		}
 
 		// TODO: Handle error state checks
@@ -1708,7 +1708,7 @@ void errorfunc(HSQUIRRELVM SQ_UNUSED_ARG(v), const SQChar* format, ...)
 	va_start(args, format);
 	V_vsnprintf(buffer, sizeof(buffer), format, args);
 	va_end(args);
-	Warning("%s", buffer);
+	Warning("\t%s", buffer);
 }
 
 const char * ScriptDataTypeToName(ScriptDataType_t datatype)
@@ -2535,7 +2535,7 @@ bool SquirrelVM::RegisterClass(ScriptClassDesc_t* pClassDesc)
 		Assert(scriptFunction.m_desc.m_Parameters.Count() < sizeof(typemask));
 		if (!CreateParamCheck(scriptFunction, typemask))
 		{
-			Warning("Unable to create param check for %s.%s\n",
+			Warning("\tUnable to create param check for %s.%s\n",
 				pClassDesc->m_pszClassname, scriptFunction.m_desc.m_pszFunction);
 			break;
 		}
@@ -3951,7 +3951,7 @@ void SquirrelVM::ReadObject( SQObjectPtr &pObj, CUtlBuffer* pBuffer, ReadStateMa
 
 		if ( !vm_->_roottable._unVal.pTable->Get( key, val ) )
 		{
-			Warning( "SquirrelVM::ReadObject: failed to find native closure '%s'\n", psz );
+			Warning( "\tSquirrelVM::ReadObject: failed to find native closure '%s'\n", psz );
 			obj._type = OT_NULL;
 			obj._unVal.raw = 0;
 			break;
@@ -4059,7 +4059,7 @@ void SquirrelVM::ReadObject( SQObjectPtr &pObj, CUtlBuffer* pBuffer, ReadStateMa
 
 			if ( !vm_->_roottable._unVal.pTable->Get( key, val ) )
 			{
-				Warning( "SquirrelVM::ReadObject: failed to find native class '%s'\n", psz );
+				Warning( "\tSquirrelVM::ReadObject: failed to find native class '%s'\n", psz );
 				obj._type = OT_NULL;
 				obj._unVal.raw = 0;
 				break;

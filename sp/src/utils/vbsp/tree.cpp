@@ -128,14 +128,14 @@ void PrintTree_r (node_t *node, int depth)
 		else
 		{
 			for (bb=node->brushlist ; bb ; bb=bb->next)
-				Msg ("%i ", bb->original->brushnum);
+				Msg ("[%i] ", bb->original->brushnum);
 			Msg ("\n");
 		}
 		return;
 	}
 
 	plane = &g_MainMap->mapplanes[node->planenum];
-	Msg ("#%i (%5.2f %5.2f %5.2f):%5.2f\n", node->planenum,
+	Msg ("#%i [%5.2f %5.2f %5.2f]:%5.2f\n", node->planenum,
 		plane->normal[0], plane->normal[1], plane->normal[2],
 		plane->dist);
 	PrintTree_r (node->children[0], depth+1);
@@ -170,16 +170,16 @@ void PruneNodes_r (node_t *node)
 	&& (node->children[1]->contents & CONTENTS_SOLID) )
 	{
 		if (node->faces)
-			Error ("node->faces seperating CONTENTS_SOLID");
+			Error ("\tnode->faces seperating CONTENTS_SOLID");
 		if (node->children[0]->faces || node->children[1]->faces)
-			Error ("!node->faces with children");
+			Error ("\t!node->faces with children");
 
 		// FIXME: free stuff
 		node->planenum = PLANENUM_LEAF;
 		node->contents = CONTENTS_SOLID;
 
 		if (node->brushlist)
-			Error ("PruneNodes: node->brushlist");
+			Error ("\tPruneNodes: node->brushlist");
 
 		// combine brush lists
 		node->brushlist = node->children[1]->brushlist;

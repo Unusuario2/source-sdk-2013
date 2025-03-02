@@ -331,7 +331,7 @@ void CopyMatchingTexinfos( side_t *pDestSides, int numDestSides, const bspbrush_
 		{
 			texinfo_t *pTexInfo = &texinfo[pSide->texinfo];
 			dtexdata_t *pTexData = GetTexData( pTexInfo->texdata );
-			Msg("Found no matching plane for %s\n", TexDataStringTable_GetString( pTexData->nameStringTableID ) );
+			Warning("\tFound no matching plane for %s\n", TexDataStringTable_GetString( pTexData->nameStringTableID ) );
 		}
 	}
 }
@@ -497,10 +497,15 @@ void WriteBrushMap (char *name, bspbrush_t *list)
 	int		i;
 	winding_t	*w;
 
+#ifdef MAPBASE
+	Msg("Writing %s\n", name);
+#else
 	Msg("writing %s\n", name);
+#endif
+
 	f = fopen (name, "w");
 	if (!f)
-		Error ("Can't write %s\b", name);
+		Error ("\tCan't write %s\b", name);
 
 	fprintf (f, "{\n\"classname\" \"worldspawn\"\n");
 
@@ -539,7 +544,7 @@ void WriteBrushVMF(char *name, bspbrush_t *list)
 	Msg("writing %s\n", name);
 	f = fopen (name, "w");
 	if (!f)
-		Error ("Can't write %s\b", name);
+		Error ("\tCan't write %s\b", name);
 
 	fprintf (f, "world\n{\n\"classname\" \"worldspawn\"\n");
 

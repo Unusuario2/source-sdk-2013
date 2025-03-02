@@ -876,7 +876,11 @@ void AddNeighbor( CCoreDispInfo *pMain,
 	// Make sure this slot isn't used on either displacement.
 	if ( pSub->IsValid() || pNeighborSub->IsValid() )
 	{
+#if defined(MAPBASE) && defined(SDK_TOOLS) // For the tooling, we use a different printing format
+		ExecuteOnce( Warning("\tFound a displacement edge abutting multiple other edges.\n" ) );
+#else
 		ExecuteOnce( Warning( "Found a displacement edge abutting multiple other edges.\n" ) );
+#endif
 		return;
 	}
 
@@ -1074,7 +1078,11 @@ void VerifyNeighborConnections( CCoreDispInfo **ppListBase, int nDisps )
 					if ( !VerifyNeighborVertConnection( pHelper, it.GetVertIndex(), it.GetCurrentNeighbor(), it.GetNBVertIndex(), iEdge ) )
 					{
 						pDisp->GetEdgeNeighbor( iEdge )->SetInvalid();
+#if defined(MAPBASE) && defined(SDK_TOOLS) // For the tooling, we use a different printing format
+						Warning("\tWarning: invalid neighbor connection on displacement near (%.2f %.2f %.2f)\n", VectorExpand( pDisp->GetCornerPoint(0) ) );
+#else
 						Warning( "Warning: invalid neighbor connection on displacement near (%.2f %.2f %.2f)\n", VectorExpand( pDisp->GetCornerPoint(0) ) );
+#endif
 						bHappy = false;
 					}
 				}			
@@ -1125,7 +1133,11 @@ void FindNeighboringDispSurfs( CCoreDispInfo **ppListBase, int nListSize )
 
 	if ( nCornerOverflows )
 	{
+#if defined(MAPBASE) && defined(SDK_TOOLS) // For the tooling, we use a different printing format
+		Warning("\tWarning: overflowed %d displacement corner-neighbor lists.", nCornerOverflows );
+#else
 		Warning( "Warning: overflowed %d displacement corner-neighbor lists.", nCornerOverflows );
+#endif
 	}
 
 	// Debug check.. make sure the neighbor connections are intact (make sure that any

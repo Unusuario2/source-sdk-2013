@@ -294,7 +294,11 @@ void CUtlFixedMemory<T>::Grow( int num )
 	BlockHeader_t *  RESTRICT pBlockHeader = ( BlockHeader_t* )malloc( sizeof( BlockHeader_t ) + nBlockSize * sizeof( T ) );
 	if ( !pBlockHeader )
 	{
+#if defined(MAPBASE) && defined(SDK_TOOLS) // For the tooling, we use a different printing format
+		Error("\tCUtlFixedMemory overflow!\n" );
+#else
 		Error( "CUtlFixedMemory overflow!\n" );
+#endif
 	}
 	pBlockHeader->m_pNext = NULL;
 	pBlockHeader->m_nBlockSize = nBlockSize;

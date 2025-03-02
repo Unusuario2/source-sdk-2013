@@ -17,6 +17,10 @@
 #include "vmpi.h"
 #include "vmpi_distribute_work.h"
 
+#ifdef MAPBASE
+#include "../common/StandardColorFormat.h" // Controls the color formatting of the console output.
+#endif 
+
 static TableVector g_BoxDirections[6] = 
 {
 	{  1,  0,  0 }, 
@@ -638,8 +642,14 @@ void ComputePerLeafAmbientLighting()
 			++nInAmbientCube;
 	}
 
+#ifdef MAPBASE
+	Msg("Surface lights");
+	ColorSpewMessage(SPEW_MESSAGE, &magenta, " [%d] ", nInAmbientCube);
+	Msg("went in leaf ambient cubes");
+	ColorSpewMessage(SPEW_MESSAGE, &magenta, " [%d][%d%%]\n", nSurfaceLights, nSurfaceLights ? ((nInAmbientCube * 100) / nSurfaceLights) : 0);
+#else
 	Msg( "%d of %d (%d%% of) surface lights went in leaf ambient cubes.\n", nInAmbientCube, nSurfaceLights, nSurfaceLights ? ((nInAmbientCube*100) / nSurfaceLights) : 0 );
-
+#endif
 	g_LeafAmbientSamples.SetCount(numleafs);
 
 	if ( g_bUseMPI )
@@ -654,7 +664,7 @@ void ComputePerLeafAmbientLighting()
 	}
 
 	// now write out the data
-	Msg("Writing leaf ambient...");
+	Msg("Writing leaf ambient... ");
 	g_pLeafAmbientIndex->RemoveAll();
 	g_pLeafAmbientLighting->RemoveAll();
 	g_pLeafAmbientIndex->SetCount( numleafs );
@@ -695,7 +705,11 @@ void ComputePerLeafAmbientLighting()
 		{
 			if ( !(dleafs[i].contents & CONTENTS_SOLID) )
 			{
-				Msg("Bad leaf ambient for leaf %d\n", i );
+#ifdef MAPBASE
+				Warning("\tBad leaf ambient for leaf [%d]\n", i );
+#else
+				MSg("Bad leaf ambient for leaf %d\n", i );
+#endif
 			}
 
 			int refLeaf = NearestNeighborWithLight(i);
@@ -703,6 +717,11 @@ void ComputePerLeafAmbientLighting()
 			g_pLeafAmbientIndex->Element(i).firstAmbientSample = refLeaf;
 		}
 	}
+
+#ifdef MAPBASE
+	ColorSpewMessage(SPEW_MESSAGE, &green, "done (0)\n");
+#else
 	Msg("done\n");
+#endif
 }
 

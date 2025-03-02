@@ -20,6 +20,11 @@
 #include "loadcmdline.h"
 #include "byteswap.h"
 
+#ifdef MAPBASE
+#include "../common/StandardColorFormat.h" // Controls the color formatting of the console output.
+#endif 
+
+
 #define ALLOWDEBUGOPTIONS (0 || _DEBUG)
 
 static FileHandle_t pFpTrans = NULL;
@@ -194,11 +199,20 @@ void ReadLightFile (char *filename)
 	FileHandle_t f = g_pFileSystem->Open( filename, "r" );
 	if (!f)
 	{
+#ifdef MAPBASE
+		Warning("\tCouldn't open texlight file: +- %s.\n", filename);
+#else
 		Warning("Warning: Couldn't open texlight file %s.\n", filename);
+#endif
 		return;
 	}
 
+#ifdef MAPBASE
+	Msg("Reading texlights from: +- ");
+	ColorSpewMessage(SPEW_MESSAGE, &blue, "%s", filename);
+#else
 	Msg("[Reading texlights from '%s']\n", filename);
+#endif
 	while ( CmdLib_FGets( buf, sizeof( buf ), f ) )
 	{
 		// check ldr/hdr
@@ -240,14 +254,18 @@ void ReadLightFile (char *filename)
 			char szTexlight[256];
 			Vector value;
 			if ( num_texlights == MAX_TEXLIGHTS )
-				Error ("Too many texlights, max = %d", MAX_TEXLIGHTS);
+				Error ("\tToo many texlights, max = %d", MAX_TEXLIGHTS);
 
 			int argCnt = sscanf (scan, "%s ",szTexlight );
 
 			if( argCnt != 1 )
 			{
 				if ( strlen( scan ) > 4 )
+#ifdef MAPBASE
+					Warning( "\tIgnoring bad texlight '%s' in: +- %s", scan, filename );
+#else
 					Msg( "ignoring bad texlight '%s' in %s", scan, filename );
+#endif
 				continue;
 			}
 
@@ -260,20 +278,33 @@ void ReadLightFile (char *filename)
 				{
 					if ( strcmp( texlights[j].filename, filename ) == 0 )
 					{
+#ifdef MAPBASE
+						Warning( "\tERROR\a: Duplication of '%s' in file: +- '%s!\n", texlights[j].name, texlights[j].filename );
+#else
 						Msg( "ERROR\a: Duplication of '%s' in file '%s'!\n",
 							 texlights[j].name, texlights[j].filename );
+#endif
 					}
 					else if ( texlights[j].value[0] != value[0]
 							  || texlights[j].value[1] != value[1]
 							  || texlights[j].value[2] != value[2] )
 					{
-						Warning( "Warning: Overriding '%s' from '%s' with '%s'!\n",
+#ifdef MAPBASE
+						Warning("\tOverriding '%s' from '%s' with: +- '%s'!\n",texlights[j].name, texlights[j].filename, filename );
+#else
+						Warning("Warning: Overriding '%s' from '%s' with '%s'!\n",
 								texlights[j].name, texlights[j].filename, filename );
+#endif
 					}
 					else
 					{
-						Warning( "Warning: Redundant '%s' def in '%s' AND '%s'!\n",
+#ifdef MAPBASE
+						Warning("\tRedundant '%s' def in '%s' AND: +- '%s'!\n",
 								 texlights[j].name, texlights[j].filename, filename );
+#else
+						Warning("Warning: Redundant '%s' def in '%s' AND '%s'!\n",
+								 texlights[j].name, texlights[j].filename, filename );
+#endif
 					}
 					break;
 				}
@@ -286,6 +317,9 @@ void ReadLightFile (char *filename)
 			num_texlights = max( num_texlights, j + 1 );
 		}
 	}
+#ifdef MAPBASE
+	ColorSpewMessage(SPEW_MESSAGE, &green, " done (0)\n");
+#endif
 	qprintf ( "[%i texlights parsed from '%s']\n\n", file_texlights, filename);
 	g_pFileSystem->Close( f );
 }
@@ -602,7 +636,7 @@ void MakePatchForFace (int fn, winding_t *w)
 		// origin offset faces must create new planes
 		if (numplanes + fakeplanes >= MAX_MAP_PLANES)
 		{
-			Error ("numplanes + fakeplanes >= MAX_MAP_PLANES");
+			Error ("\tnumplanes + fakeplanes >= MAX_MAP_PLANES");
 		}
 		pl = &dplanes[numplanes + fakeplanes];
 		fakeplanes++;
@@ -697,7 +731,13 @@ void MakePatches (void)
 	entity_t	*ent;
 
 	ParseEntities ();
+
+#ifdef MAPBASE
+	Msg("Number of faces ");
+	ColorSpewMessage(SPEW_MESSAGE, &magenta, "[%i]\n",numfaces);
+#else
 	qprintf ("%i faces\n", numfaces);
+#endif
 
 	for (i=0 ; i<nummodels ; i++)
 	{
@@ -725,10 +765,15 @@ void MakePatches (void)
 
 	if (num_degenerate_faces > 0)
 	{
-		qprintf("%d degenerate faces\n", num_degenerate_faces );
+		Warning("\t[%d] degenerate faces\n", num_degenerate_faces );
 	}
 
+#ifdef MAPBASE
+	Msg("Total area ");
+	ColorSpewMessage(SPEW_MESSAGE, &magenta, "[%i square feet [%.2f square inches]]\n", (int)(totalarea / 144), totalarea);
+#else
 	qprintf ("%i square feet [%.2f square inches]\n", (int)(totalarea/144), totalarea );
+#endif
 
 	// make the displacement surface patches
 	StaticDispMgr()->MakePatches();
@@ -790,7 +835,11 @@ int CreateChildPatch( int nParentIndex, winding_t *pWinding, float flArea, const
 	if ( ValidDispFace( g_pFaces + child->faceNumber ) )
 	{
 		// shouldn't get here anymore!!
+#ifdef MAPBASE
+		Warning( "\tSubdividePatch: Error - Should not be here!\n" );
+#else
 		Msg( "SubdividePatch: Error - Should not be here!\n" );
+#endif
 		StaticDispMgr()->GetDispSurfNormal( child->faceNumber, child->origin, child->normal, true );
 	}
 	else
@@ -899,7 +948,11 @@ void SubdividePatch( int ndxPatch )
 
 	if( area1 == 0 || area2 == 0 )
 	{
+#ifdef MAPBASE
+		Warning( "\tZero area child patch\n" );
+#else
 		Msg( "zero area child patch\n" );
+#endif
 		return;
 	}
 
@@ -930,7 +983,12 @@ void SubdividePatches (void)
 		return;
 
 	unsigned int uiPatchCount = g_Patches.Size();
-	qprintf ("%i patches before subdivision\n", uiPatchCount);
+#ifdef MAPBASE
+	Msg("Patches before subdivision ");
+	ColorSpewMessage(SPEW_MESSAGE, &magenta, "[%i]\n", g_Patches.Size());
+#else
+	qprintf ("%i patches before subdivision\n", g_Patches.Size());
+#endif
 
 	for (i = 0; i < uiPatchCount; i++)
 	{
@@ -1039,8 +1097,12 @@ void SubdividePatches (void)
 		}
 #endif
 	}
-
-	qprintf ("%i patches after subdivision\n", uiPatchCount);
+#ifdef MAPBASE
+	Msg("Patches after subdivision ");
+	ColorSpewMessage(SPEW_MESSAGE, &magenta, "[%i]\n", uiPatchCount);
+#else
+	qprintf("%i patches after subdivision\n", uiPatchCount);
+#endif
 }
 
 
@@ -1220,7 +1282,7 @@ void MakeScales ( int ndxPatch, transfer_t *all_transfers )
 
 		patch->transfers = ( transfer_t* )calloc (1, patch->numtransfers * sizeof(transfer_t));
 		if (!patch->transfers)
-			Error ("Memory allocation failure");
+			Error ("\tMemory allocation failure");
 
 		// get total transfer energy
 		t2 = all_transfers;
@@ -1273,7 +1335,7 @@ void WriteWorld (char *name, int iBump)
 
 	out = g_pFileSystem->Open( name, "w" );
 	if (!out)
-		Error ("Couldn't open %s", name);
+		Error ("\tCouldn't open %s", name);
 
 	unsigned int uiPatchCount = g_Patches.Size();
 	for (j=0; j<uiPatchCount; j++)
@@ -1311,7 +1373,7 @@ void WriteRTEnv (char *name)
 
 	out = g_pFileSystem->Open( name, "w" );
 	if (!out)
-		Error ("Couldn't open %s", name);
+		Error ("\tCouldn't open %s", name);
 
 	winding_t *triw = AllocWinding( 3 );
 	triw->numpoints = 3;
@@ -1382,7 +1444,7 @@ void WriteTrace( const char *pFileName, const FourRays &rays, const RayTracingRe
 
 	out = g_pFileSystem->Open( pFileName, "a" );
 	if (!out)
-		Error ("Couldn't open %s", pFileName);
+		Error ("\tCouldn't open %s", pFileName);
 
 	// Draws rays
 	for ( int i = 0; i < 4; ++i )
@@ -1711,7 +1773,13 @@ void BounceLight (void)
 		// light is always received to leaf patches
 		CollectLight( added );
 
+#ifdef MAPBASE
+		Msg("\tBounce #%i added RGB", i + 1);
+		ColorSpewMessage(SPEW_MESSAGE, &magenta, " [%.0f, %.0f, %.0f]\n", added[0], added[1], added[2]);
+#else
 		qprintf ("\tBounce #%i added RGB(%.0f, %.0f, %.0f)\n", i+1, added[0], added[1], added[2] );
+#endif
+
 
 		if ( i+1 == numbounce || (added[0] < 1.0 && added[1] < 1.0 && added[2] < 1.0) )
 			bouncing = false;
@@ -1929,10 +1997,23 @@ void MakeAllScales (void)
 	// release visibility matrix
 	FreeVisMatrix ();
 
-	Msg("transfers %d, max %d\n", total_transfer, max_transfer );
+#ifdef MAPBASE
+	Msg("Transfers ");
+	ColorSpewMessage(SPEW_MESSAGE, &magenta, "[%d]", total_transfer);
+	Msg(", max ");
+	ColorSpewMessage(SPEW_MESSAGE, &magenta, "[%d]\n", max_transfer);
+#else
+	Msg("transfers %d, max %d\n", total_transfer, max_transfer);
+#endif
 
+#ifdef MAPBASE
+	Msg("Transfer lists");
+	ColorSpewMessage(SPEW_MESSAGE, &magenta, " [%f megs]\n"
+		, (float)total_transfer * sizeof(transfer_t) / (1024*1024));
+#else
 	qprintf ("transfer lists: %5.1f megs\n"
 		, (float)total_transfer * sizeof(transfer_t) / (1024*1024));
+#endif
 }
 
 
@@ -2073,7 +2154,7 @@ bool RadWorld_Go()
 		//
 		// displacement surface luxel accumulation (make threaded!!!)
 		//
-		StaticDispMgr()->StartTimer( "Build Patch/Sample Hash Table(s)....." );
+		StaticDispMgr()->StartTimer( "Build Patch/Sample Hash Table(s)... " );
 		StaticDispMgr()->InsertSamplesDataIntoHashTable();
 		StaticDispMgr()->InsertPatchSampleDataIntoHashTable();
 		StaticDispMgr()->EndTimer();
@@ -2086,7 +2167,13 @@ bool RadWorld_Go()
 		// Distribute the lighting data to workers.
 		VMPI_DistributeLightData();
 			
+#ifdef MAPBASE
+		Msg("FinalLightFace... "); 
+		ColorSpewMessage(SPEW_MESSAGE, &green, "done (0)\n");
+		fflush(stdout);
+#else
 		Msg("FinalLightFace Done\n"); fflush(stdout);
+#endif
 	}
 
 	return true;
@@ -2113,7 +2200,7 @@ void InitDumpPatchesFiles()
 			pFileSamples[iStyle][iBump] = g_pFileSystem->Open( szFilename, "w" );
 			if( !pFileSamples[iStyle][iBump] )
 			{
-				Error( "Can't open %s for -dump.\n", szFilename );
+				Error( "\tCan't open %s for -dump.\n", szFilename );
 			}
 		}
 	}
@@ -2156,7 +2243,12 @@ void VRAD_LoadBSP( char const *pFilename )
 	if ( !g_pFileSystem->FileExists( global_lights ) )
 	{
 		// Otherwise, try looking in the BIN directory from which we were run from
-		Msg( "Could not find lights.rad in %s.\nTrying VRAD BIN directory instead...\n", 
+#ifdef MAPBASE
+		Warning( "\tCould not find lights.rad in %s.\n\tTrying VRAD BIN directory instead...\n", 
+#else
+		Warning( "Could not find lights.rad in %s.\nTrying BIN directory instead...\n",
+#endif
+
 			    global_lights );
 		GetModuleFileName( NULL, global_lights, sizeof( global_lights ) );
 		Q_ExtractFilePath( global_lights, global_lights, sizeof( global_lights ) );
@@ -2180,7 +2272,14 @@ void VRAD_LoadBSP( char const *pFilename )
 
 	GetPlatformMapPath( source, platformPath, 0, MAX_PATH );
 
-	Msg( "Loading %s\n", platformPath );
+#ifdef MAPBASE
+	Msg("Loading bsp file: +- ");
+	ColorSpewMessage(SPEW_MESSAGE, &blue, "%s", platformPath);
+	ColorSpewMessage(SPEW_MESSAGE, &green, " done (0)\n");
+#else
+	Msg("Loading %s...done\n", platformPath);
+#endif
+
 	VMPI_SetCurrentStage( "LoadBSPFile" );
 	LoadBSPFile (platformPath);
 	
@@ -2216,7 +2315,11 @@ void VRAD_LoadBSP( char const *pFilename )
 
 	if (!visdatasize)
 	{
+#ifdef MAPBASE
+		Warning("\tNo vis information, direct lighting only.\n");
+#else
 		Msg("No vis information, direct lighting only.\n");
+#endif
 		numbounce = 0;
 		ambient[0] = ambient[1] = ambient[2] = 0.1f;
 		dvis->numclusters = CountClusters();
@@ -2259,7 +2362,13 @@ void VRAD_LoadBSP( char const *pFilename )
 	float start = Plat_FloatTime();
 	g_RtEnv.SetupAccelerationStructure();
 	float end = Plat_FloatTime();
+
+#ifdef MAPBASE
+	ColorSpewMessage(SPEW_MESSAGE, &green, "done (%.2f)\n", end - start);
+#else
 	printf ( "Done (%.2f seconds)\n", end-start );
+#endif
+
 
 #if 0  // To test only k-d build
 	exit(0);
@@ -2272,7 +2381,7 @@ void VRAD_LoadBSP( char const *pFilename )
 	{
 		if( !g_pIncremental->Init( source, incrementfile ) )
 		{
-			Error( "Unable to load incremental lighting file in %s.\n", incrementfile );
+			Error( "\tUnable to load incremental lighting file in: +- %s.\n", incrementfile );
 			return;
 		}
 	}
@@ -2300,7 +2409,12 @@ extern void CloseDispLuxels();
 
 void VRAD_Finish()
 {
-	Msg( "Ready to Finish\n" ); 
+#ifdef MAPBASE
+	ColorSpewMessage(SPEW_MESSAGE, &green, "--> Map build ready to finish\n");
+#else
+	Msg( "Ready to Finish\n" );
+#endif
+
 	fflush( stdout );
 
 	if ( verbose )
@@ -2308,9 +2422,19 @@ void VRAD_Finish()
 		PrintBSPFileSizes();
 	}
 
-	Msg( "Writing %s\n", platformPath );
+#ifdef MAPBASE
+	Msg("Writing Bsp file: +- ");
+	ColorSpewMessage(SPEW_MESSAGE, &blue, "%s ", platformPath);
+#else
+	Msg("Writing %s\n", platformPath);
+#endif
+
 	VMPI_SetCurrentStage( "WriteBSPFile" );
 	WriteBSPFile(platformPath);
+
+#ifdef MAPBASE
+	ColorSpewMessage(SPEW_MESSAGE, &green, "done (0)\n");
+#endif
 
 	if ( g_bDumpPatches )
 	{
@@ -2331,7 +2455,12 @@ void VRAD_Finish()
 	
 	char str[512];
 	GetHourMinuteSecondsString( (int)( end - g_flStartTime ), str, sizeof( str ) );
-	Msg( "%s elapsed\n", str );
+
+#ifdef MAPBASE
+	ColorSpewMessage(SPEW_MESSAGE, &green, "--> Bake lighting build finished %s seconds.\n\n", str);
+#else
+	Msg("%s elapsed\n", str);
+#endif
 
 	ReleasePakFileLumps();
 }
@@ -2411,14 +2540,14 @@ int ParseCommandLine( int argc, char **argv, bool *onlydetail )
 				int bounceParam = atoi (argv[i]);
 				if ( bounceParam < 0 )
 				{
-					Warning("Error: expected non-negative value after '-bounce'\n" );
+					Warning("\tError: expected non-negative value after '-bounce'\n" );
 					return 1;
 				}
 				numbounce = (unsigned)bounceParam;
 			}
 			else
 			{
-				Warning("Error: expected a value after '-bounce'\n" );
+				Warning("\tError: expected a value after '-bounce'\n" );
 				return 1;
 			}
 		}
@@ -2433,13 +2562,13 @@ int ParseCommandLine( int argc, char **argv, bool *onlydetail )
 				numthreads = atoi (argv[i]);
 				if ( numthreads <= 0 )
 				{
-					Warning("Error: expected positive value after '-threads'\n" );
+					Warning("\tError: expected positive value after '-threads'\n" );
 					return 1;
 				}
 			}
 			else
 			{
-				Warning("Error: expected a value after '-threads'\n" );
+				Warning("\tError: expected a value after '-threads'\n" );
 				return 1;
 			}
 		}
@@ -2451,7 +2580,7 @@ int ParseCommandLine( int argc, char **argv, bool *onlydetail )
 			}
 			else
 			{
-				Warning("Error: expected a filepath after '-lights'\n" );
+				Warning("\tError: expected a filepath after '-lights'\n" );
 				return 1;
 			}
 		}
@@ -2496,7 +2625,7 @@ int ParseCommandLine( int argc, char **argv, bool *onlydetail )
 			}
 			else
 			{
-				Warning("Error: expected a scale factor after '-extrasky'\n" );
+				Warning("\tError: expected a scale factor after '-extrasky'\n" );
 				return 1;
 			}
 		}
@@ -2532,7 +2661,7 @@ int ParseCommandLine( int argc, char **argv, bool *onlydetail )
 			}
 			else
 			{
-				Warning("Error: expected an angle after '-smooth'\n" );
+				Warning("\tError: expected an angle after '-smooth'\n" );
 				return 1;
 			}
 		}
@@ -2550,7 +2679,7 @@ int ParseCommandLine( int argc, char **argv, bool *onlydetail )
 			}
 			else
 			{
-				Warning("Error: expected a value after '-luxeldensity'\n" );
+				Warning("\tError: expected a value after '-luxeldensity'\n" );
 				return 1;
 			}
 		}
@@ -2576,7 +2705,7 @@ int ParseCommandLine( int argc, char **argv, bool *onlydetail )
 			}
 			else
 			{
-				Warning("Error: expected an angular extent value (0..180) '-softsun'\n" );
+				Warning("\tError: expected an angular extent value (0..180) '-softsun'\n" );
 				return 1;
 			}
 		}
@@ -2588,7 +2717,7 @@ int ParseCommandLine( int argc, char **argv, bool *onlydetail )
 			}
 			else
 			{
-				Warning( "Error: expected a sample size after '-maxdispsamplesize'\n" );
+				Warning("\tError: expected a sample size after '-maxdispsamplesize'\n" );
 				return 1;
 			}
 		}
@@ -2629,13 +2758,13 @@ int ParseCommandLine( int argc, char **argv, bool *onlydetail )
 				maxchop = (float)atof (argv[i]);
 				if ( maxchop < 1 )
 				{
-					Warning("Error: expected positive value after '-maxchop'\n" );
+					Warning("\tError: expected positive value after '-maxchop'\n" );
 					return 1;
 				}
 			}
 			else
 			{
-				Warning("Error: expected a value after '-maxchop'\n" );
+				Warning("\tError: expected a value after '-maxchop'\n" );
 				return 1;
 			}
 		}
@@ -2646,14 +2775,14 @@ int ParseCommandLine( int argc, char **argv, bool *onlydetail )
 				minchop = (float)atof (argv[i]);
 				if ( minchop < 1 )
 				{
-					Warning("Error: expected positive value after '-chop'\n" );
+					Warning("\tError: expected positive value after '-chop'\n" );
 					return 1;
 				}
 				minchop = min( minchop, maxchop );
 			}
 			else
 			{
-				Warning("Error: expected a value after '-chop'\n" );
+				Warning("\tError: expected a value after '-chop'\n" );
 				return 1;
 			}
 		}
@@ -2664,13 +2793,13 @@ int ParseCommandLine( int argc, char **argv, bool *onlydetail )
 				dispchop = ( float )atof( argv[i] );
 				if ( dispchop < 1.0f )
 				{
-					Warning( "Error: expected positive value after '-dipschop'\n" );
+					Warning("\tError: expected positive value after '-dipschop'\n" );
 					return 1;
 				}
 			}
 			else
 			{
-				Warning( "Error: expected a value after '-dispchop'\n" );
+				Warning("\tError: expected a value after '-dispchop'\n" );
 				return 1;
 			}
 		}
@@ -2681,17 +2810,22 @@ int ParseCommandLine( int argc, char **argv, bool *onlydetail )
 				g_MaxDispPatchRadius = ( float )atof( argv[i] );
 				if ( g_MaxDispPatchRadius < 10.0f )
 				{
-					Warning( "Error: g_MaxDispPatchRadius < 10.0\n" );
+					Warning("\tError: g_MaxDispPatchRadius < 10.0\n" );
 					return 1;
 				}
 			}
 			else
 			{
-				Warning( "Error: expected a value after '-disppatchradius'\n" );
+				Warning("\tError: expected a value after '-disppatchradius'\n" );
 				return 1;
 			}
 		}
-
+#if MAPBASE
+		else if (!Q_stricmp(argv[i], "-NoColorHighlighting"))
+		{
+			DisableColorHighlighting();
+		}
+#endif
 #if ALLOWDEBUGOPTIONS
 		else if (!Q_stricmp(argv[i],"-scale"))
 		{
@@ -2701,7 +2835,7 @@ int ParseCommandLine( int argc, char **argv, bool *onlydetail )
 			}
 			else
 			{
-				Warning("Error: expected a value after '-scale'\n" );
+				Warning("\tError: expected a value after '-scale'\n" );
 				return 1;
 			}
 		}
@@ -2715,7 +2849,7 @@ int ParseCommandLine( int argc, char **argv, bool *onlydetail )
 			}
 			else
 			{
-				Warning("Error: expected three color values after '-ambient'\n" );
+				Warning("\tError: expected three color values after '-ambient'\n" );
 				return 1;
 			}
 		}
@@ -2727,7 +2861,7 @@ int ParseCommandLine( int argc, char **argv, bool *onlydetail )
 			}
 			else
 			{
-				Warning("Error: expected a value after '-dlight'\n" );
+				Warning("\tError: expected a value after '-dlight'\n" );
 				return 1;
 			}
 		}
@@ -2739,7 +2873,7 @@ int ParseCommandLine( int argc, char **argv, bool *onlydetail )
 			}
 			else
 			{
-				Warning("Error: expected a value after '-sky'\n" );
+				Warning("\tError: expected a value after '-sky'\n" );
 				return 1;
 			}
 		}
@@ -2755,7 +2889,7 @@ int ParseCommandLine( int argc, char **argv, bool *onlydetail )
 			}
 			else
 			{
-				Warning("Error: expected a light threshold after '-coring'\n" );
+				Warning("\tError: expected a light threshold after '-coring'\n" );
 				return 1;
 			}
 		}
@@ -2784,12 +2918,12 @@ int ParseCommandLine( int argc, char **argv, bool *onlydetail )
 
 void PrintCommandLine( int argc, char **argv )
 {
-	Warning( "Command line: " );
+	Warning("\tCommand line: " );
 	for ( int z=0; z < argc; z++ )
 	{
-		Warning( "\"%s\" ", argv[z] );
+		Warning("\t\"%s\" ", argv[z] );
 	}
-	Warning( "\n\n" );
+	Warning("\t\n\n" );
 }
 
 
@@ -2836,6 +2970,13 @@ void PrintUsage( int argc, char **argv )
 		"                    supersampling.\n"
 		"  -smooth #       : Set the threshold for smoothing groups, in degrees\n"
 		"                    (default 45).\n"
+#ifdef MAPBASE
+		"  -coring #	   : Scale the light threshold before a luxel is completely unlit, used to save lightmap data. (default 1.0)\n"	
+		"  -ambient # # #  : Sets the ambient term. Can be used to tweak lightmap color. Mixes the color into all lightmaps.\n"
+		"  -scale #        : Scales all the lights by a # factor. (default 1.0) \n"
+		"  -dlight #       : Set the dlight_threshold constant. (default 0.1)"
+		"  -notexscale     : Disables calculation of the texture and lightmap scaling factors for a patch.\n"
+#endif
 		"  -dlightmap      : Force direct lighting into different lightmap than\n"
 		"                    radiosity.\n"
 		"  -stoponexit	   : Wait for a keypress on exit.\n"
@@ -2865,6 +3006,9 @@ void PrintUsage( int argc, char **argv )
 		"  -textureshadows : Allows texture alpha channels to block light - rays intersecting alpha surfaces will sample the texture\n"
 		"  -noskyboxrecurse : Turn off recursion into 3d skybox (skybox shadows on world)\n"
 		"  -nossprops      : Globally disable self-shadowing on static props\n"
+#ifdef MAPBASE
+		"  -NoColorHighlighting: Disables all highlighted colors in the console, except for warnings and errors.\n"
+#endif
 		"\n"
 #if 1 // Disabled for the initial SDK release with VMPI so we can get feedback from selected users.
 		);
@@ -2878,7 +3022,7 @@ void PrintUsage( int argc, char **argv )
 	{
 		if ( V_stricmp( argv[i], "-mpi_ListParams" ) == 0 )
 		{
-			Warning( "VMPI-specific options:\n\n" );
+			Warning("\tVMPI-specific options:\n\n" );
 
 			bool bIsSDKMode = VMPI_IsSDKMode();
 			for ( int i=k_eVMPICmdLineParam_FirstParam+1; i < k_eVMPICmdLineParam_LastParam; i++ )
@@ -2886,9 +3030,9 @@ void PrintUsage( int argc, char **argv )
 				if ( (VMPI_GetParamFlags( (EVMPICmdLineParam)i ) & VMPI_PARAM_SDK_HIDDEN) && bIsSDKMode )
 					continue;
 					
-				Warning( "[%s]\n", VMPI_GetParamString( (EVMPICmdLineParam)i ) );
+				Warning("\t[%s]\n", VMPI_GetParamString( (EVMPICmdLineParam)i ) );
 				Warning( VMPI_GetParamHelpString( (EVMPICmdLineParam)i ) );
-				Warning( "\n\n" );
+				Warning("\t\n\n" );
 			}
 			break;
 		}
@@ -2900,12 +3044,16 @@ void PrintUsage( int argc, char **argv )
 int RunVRAD( int argc, char **argv )
 {
 #if defined(_MSC_VER) && ( _MSC_VER >= 1310 )
-	Msg("Valve Software - vrad.exe SSE (" __DATE__ ")\n" );
+	#if defined (MAPBASE) && defined (_WIN32)
+		ColorSpewMessage(SPEW_MESSAGE, &cyan, "Valve Software - Valve Radiosity Simulator (vrad.exe) (Build: pc32 %s)", __DATE__);
+	#else
+		Msg("Valve Software - vrad.exe (" __DATE__ ")\n" );
+	#endif
 #else
 	Msg("Valve Software - vrad.exe (" __DATE__ ")\n" );
 #endif
 
-	Msg("\n      Valve Radiosity Simulator     \n");
+	//Msg("\n      Valve Radiosity Simulator     \n");
 
 	verbose = true;  // Originally FALSE
 

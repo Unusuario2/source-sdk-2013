@@ -24,6 +24,10 @@
 #include "materialpatch.h"
 #include "bitvec.h"
 
+#ifdef MAPBASE
+#include "../common/StandardColorFormat.h" // Controls the color formatting of the console output.
+#endif
+
 // bit per leaf
 typedef CBitVec<MAX_MAP_LEAFS> leafbitarray_t;
 
@@ -68,7 +72,11 @@ void CTextBuffer::WriteIntKey( const char *pKeyName, int outputData )
 	// FAIL!
 	if ( strlen(pKeyName) > 1000 )
 	{
+#ifdef MAPBASE
+		Warning("\tError writing collision data %s\n", pKeyName );
+#else
 		Msg("Error writing collision data %s\n", pKeyName );
+#endif
 		return;
 	}
 	sprintf( tmp, "\"%s\" \"%d\"\n", pKeyName, outputData );
@@ -90,7 +98,11 @@ void CTextBuffer::WriteFloatKey( const char *pKeyName, float outputData )
 	// FAIL!
 	if ( strlen(pKeyName) > 1000 )
 	{
-		Msg("Error writing collision data %s\n", pKeyName );
+#ifdef MAPBASE
+		Warning("\tError writing collision data %s\n", pKeyName);
+#else
+		Msg("Error writing collision data %s\n", pKeyName);
+#endif
 		return;
 	}
 	sprintf( tmp, "\"%s\" \"%f\"\n", pKeyName, outputData );
@@ -104,7 +116,11 @@ void CTextBuffer::WriteFloatArrayKey( const char *pKeyName, const float *outputD
 	// FAIL!
 	if ( strlen(pKeyName) > 1000 )
 	{
-		Msg("Error writing collision data %s\n", pKeyName );
+#ifdef MAPBASE
+		Warning("\tError writing collision data %s\n", pKeyName);
+#else
+		Msg("Error writing collision data %s\n", pKeyName);
+#endif
 		return;
 	}
 	sprintf( tmp, "\"%s\" \"", pKeyName );
@@ -148,8 +164,14 @@ void DumpCollideToGlView( CPhysCollide *pCollide, const char *pFilename )
 {
 	if ( !pCollide )
 		return;
-
-	Msg("Writing %s...\n", pFilename );
+#ifdef MAPBASE
+	Msg("Writing: +- ");
+	ColorSpewMessage(SPEW_MESSAGE, &blue, "%s", pFilename);
+	ColorSpewMessage(SPEW_MESSAGE, &green, " done (0)\n");
+#else
+	Msg("Writing %s...\n", pFilename);
+#endif
+	
 	Vector *outVerts;
 	int vertCount = physcollision->CreateDebugMesh( pCollide, &outVerts );
 	FILE *fp = fopen( pFilename, "w" );
@@ -172,7 +194,14 @@ void DumpCollideToGlView( CPhysCollide *pCollide, const char *pFilename )
 
 void DumpCollideToPHY( CPhysCollide *pCollide, CTextBuffer *text,   const char *pFilename )
 {
-	Msg("Writing %s...\n", pFilename );
+#ifdef MAPBASE
+	Msg("Writing: +- ");
+	ColorSpewMessage(SPEW_MESSAGE, &blue, "%s", pFilename);
+	ColorSpewMessage(SPEW_MESSAGE, &green, " done (0)\n");
+#else
+	Msg("Writing %s...\n", pFilename);
+#endif
+
 	FILE *fp = fopen( pFilename, "wb" );
 	phyheader_t header;
 	header.size = sizeof(header);
@@ -521,7 +550,7 @@ CPhysConvex *CPlaneList::BuildConvexForBrush( int brushnumber, float shrink, CPh
 			if ( fabs(thick) < shrinkMinimum )
 			{
 #if _DEBUG
-				Warning("Can't shrink brush %d, plane %d (%.2f, %.2f, %.2f)\n", brushnumber, pside->planenum, pplane->normal[0], pplane->normal[1], pplane->normal[2] );
+				Warning("\tCan't shrink brush %d, plane %d (%.2f, %.2f, %.2f)\n", brushnumber, pside->planenum, pplane->normal[0], pplane->normal[1], pplane->normal[2] );
 #endif
 				shrinkThisPlane = 0;
 			}
@@ -1319,7 +1348,7 @@ static void BuildWorldPhysModel( CUtlVector<CPhysCollisionEntry *> &collisionLis
 
 	if ( !g_bNoVirtualMesh && Disp_HasPower4Displacements() )
 	{
-		Warning("WARNING: Map using power 4 displacements, terrain physics cannot be compressed, map will need additional memory and CPU.\n");
+		Warning("\tWARNING: Map using power 4 displacements, terrain physics cannot be compressed, map will need additional memory and CPU.\n");
 		g_bNoVirtualMesh = true;
 	}
 
@@ -1507,7 +1536,7 @@ void EmitPhysCollision()
 
 	if ( !physcollision )
 	{
-		Warning("!!! WARNING: Can't build collision data!\n" );
+		Warning("\t!!! WARNING: Can't build collision data!\n" );
 		return;
 	}
 
@@ -1518,7 +1547,11 @@ void EmitPhysCollision()
 
 	int start = Plat_FloatTime();
 
-	Msg("Building Physics collision data...\n" );
+#ifdef MAPBASE
+		Msg("Building Physics collision data...");
+#else 
+	Msg("Building Physics collision data...\n");
+#endif 
 
 	int i, j;
 	for ( i = 0; i < nummodels; i++ )
@@ -1650,7 +1683,12 @@ void EmitPhysCollision()
 	memcpy( ptr, &model, sizeof(model) );
 	ptr += sizeof(model);
 	Assert( (ptr-g_pPhysCollide) == g_PhysCollideSize);
-	Msg("done (%d) (%d bytes)\n", (int)(Plat_FloatTime() - start), g_PhysCollideSize );
 
+#ifdef MAPBASE
+	ColorSpewMessage(SPEW_MESSAGE, &magenta, " (%d bytes)", g_PhysCollideSize);
+	ColorSpewMessage(SPEW_MESSAGE, &green, " done(%d)\n", (int)(Plat_FloatTime() - start));
+#else
+	Msg("done (%d)\n", (int)(Plat_FloatTime() - start));
+#endif
 	// UNDONE: Collision models (collisionList) memory leak!
 }

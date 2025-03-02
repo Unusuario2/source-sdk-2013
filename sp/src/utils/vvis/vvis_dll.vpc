@@ -15,7 +15,7 @@ $Configuration
 	$Compiler
 	{
 		$AdditionalIncludeDirectories		"$BASE,..\common,..\vmpi,..\vmpi\mysql\include"
-		$PreprocessorDefinitions			"$BASE;MPI;PROTECTED_THINGS_DISABLE"
+		$PreprocessorDefinitions			"$BASE;MPI;PROTECTED_THINGS_DISABLE;SDK_TOOLS"
 	}
 
 	$Linker
@@ -43,6 +43,7 @@ $Project "Vvis_dll"
 		$File	"..\common\pacifier.cpp"
 		$File	"$SRCDIR\public\scratchpad3d.cpp"
 		$File	"..\common\scratchpad_helpers.cpp"
+		$File   "..\common\StandardColorFormat.cpp"
 		$File	"..\common\scriplib.cpp"
 		$File	"..\common\threads.cpp"
 		$File	"..\common\tools_minidump.cpp"
@@ -68,6 +69,7 @@ $Project "Vvis_dll"
 		$File	"..\common\cmdlib.h"
 		$File	"$SRCDIR\public\cmodel.h"
 		$File	"$SRCDIR\public\tier0\commonmacros.h"
+		$File   "..\common\StandardColorFormat.h"
 		$File	"$SRCDIR\public\GameBSPFile.h"
 		$File	"..\common\ISQLDBReplyTarget.h"
 		$File	"$SRCDIR\public\mathlib\mathlib.h"
@@ -95,7 +97,7 @@ $Project "Vvis_dll"
 
 	$Folder	"Link Libraries"
 	{
-		$Lib mathlib
+		$Lib mathlib_sdktools
 		$Lib tier2
 		$Lib vmpi
 	}

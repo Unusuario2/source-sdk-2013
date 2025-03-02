@@ -398,9 +398,11 @@ FSReturnCode_t SetupFileSystemError( bool bRunVConfig, FSReturnCode_t retVal, co
 	va_start( marker, pMsg );
 	Q_vsnprintf( g_FileSystemError, sizeof( g_FileSystemError ), pMsg, marker );
 	va_end( marker );
-
+#if defined(MAPBASE) && defined (SDK_TOOLS) //for the tooling we use a different printig format
+	Warning("\t%s\n", g_FileSystemError );
+#else
 	Warning( "%s\n", g_FileSystemError );
-
+#endif
 	// Run vconfig?
 	// Don't do it if they specifically asked for it not to, or if they manually specified a vconfig with -game or -vproject.
 	if ( bRunVConfig && g_FileSystemErrorMode == FS_ERRORMODE_VCONFIG && !CommandLine()->FindParm( CMDLINEOPTION_NOVCONFIG ) && !GetVProjectCmdLineValue() )
@@ -410,7 +412,11 @@ FSReturnCode_t SetupFileSystemError( bool bRunVConfig, FSReturnCode_t retVal, co
 
 	if ( g_FileSystemErrorMode == FS_ERRORMODE_AUTO || g_FileSystemErrorMode == FS_ERRORMODE_VCONFIG )
 	{
+#if defined(MAPBASE) && defined (SDK_TOOLS) //for the tooling we use a different printig format
+		Error("\t%s\n", g_FileSystemError );
+#else
 		Error( "%s\n", g_FileSystemError );
+#endif	
 	}
 	
 	return retVal;
@@ -561,7 +567,11 @@ FSReturnCode_t FileSystem_LoadSearchPaths( CFSSearchPathsInit &initInfo )
 			V_MakeAbsolutePath( szAbsSearchPath, sizeof( szAbsSearchPath ), vecPaths[ idxExtraPath ], baseDir );
 			V_FixSlashes( szAbsSearchPath );
 			if ( !V_RemoveDotSlashes( szAbsSearchPath ) )
+#if defined(MAPBASE) && defined (SDK_TOOLS) //for the tooling we use a different printig format
+				Error("\tBad -insert_search_path - Can't resolve pathname for '%s'", szAbsSearchPath );
+#else
 				Error( "Bad -insert_search_path - Can't resolve pathname for '%s'", szAbsSearchPath );
+#endif
 			V_StripTrailingSlash( szAbsSearchPath );
 			FileSystem_AddLoadedSearchPath( initInfo, "GAME", szAbsSearchPath, false );
 			FileSystem_AddLoadedSearchPath( initInfo, "MOD", szAbsSearchPath, false );
@@ -599,7 +609,11 @@ FSReturnCode_t FileSystem_LoadSearchPaths( CFSSearchPathsInit &initInfo )
 		// Now resolve any ./'s.
 		V_FixSlashes( szAbsSearchPath );
 		if ( !V_RemoveDotSlashes( szAbsSearchPath ) )
+#if defined(MAPBASE) && defined (SDK_TOOLS) //for the tooling we use a different printig format
+			Error("\tFileSystem_AddLoadedSearchPath - Can't resolve pathname for '%s'", szAbsSearchPath );
+#else
 			Error( "FileSystem_AddLoadedSearchPath - Can't resolve pathname for '%s'", szAbsSearchPath );
+#endif
 		V_StripTrailingSlash( szAbsSearchPath );
 
 		// Don't bother doing any wildcard expansion unless it has wildcards.  This avoids the weird
@@ -924,8 +938,11 @@ FSReturnCode_t LocateGameInfoFile( const CFSSteamSetupInfo &fsInfo, char *pOutDi
 
 	if ( IsPC() )
 	{
+#if defined(MAPBASE) && defined (SDK_TOOLS) //for the tooling we use a different printig format
+		Warning("\tWarning: falling back to auto detection of vproject directory.\n" );
+#else
 		Warning( "Warning: falling back to auto detection of vproject directory.\n" );
-		
+#endif	
 		// Now look for it in the directory they passed in.
 		if ( fsInfo.m_pDirectoryName )
 			Q_MakeAbsolutePath( pOutDir, outDirLen, fsInfo.m_pDirectoryName );
@@ -999,7 +1016,11 @@ FSReturnCode_t SetSteamInstallPath( char *steamInstallPath, int steamInstallPath
 	{
 		if ( bErrorsAsWarnings )
 		{
+#if defined(MAPBASE) && defined (SDK_TOOLS) //for the tooling we use a different printig format
+			Warning("\tSetSteamInstallPath: FileSystem_GetExecutableDir failed.\n" );
+#else
 			Warning( "SetSteamInstallPath: FileSystem_GetExecutableDir failed.\n" );
+#endif
 			return FS_INVALID_PARAMETERS;
 		}
 		else
@@ -1029,7 +1050,11 @@ FSReturnCode_t SetSteamInstallPath( char *steamInstallPath, int steamInstallPath
 		{
 			if ( bErrorsAsWarnings )
 			{
+#if defined(MAPBASE) && defined (SDK_TOOLS) //for the tooling we use a different printig format
+				Warning("\tCan't find %s relative to executable path: %s.\n", pchSteamDLL, executablePath );
+#else
 				Warning( "Can't find %s relative to executable path: %s.\n", pchSteamDLL, executablePath );
+#endif
 				return FS_MISSING_STEAM_DLL;
 			}
 			else
@@ -1105,7 +1130,11 @@ void SetSteamAppUser( KeyValues *pSteamInfo, const char *steamInstallPath, CStea
 		KeyValues *pSteamAppData = ReadKeyValuesFile( fullFilename );
 		if ( !pSteamAppData || (pTempAppUser = pSteamAppData->GetString( "AutoLoginUser", NULL )) == NULL )
 		{
+#if defined(MAPBASE) && defined(SDK_TOOLS) // For the tooling, we use a different printing format
+			Error("\tCan't find steam app user info." );
+#else
 			Error( "Can't find steam app user info." );
+#endif
 		}
 		Q_strncpy( appUser, pTempAppUser, sizeof( appUser ) ); 
 		

@@ -8,6 +8,11 @@
 
 #include "vbsp.h"
 #include "collisionutils.h"
+
+#ifdef MAPBASE
+#include "../common/StandardColorFormat.h" // Controls the color formatting of the console output.
+#endif 
+
 /*
 ==============================================================================
 
@@ -66,11 +71,11 @@ void WritePortalFile(FILE *pFile, const CUtlVector<cluster_portals_t> &list)
 			WindingPlane (w, normal, &dist);
 			if ( DotProduct (p->plane.normal, normal) < 0.99 )
 			{	// backwards...
-				fprintf (pFile,"%i %i %i ",w->numpoints, p->nodes[1]->cluster, p->nodes[0]->cluster);
+				fprintf (pFile,"[%i %i %i] ",w->numpoints, p->nodes[1]->cluster, p->nodes[0]->cluster);
 			}
 			else
 			{
-				fprintf (pFile,"%i %i %i ",w->numpoints, p->nodes[0]->cluster, p->nodes[1]->cluster);
+				fprintf (pFile,"[%i %i %i] ",w->numpoints, p->nodes[0]->cluster, p->nodes[1]->cluster);
 			}
 			
 			for (int i=0 ; i<w->numpoints ; i++)
@@ -329,7 +334,14 @@ void WritePortalFile (tree_t *tree)
 	qprintf ("--- WritePortalFile ---\n");
 
 	sprintf (filename, "%s.prt", source);
-	Msg ("writing %s...", filename);
+
+#ifdef MAPBASE
+		Msg("Writing portal file: +- ");
+		ColorSpewMessage(SPEW_MESSAGE, &blue, "%s", filename);
+		ColorSpewMessage(SPEW_MESSAGE, &green, " done (0)\n");
+#else
+	Msg("writing %s...", filename);
+#endif 
 
 	headnode = tree->headnode;
 
@@ -340,7 +352,7 @@ void WritePortalFile (tree_t *tree)
 
 // set the cluster field in every leaf and count the total number of portals
 	num_visclusters = 0;
-	Msg("Building visibility clusters...\n");
+	Msg("Building visibility clusters... ");
 	CUtlVector<node_t *> leaves;
 	BuildVisLeafList_r( headnode, leaves );
 
@@ -351,14 +363,18 @@ void WritePortalFile (tree_t *tree)
 // write the file
 	FILE *pf = fopen (filename, "w");
 	if (!pf)
-		Error ("Error opening %s", filename);
-		
+#ifdef MAPBASE
+		Error ("\t\nError opening: +- %s", filename);
+#else
+		Error("\nError opening %s", filename);
+#endif
+
 	fprintf (pf, "%s\n", PORTALFILE);
 	fprintf (pf, "%i\n", num_visclusters);
 	fprintf (pf, "%i\n", num_visportals);
 
-	qprintf ("%5i visclusters\n", num_visclusters);
-	qprintf ("%5i visportals\n", num_visportals);
+	qprintf ("[%5i] visclusters\n", num_visclusters);
+	qprintf ("[%5i] visportals\n", num_visportals);
 
 	WritePortalFile(pf, portalList);
 
@@ -369,6 +385,10 @@ void WritePortalFile (tree_t *tree)
 	clusterleaf = 1;
 	SaveClusters_r (headnode);
 
-	Msg("done (%d)\n", (int)(Plat_FloatTime() - start) );
+#ifdef MAPBASE
+	ColorSpewMessage(SPEW_MESSAGE, &green, "done (%d)\n", (int)(Plat_FloatTime() - start));
+#else
+	Msg("done (%d)\n", (int)(Plat_FloatTime() - start));
+#endif
 }
 

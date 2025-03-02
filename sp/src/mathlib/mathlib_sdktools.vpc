@@ -1,0 +1,18 @@
+//-----------------------------------------------------------------------------
+//	MATHLIB_SDKTOOLS.VPC
+//
+// We use a modify version of mathlib for the compile tools since we use another printing formating.
+//
+//	Project Script
+//-----------------------------------------------------------------------------
+
+$macro SRCDIR		".."
+$include "$SRCDIR\mathlib\mathlib.vpc"
+
+$Configuration
+{
+	$Compiler
+	{
+		$PreprocessorDefinitions		"$SDK_TOOLS"
+	}
+}

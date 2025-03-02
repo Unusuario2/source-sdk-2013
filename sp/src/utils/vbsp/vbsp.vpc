@@ -17,7 +17,7 @@ $Configuration
 		$AdditionalIncludeDirectories		"$BASE,..\common,..\vmpi"
 		$PreprocessorDefinitions			"$BASE;MACRO_MATHLIB;PROTECTED_THINGS_DISABLE"
 		
-		$PreprocessorDefinitions			"$BASE;MAPBASE_VSCRIPT"	[$MAPBASE_VSCRIPT]
+		$PreprocessorDefinitions			"$BASE;MAPBASE_VSCRIPT;SDK_TOOLS"	[$MAPBASE_VSCRIPT]
 	}
 
 	$Linker
@@ -85,6 +85,7 @@ $Project "Vbsp"
 			$File	"..\common\cmdlib.cpp"
 			$File	"$SRCDIR\public\filesystem_helpers.cpp"
 			$File	"$SRCDIR\public\filesystem_init.cpp"
+			$File   "..\common\StandardColorFormat.cpp"
 			$File	"..\common\filesystem_tools.cpp"
 			$File	"..\common\map_shared.cpp"
 			$File	"..\common\pacifier.cpp"
@@ -120,6 +121,7 @@ $Project "Vbsp"
 			$File	"$SRCDIR\public\builddisp.h"
 			$File	"$SRCDIR\public\ChunkFile.h"
 			$File	"..\common\cmdlib.h"
+			$File   "..\common\StandardColorFormat.h"
 			$File	"disp_ivp.h"
 			$File	"$SRCDIR\public\filesystem.h"
 			$File	"$SRCDIR\public\filesystem_helpers.h"
@@ -186,7 +188,7 @@ $Project "Vbsp"
 	{
 		$Lib bitmap
 		$Lib fgdlib
-		$Lib mathlib
+		$Lib mathlib_sdktools
 		$Lib tier2
 		$Lib vtf
 		$Lib vscript [$MAPBASE_VSCRIPT]

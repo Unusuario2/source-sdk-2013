@@ -679,7 +679,11 @@ I CUtlLinkedList<T,S,ML,I,M>::AllocInternal( bool multilist )
 			Assert( m_Memory.IsValidIterator( it ) );
 			if ( !m_Memory.IsValidIterator( it ) )
 			{
+#if defined(MAPBASE) && defined(SDK_TOOLS) // For the tooling, we use a different printing format
+				ExecuteNTimes( 10, Warning("\tCUtlLinkedList overflow! (exhausted memory allocator)\n" ) );
+#else
 				ExecuteNTimes( 10, Warning( "CUtlLinkedList overflow! (exhausted memory allocator)\n" ) );
+#endif
 				return InvalidIndex();
 			}
 		}
@@ -687,7 +691,11 @@ I CUtlLinkedList<T,S,ML,I,M>::AllocInternal( bool multilist )
 		// We can overflow before the utlmemory overflows, since S != I
 		if ( !IndexInRange( m_Memory.GetIndex( it ) ) )
 		{
+#if defined(MAPBASE) && defined(SDK_TOOLS) // For the tooling, we use a different printing format
+			ExecuteNTimes( 10, Warning("\tCUtlLinkedList overflow! (exhausted index range)\n" ) );
+#else
 			ExecuteNTimes( 10, Warning( "CUtlLinkedList overflow! (exhausted index range)\n" ) );
+#endif
 			return InvalidIndex();
 		}
 

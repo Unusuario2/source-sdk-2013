@@ -93,22 +93,38 @@ public:
 	// Hit an error, report it and the parsing stack for context
 	void ReportError( const char *pError )
 	{
+#if defined(MAPBASE) && defined (SDK_TOOLS) //for the tooling we use a different printig format
+		Warning("\tKeyValues Error: %s in file %s\n", pError, m_pFilename );
+#else
 		Warning( "KeyValues Error: %s in file %s\n", pError, m_pFilename );
+#endif
 		for ( int i = 0; i < m_maxErrorIndex; i++ )
 		{
 			if ( m_errorStack[i] != INVALID_KEY_SYMBOL )
 			{
 				if ( i < m_errorIndex )
 				{
+#if defined(MAPBASE) && defined (SDK_TOOLS) //for the tooling we use a different printig format
+					Warning("\t%s, ", KeyValues::CallGetStringForSymbol(m_errorStack[i]) );
+#else
 					Warning( "%s, ", KeyValues::CallGetStringForSymbol(m_errorStack[i]) );
+#endif
 				}
 				else
 				{
+#if defined(MAPBASE) && defined (SDK_TOOLS) //for the tooling we use a different printig format
+					Warning("\t(*%s*), ", KeyValues::CallGetStringForSymbol(m_errorStack[i]) );
+#else
 					Warning( "(*%s*), ", KeyValues::CallGetStringForSymbol(m_errorStack[i]) );
+#endif
 				}
 			}
 		}
+#if defined(MAPBASE) && defined (SDK_TOOLS) //for the tooling we use a different printig format
+		Warning("\t\n" );
+#else
 		Warning( "\n" );
+#endif
 	}
 
 private:
@@ -600,7 +616,11 @@ const char *KeyValues::ReadToken( CUtlBuffer &buf, bool &wasQuoted, bool &wasCon
 		else if ( !bReportedError )
 		{
 			bReportedError = true;
+#if defined(MAPBASE) && defined (SDK_TOOLS) //for the tooling we use a different printig format
+			g_KeyValuesErrorStack.ReportError("\t ReadToken overflow" );
+#else
 			g_KeyValuesErrorStack.ReportError(" ReadToken overflow" );
+#endif
 		}
 
 		buf.SeekGet( CUtlBuffer::SEEK_CURRENT, 1 );
@@ -2139,7 +2159,11 @@ bool KeyValues::LoadFromBuffer( char const *resourceName, CUtlBuffer &buf, IBase
 
 			if ( !s || *s == 0 )
 			{
+#if defined(MAPBASE) && defined (SDK_TOOLS) //for the tooling we use a different printig format
+				g_KeyValuesErrorStack.ReportError("\t#include is NULL " );
+#else
 				g_KeyValuesErrorStack.ReportError("#include is NULL " );
+#endif
 			}
 			else
 			{
@@ -2155,7 +2179,11 @@ bool KeyValues::LoadFromBuffer( char const *resourceName, CUtlBuffer &buf, IBase
 
 			if ( !s || *s == 0 )
 			{
+#if defined(MAPBASE) && defined (SDK_TOOLS) //for the tooling we use a different printig format
+				g_KeyValuesErrorStack.ReportError("\t#base is NULL " );
+#else
 				g_KeyValuesErrorStack.ReportError("#base is NULL " );
+#endif
 			}
 			else
 			{
@@ -2201,7 +2229,11 @@ bool KeyValues::LoadFromBuffer( char const *resourceName, CUtlBuffer &buf, IBase
 		}
 		else
 		{
+#if defined(MAPBASE) && defined (SDK_TOOLS) //for the tooling we use a different printig format
+			g_KeyValuesErrorStack.ReportError("\tLoadFromBuffer: missing {" );
+#else
 			g_KeyValuesErrorStack.ReportError("LoadFromBuffer: missing {" );
+#endif
 		}
 
 		if ( !bAccepted )
@@ -2296,13 +2328,21 @@ void KeyValues::RecursiveLoadFromBuffer( char const *resourceName, CUtlBuffer &b
 
 		if ( !name )	// EOF stop reading
 		{
+#if defined(MAPBASE) && defined (SDK_TOOLS) //for the tooling we use a different printig format
+			g_KeyValuesErrorStack.ReportError("\tRecursiveLoadFromBuffer:  got EOF instead of keyname" );
+#else
 			g_KeyValuesErrorStack.ReportError("RecursiveLoadFromBuffer:  got EOF instead of keyname" );
+#endif
 			break;
 		}
 
 		if ( !*name ) // empty token, maybe "" or EOF
 		{
+#if defined(MAPBASE) && defined (SDK_TOOLS) //for the tooling we use a different printig format
+			g_KeyValuesErrorStack.ReportError("\tRecursiveLoadFromBuffer:  got empty keyname" );
+#else
 			g_KeyValuesErrorStack.ReportError("RecursiveLoadFromBuffer:  got empty keyname" );
+#endif
 			break;
 		}
 
@@ -2328,13 +2368,21 @@ void KeyValues::RecursiveLoadFromBuffer( char const *resourceName, CUtlBuffer &b
 
 		if ( !value )
 		{
+#if defined(MAPBASE) && defined (SDK_TOOLS) //for the tooling we use a different printig format
+			g_KeyValuesErrorStack.ReportError("\tRecursiveLoadFromBuffer:  got NULL key" );
+#else
 			g_KeyValuesErrorStack.ReportError("RecursiveLoadFromBuffer:  got NULL key" );
+#endif
 			break;
 		}
 		
 		if ( *value == '}' && !wasQuoted )
 		{
+#if defined(MAPBASE) && defined (SDK_TOOLS) //for the tooling we use a different printig format
+			g_KeyValuesErrorStack.ReportError("\tRecursiveLoadFromBuffer:  got } in key" );
+#else
 			g_KeyValuesErrorStack.ReportError("RecursiveLoadFromBuffer:  got } in key" );
+#endif
 			break;
 		}
 
@@ -2349,7 +2397,11 @@ void KeyValues::RecursiveLoadFromBuffer( char const *resourceName, CUtlBuffer &b
 		{
 			if ( wasConditional )
 			{
+#if defined(MAPBASE) && defined (SDK_TOOLS) //for the tooling we use a different printig format
+				g_KeyValuesErrorStack.ReportError("\tRecursiveLoadFromBuffer:  got conditional between key and value" );
+#else
 				g_KeyValuesErrorStack.ReportError("RecursiveLoadFromBuffer:  got conditional between key and value" );
+#endif
 				break;
 			}
 			

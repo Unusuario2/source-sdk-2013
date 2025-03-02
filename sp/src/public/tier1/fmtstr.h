@@ -121,7 +121,11 @@ public:
 		m_szBuf[SIZE_BUF - 1] = 0; 
 		if ( bTruncated && !m_bQuietTruncation && ( s_nWarned < 5 ) ) 
 		{ 
+#if defined(MAPBASE) && defined(SDK_TOOLS) // For the tooling, we use a different printing format
+			Warning("\tCFmtStr truncated to %d without QUIET_TRUNCATION specified!\n", SIZE_BUF ); 
+#else
 			Warning( "CFmtStr truncated to %d without QUIET_TRUNCATION specified!\n", SIZE_BUF ); 
+#endif
 			AssertMsg( 0, "CFmtStr truncated without QUIET_TRUNCATION specified!\n" );
 			s_nWarned++; 
 		} 

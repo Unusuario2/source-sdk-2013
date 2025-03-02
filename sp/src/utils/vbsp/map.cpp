@@ -22,6 +22,11 @@
 #include "vscript_vbsp.h"
 #endif
 
+#ifdef MAPBASE
+#include "../common/StandardColorFormat.h" // Controls the color formatting of the console output.
+#endif 
+
+
 #ifdef VSVMFIO
 #include "VmfImport.h"
 #endif // VSVMFIO
@@ -225,10 +230,10 @@ int CMapFile::CreateNewFloatPlane (Vector& normal, vec_t dist)
 	plane_t	*p, temp;
 
 	if (VectorLength(normal) < 0.5)
-		g_MapError.ReportError ("FloatPlane: bad normal");
+		g_MapError.ReportError ("\tFloatPlane: bad normal");
 	// create a new plane
 	if (nummapplanes+2 > MAX_MAP_PLANES)
-		g_MapError.ReportError ("MAX_MAP_PLANES");
+		g_MapError.ReportError ("\tMAX_MAP_PLANES");
 
 	p = &mapplanes[nummapplanes];
 	VectorCopy (normal, p->normal);
@@ -514,7 +519,7 @@ void CMapFile::AddBrushBevels (mapbrush_t *b)
 			if (i == b->numsides)
 			{	// add a new side
 				if (nummapbrushsides == MAX_MAP_BRUSHSIDES)
-					g_MapError.ReportError ("MAX_MAP_BRUSHSIDES");
+					g_MapError.ReportError ("\tMAX_MAP_BRUSHSIDES");
 				nummapbrushsides++;
 				b->numsides++;
 				VectorClear (normal);
@@ -610,7 +615,7 @@ void CMapFile::AddBrushBevels (mapbrush_t *b)
 						continue;	// wasn't part of the outer hull
 					// add this plane
 					if (nummapbrushsides == MAX_MAP_BRUSHSIDES)
-						g_MapError.ReportError ("MAX_MAP_BRUSHSIDES");
+						g_MapError.ReportError ("\tMAX_MAP_BRUSHSIDES");
 					nummapbrushsides++;
 					s2 = &b->original_sides[b->numsides];
 					s2->planenum = FindFloatPlane (normal, dist);
@@ -671,9 +676,17 @@ qboolean CMapFile::MakeBrushWindings (mapbrush_t *ob)
 	for (i=0 ; i<3 ; i++)
 	{
 		if (ob->mins[i] < MIN_COORD_INTEGER || ob->maxs[i] > MAX_COORD_INTEGER)
+#ifdef MAPBASE
+			Warning("\tBrush [%i]: bounds out of range\n", ob->id);
+#else
 			Msg("Brush %i: bounds out of range\n", ob->id);
+#endif
 		if (ob->mins[i] > MAX_COORD_INTEGER || ob->maxs[i] < MIN_COORD_INTEGER)
+#ifdef MAPBASE
+			Warning("\tBrush [%i]: no visible sides on brush\n", ob->id);
+#else
 			Msg("Brush %i: no visible sides on brush\n", ob->id);
+#endif
 	}
 
 	return true;
@@ -876,7 +889,7 @@ ChunkFileResult_t LoadDispInfoCallback(CChunkFile *pFile, mapdispinfo_t **ppMapD
     //
     if (nummapdispinfo > MAX_MAP_DISPINFO)
 	{
-        g_MapError.ReportError( "ParseDispInfoChunk: nummapdispinfo > MAX_MAP_DISPINFO" );
+        g_MapError.ReportError("\tParseDispInfoChunk: nummapdispinfo > MAX_MAP_DISPINFO" );
 	}
 
     // get a pointer to the next available displacement info slot
@@ -1338,7 +1351,7 @@ static ChunkFileResult_t LoadOverlayDataTransitionKeyCallback( const char *szKey
 		Assert( strlen( pMaterialName ) < OVERLAY_MAP_STRLEN );
 		if ( strlen( pMaterialName ) >= OVERLAY_MAP_STRLEN )
 		{
-			Error( "Overlay Material Name (%s) > OVERLAY_MAP_STRLEN (%d)", pMaterialName, OVERLAY_MAP_STRLEN );
+			Error("\tOverlay Material Name (%s) > OVERLAY_MAP_STRLEN (%d)", pMaterialName, OVERLAY_MAP_STRLEN );
 			return ChunkFile_Fail;
 		}
 		strcpy( pOverlay->szMaterialName, pMaterialName );	
@@ -1500,7 +1513,7 @@ ChunkFileResult_t CMapFile::LoadEntityCallback(CChunkFile *pFile, int nParam)
 	if (num_entities == MAX_MAP_ENTITIES)
 	{
 		// Exits.
-		g_MapError.ReportError ("num_entities == MAX_MAP_ENTITIES");
+		g_MapError.ReportError ("\tnum_entities == MAX_MAP_ENTITIES");
 	}
 
 	entity_t *mapent = &entities[num_entities];
@@ -1788,7 +1801,7 @@ ChunkFileResult_t CMapFile::LoadEntityCallback(CChunkFile *pFile, int nParam)
 
 			if (mapent->numbrushes != 1)
 			{
-				Error ("Entity %i: func_areaportal can only be a single brush", num_entities-1);
+				Error ("\tEntity %i: func_areaportal can only be a single brush", num_entities-1);
 			}
 
 			mapbrush_t *b = &mapbrushes[nummapbrushes-1];
@@ -2087,7 +2100,11 @@ void CMapFile::CheckForInstances( const char *pszFileName )
 	KeyValues *GameInfoKV = ReadKeyValuesFile( GameInfoPath );
 	if ( !GameInfoKV )
 	{
-		Msg( "Could not locate gameinfo.txt for Instance Remapping at %s\n", GameInfoPath );
+#ifdef MAPBASE
+	Warning("\tCould not locate gameinfo.txt for Instance Remapping at: +- %s\033\n", GameInfoPath);
+#else
+	Warning("\tCould not locate gameinfo.txt for Instance Remapping at %s\n", GameInfoPath);
+#endif 
 		return;
 	}
 
@@ -2100,7 +2117,11 @@ void CMapFile::CheckForInstances( const char *pszFileName )
 	const char *GameDataFile = GameInfoKV->GetString( "GameData", NULL );
 	if ( !GameDataFile )
 	{
-		Msg( "Could not locate 'GameData' key in %s\n", GameInfoPath );
+#ifdef MAPBASE
+		Warning("\tCould not locate 'GameData' key in: +- %s\n", GameInfoPath);
+#else
+		Warning("\tCould not locate 'GameData' key in %s\n", GameInfoPath);
+#endif 
 		return;
 	}
 
@@ -2114,7 +2135,11 @@ void CMapFile::CheckForInstances( const char *pszFileName )
 	{
 		if ( !g_pFullFileSystem->RelativePathToFullPath( GameDataFile, NULL, FDGPath, sizeof( FDGPath ) ) )
 		{
-			Msg( "Could not locate GameData file %s\n", GameDataFile );
+#ifdef MAPBASE
+			Warning("\tCould not locate 'GameData' file: +- %s\n", GameDataFile);
+#else
+			Warning("\tCould not locate GameData file %s\n", GameDataFile);
+#endif
 		}
 	}
 
@@ -2150,8 +2175,11 @@ void CMapFile::CheckForInstances( const char *pszFileName )
 				if ( bLoaded == false )
 				{
 					Color red( 255, 0, 0, 255 );
-
+#ifdef MAPBASE
+					ColorSpewMessage( SPEW_ERROR, &red, "\tCould not open instance file: +- %s\n", pInstanceFile );
+#else
 					ColorSpewMessage( SPEW_ERROR, &red, "Could not open instance file %s\n", pInstanceFile );
+#endif
 				}
 			}
 
@@ -2487,7 +2515,7 @@ void CMapFile::MergeEntities( entity_t *pInstanceEntity, CMapFile *Instance, Vec
 			if ( value > max_ai_node_id )
 			{
 				max_ai_node_id = value;
-				//Warning( "Max AI nodes is now %i", max_ai_node_id );
+				//Warning("\tMax AI nodes is now %i", max_ai_node_id );
 			}
 		}
 #endif
@@ -2713,7 +2741,7 @@ void CMapFile::MergeOverlays( entity_t *pInstanceEntity, CMapFile *Instance, Vec
 		int iSides = (nummapbrushsides - Instance->nummapbrushsides);
 		for (int i2 = 0; i2 < g_aMapOverlays[i].aSideList.Count(); i2++)
 		{
-			//Warning( "Remapping overlay side %i to %i\n", g_aMapOverlays[i].aSideList[i2], g_aMapOverlays[i].aSideList[i2] + iSides );
+			//Warning("\tRemapping overlay side %i to %i\n", g_aMapOverlays[i].aSideList[i2], g_aMapOverlays[i].aSideList[i2] + iSides );
 			g_aMapOverlays[i].aSideList[i2] += iSides;
 		}
 #endif
@@ -2790,9 +2818,14 @@ bool LoadMapFile( const char *pszFileName )
 
 			if ( g_MainMap == g_LoadingMap || verbose )
 			{
-				Msg( "Loading %s\n", pszFileName );
+#ifdef MAPBASE
+			Msg("Loading vmf file: +- ");
+			ColorSpewMessage(SPEW_MESSAGE, &blue, "%s", pszFileName);
+			ColorSpewMessage(SPEW_MESSAGE, &green, " done (0)\n");
+#else
+			Msg("Loading %s...done\n", pszFileName);
+#endif	
 			}
-
 
 			// reset the displacement info count
 	//		nummapdispinfo = 0;
@@ -2818,7 +2851,7 @@ bool LoadMapFile( const char *pszFileName )
 		}
 		else
 		{
-			Error("Error opening %s: %s.\n", pszFileName, File.GetErrorText(eResult));
+			Error("\tError opening %s: %s.\n", pszFileName, File.GetErrorText(eResult));
 		}
 	}
 
@@ -2858,7 +2891,7 @@ bool LoadMapFile( const char *pszFileName )
 		{
 			if (g_pParallaxObbStrs[i][0] != '\0' && g_pParallaxObbsDone[i] == false)
 			{
-				//Warning( "Testing OBB string %s\n", g_pParallaxObbStrs[i] );
+				//Warning("\tTesting OBB string %s\n", g_pParallaxObbStrs[i] );
 
 				entity_t* obbEnt = NULL;
 				for (int i2 = 0; i2 < g_LoadingMap->num_entities; i2++)
@@ -2868,7 +2901,7 @@ bool LoadMapFile( const char *pszFileName )
 
 					obbEnt = &g_LoadingMap->entities[i2];
 					g_pParallaxObbStrs[i] = ValueForKey(obbEnt, "transformationmatrix");
-					//Warning( "Using OBB transformation matrix \"%s\"\n", g_pParallaxObbStrs[i] );
+					//Warning("\tUsing OBB transformation matrix \"%s\"\n", g_pParallaxObbStrs[i] );
 					g_pParallaxObbsDone[i] = true;
 
 					break;
@@ -2876,7 +2909,7 @@ bool LoadMapFile( const char *pszFileName )
 
 				if (!obbEnt)
 				{
-					Warning( "Cannot find parallax obb \"%s\" (num_entities is %i)\n", g_pParallaxObbStrs[i], g_LoadingMap->num_entities );
+					Warning("\tCannot find parallax obb \"%s\" (num_entities is %i)\n", g_pParallaxObbStrs[i], g_LoadingMap->num_entities );
 					//g_pParallaxObbStrs[i][0] = '\0';
 				}
 			}
@@ -2950,7 +2983,7 @@ ChunkFileResult_t CMapFile::LoadSideCallback(CChunkFile *pFile, LoadSide_t *pSid
 {
 	if (nummapbrushsides == MAX_MAP_BRUSHSIDES)
 	{
-		g_MapError.ReportError ("MAX_MAP_BRUSHSIDES");
+		g_MapError.ReportError ("\tMAX_MAP_BRUSHSIDES");
 	}
 
 	pSideInfo->pSide = &brushsides[nummapbrushsides];
@@ -3042,7 +3075,7 @@ ChunkFileResult_t CMapFile::LoadSideCallback(CChunkFile *pFile, LoadSide_t *pSid
 				// save the td off in case there is an origin brush and we
 				// have to recalculate the texinfo
 				if (nummapbrushsides == MAX_MAP_BRUSHSIDES)
-					g_MapError.ReportError ("MAX_MAP_BRUSHSIDES");
+					g_MapError.ReportError ("\tMAX_MAP_BRUSHSIDES");
 				side_brushtextures[nummapbrushsides] = pSideInfo->td;
 				nummapbrushsides++;
 				b->numsides++;
@@ -3087,7 +3120,7 @@ ChunkFileResult_t LoadSideKeyCallback(const char *szKey, const char *szValue, Lo
 
 		if (nRead != 9)
 		{
-			g_MapError.ReportError("parsing plane definition");
+			g_MapError.ReportError("\tparsing plane definition");
 		}
 	}
 	else if (!stricmp(szKey, "material"))
@@ -3114,7 +3147,7 @@ ChunkFileResult_t LoadSideKeyCallback(const char *szKey, const char *szValue, Lo
 		int nRead = sscanf(szValue, "[%f %f %f %f] %f", &pSideInfo->td.UAxis[0], &pSideInfo->td.UAxis[1], &pSideInfo->td.UAxis[2], &pSideInfo->td.shift[0], &pSideInfo->td.textureWorldUnitsPerTexel[0]);
 		if (nRead != 5)
 		{
-			g_MapError.ReportError("parsing U axis definition");
+			g_MapError.ReportError("\tparsing U axis definition");
 		}
 	}
 	else if (!stricmp(szKey, "vaxis"))
@@ -3122,7 +3155,7 @@ ChunkFileResult_t LoadSideKeyCallback(const char *szKey, const char *szValue, Lo
 		int nRead = sscanf(szValue, "[%f %f %f %f] %f", &pSideInfo->td.VAxis[0], &pSideInfo->td.VAxis[1], &pSideInfo->td.VAxis[2], &pSideInfo->td.shift[1], &pSideInfo->td.textureWorldUnitsPerTexel[1]);
 		if (nRead != 5)
 		{
-			g_MapError.ReportError("parsing V axis definition");
+			g_MapError.ReportError("\tparsing V axis definition");
 		}
 	}
 	else if (!stricmp(szKey, "lightmapscale"))
@@ -3238,7 +3271,7 @@ ChunkFileResult_t CMapFile::LoadSolidCallback(CChunkFile *pFile, LoadEntity_t *p
 {
 	if (nummapbrushes == MAX_MAP_BRUSHES)
 	{
-		g_MapError.ReportError ("nummapbrushes == MAX_MAP_BRUSHES");
+		g_MapError.ReportError ("\tnummapbrushes == MAX_MAP_BRUSHES");
 	}
 
 	mapbrush_t *b = &mapbrushes[nummapbrushes];
@@ -3323,7 +3356,7 @@ ChunkFileResult_t CMapFile::LoadSolidCallback(CChunkFile *pFile, LoadEntity_t *p
 
 			if (num_entities == 1)
 			{
-				Error("Brush %i: origin brushes not allowed in world", b->id);
+				Error("\tBrush %i: origin brushes not allowed in world", b->id);
 			}
 
 			VectorAdd (b->mins, b->maxs, origin);
@@ -3428,7 +3461,7 @@ int CMapFile::ScriptAddSimpleEntityKV( HSCRIPT hKV )
 	if (num_entities == MAX_MAP_ENTITIES)
 	{
 		// Exits.
-		g_MapError.ReportError ("num_entities == MAX_MAP_ENTITIES");
+		g_MapError.ReportError ("\tnum_entities == MAX_MAP_ENTITIES");
 		return -1;
 	}
 
@@ -3491,7 +3524,7 @@ int CMapFile::ScriptAddInstance( const char *pszVMF, const Vector& vecOrigin, co
 	if (num_entities == MAX_MAP_ENTITIES)
 	{
 		// Exits.
-		g_MapError.ReportError ("num_entities == MAX_MAP_ENTITIES");
+		g_MapError.ReportError ("\tnum_entities == MAX_MAP_ENTITIES");
 		return -1;
 	}
 
@@ -3537,10 +3570,21 @@ void CMapFile::TestExpandBrushes (void)
 	mapbrush_t	*brush;
 	vec_t	dist;
 
-	Msg ("writing %s\n", name);
+#ifdef MAPBASE
+	Msg("Writing: +- ");
+	ColorSpewMessage(SPEW_MESSAGE, &blue, "%s", name);
+	ColorSpewMessage(SPEW_MESSAGE, &green, " done (0)\n");
+#else
+	Msg("writing %s...\n", name);
+#endif
+
 	f = fopen (name, "wb");
 	if (!f)
-		Error ("Can't write %s\b", name);
+#ifdef MAPBASE
+		Error ("\tCan't write: +- %s\b", name);
+#else
+		Error("Can't write %s\b", name);
+#endif
 
 	fprintf (f, "{\n\"classname\" \"worldspawn\"\n");
 	fprintf( f, "\"mapversion\" \"220\"\n\"sounds\" \"1\"\n\"MaxRange\" \"4096\"\n\"mapversion\" \"220\"\n\"wad\" \"vert.wad;dev.wad;generic.wad;spire.wad;urb.wad;cit.wad;water.wad\"\n" );
@@ -3559,9 +3603,9 @@ void CMapFile::TestExpandBrushes (void)
 
 			w = BaseWindingForPlane (mapplanes[s->planenum].normal, dist);
 
-			fprintf (f,"( %i %i %i ) ", (int)w->p[0][0], (int)w->p[0][1], (int)w->p[0][2]);
-			fprintf (f,"( %i %i %i ) ", (int)w->p[1][0], (int)w->p[1][1], (int)w->p[1][2]);
-			fprintf (f,"( %i %i %i ) ", (int)w->p[2][0], (int)w->p[2][1], (int)w->p[2][2]);
+			fprintf (f,"[ %i %i %i ] ", (int)w->p[0][0], (int)w->p[0][1], (int)w->p[0][2]);
+			fprintf (f,"[ %i %i %i ] ", (int)w->p[1][0], (int)w->p[1][1], (int)w->p[1][2]);
+			fprintf (f,"[ %i %i %i ] ", (int)w->p[2][0], (int)w->p[2][1], (int)w->p[2][2]);
 
 			fprintf (f, "%s [ 0 0 1 -512 ] [ 0 -1 0 -256 ] 0 1 1 \n", 
 				TexDataStringTable_GetString( GetTexData( texinfo[s->texinfo].texdata )->nameStringTableID ) );
@@ -3574,7 +3618,7 @@ void CMapFile::TestExpandBrushes (void)
 
 	fclose (f);
 
-	Error ("can't proceed after expanding brushes");
+	Error ("\tCan't proceed after expanding brushes");
 }
 
 
@@ -3593,7 +3637,7 @@ mapdispinfo_t *ParseDispInfoChunk( void )
     // check to see if we exceeded the maximum displacement info list size
     //
     if( nummapdispinfo > MAX_MAP_DISPINFO )
-        g_MapError.ReportError( "ParseDispInfoChunk: nummapdispinfo > MAX_MAP_DISPINFO");
+        g_MapError.ReportError("\tParseDispInfoChunk: nummapdispinfo > MAX_MAP_DISPINFO");
 
     // get a pointer to the next available displacement info slot
     pMapDispInfo = &mapdispinfo[nummapdispinfo];
@@ -3604,7 +3648,7 @@ mapdispinfo_t *ParseDispInfoChunk( void )
     //
     GetToken( false );
     if( strcmp( token, "{" ) )
-        g_MapError.ReportError( "ParseDispInfoChunk: Illegal Chunk! - {" );
+        g_MapError.ReportError("\tParseDispInfoChunk: Illegal Chunk! - {" );
 
     //
     //
@@ -3621,7 +3665,7 @@ mapdispinfo_t *ParseDispInfoChunk( void )
     {
         GetToken( false );
         if( strcmp( token, "[" ) )
-            g_MapError.ReportError( "ParseDispInfoChunk: Illegal Chunk! - [" );
+            g_MapError.ReportError("\tParseDispInfoChunk: Illegal Chunk! - [" );
 
         for( j = 0; j < 3; j++ )
         {
@@ -3639,7 +3683,7 @@ mapdispinfo_t *ParseDispInfoChunk( void )
 
         GetToken( false );
         if( strcmp( token, "]" ) )
-            g_MapError.ReportError( "ParseDispInfoChunk: Illegal Chunk! - ]" );
+            g_MapError.ReportError("\tParseDispInfoChunk: Illegal Chunk! - ]" );
     }
 
     // max displacement value
@@ -3695,7 +3739,7 @@ mapdispinfo_t *ParseDispInfoChunk( void )
     //
     GetToken( true );
     if( strcmp( token, "}" ) )
-        g_MapError.ReportError( "ParseDispInfoChunk: Illegal Chunk! - }" );
+        g_MapError.ReportError("\tParseDispInfoChunk: Illegal Chunk! - }" );
     
     // return the index of the displacement info slot
     return pMapDispInfo;
