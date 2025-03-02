@@ -16,6 +16,7 @@
 
 #include "bsplib.h"
 
+
 typedef int qboolean;
 typedef float vec_t;
 
@@ -64,6 +65,7 @@ extern bool		g_bPropperInsertAllAsStatic;
 extern bool		g_bPropperStripEntities;
 extern int		g_iDefaultCubemapSize;
 extern int		noleaktest;
+
 
 bool Is3DSkyboxArea(int area);
 

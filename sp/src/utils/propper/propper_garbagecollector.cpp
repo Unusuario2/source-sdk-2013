@@ -7,12 +7,14 @@
 // $NoKeywords: $
 //=======================================================================================//
 
-//Explanation: Since Propper shares most of his code with VBSP there is a lot of code that 
-//is not used but is needed for compiling Propper. This code is garbage since it doesnt provide 
-//anything, only makes the code base a LOT more messier and harder to understand.
+// Explanation: Since Propper shares most of its code with VBSP, there is a lot of unused code  
+// that is required for compiling Propper. This unused code clutters the codebase, making it  
+// messier and harder to understand.  
 //
-//So to avoid these issues i have made a separte .cpp file so the Propper source code is clean and readible.
-//These files are meant to be edited only when major changes in vbps occurs, if not, do not edit anything
+// To avoid these issues, I have created separate .cpp/.h files to keep the Propper source code  
+// clean and readable. These files should only be modified when major changes occur in VBSP.  
+// Otherwise, they should remain untouched.
+
 
 #include "propper_garbagecollector.h"
 
