@@ -9,15 +9,17 @@
 
 // Explanation: Since Propper shares most of its code with VBSP, there is a lot of unused code  
 // that is required for compiling Propper. This unused code clutters the codebase, making it  
-// messier and harder to understand.  
+// messier and much harder to understand.  
 //
 // To avoid these issues, I have created separate .cpp/.h files to keep the Propper source code  
 // clean and readable. These files should only be modified when major changes occur in VBSP.  
 // Otherwise, they should remain untouched.
 
-
 #include "propper_garbagecollector.h"
 
+//-------------------------------+---------------+---------------------------------------//
+//-------------------------------| vbsp.cpp code |---------------------------------------//
+//-------------------------------+---------------+---------------------------------------//
 vec_t		microvolume = 1.0;
 qboolean	noprune;
 qboolean	glview;
@@ -64,6 +66,7 @@ bool		g_bPropperStripEntities = false;
 int			g_iDefaultCubemapSize = 32;
 int			noleaktest = true;
 
+
 bool Is3DSkyboxArea(int area)
 {
 	for (int i = g_SkyAreas.Count(); --i >= 0; )
@@ -81,3 +84,22 @@ bool IsFuncOccluder(int entity_num)
 	const char* pClassName = ValueForKey(mapent, "classname");
 	return (strcmp("func_occluder", pClassName) == 0);
 }
+//--------------------------------+-------------------+----------------------------------//
+//--------------------------------| End vbsp.cpp code |----------------------------------//
+//--------------------------------+-------------------+----------------------------------//
+
+
+
+//|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+//|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+
+
+
+//--------------------------------+---------------+--------------------------------------//
+//--------------------------------|  vbsp.h code  |--------------------------------------//
+//--------------------------------+---------------+--------------------------------------//
+
+
+//--------------------------------+-------------------+----------------------------------//
+//--------------------------------|  End vbsp.h code  |----------------------------------//
+//--------------------------------+-------------------+----------------------------------//

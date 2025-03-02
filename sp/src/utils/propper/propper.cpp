@@ -38,46 +38,26 @@ char		name[1024];
 char		materialPath[1024];
 char		outbase[32];
 
-//Propper var
-int numverts = 0;
-int smdmaterials = 0;
-bool logging = false;
-char *sourcefolder;
-bool dobodygroup = false;
-bool objExport = false;
-bool studioCompile = true;
-bool fixMaterials = true;
-bool mat_nonormal = false;
-
-//This gets initialized twice. Hrm...
-char targetPath[1024];
-
-model_t propper_models[MAX_PROPPER_MODELS];
-int num_models = 0;
-
-smd_triangle_t smd_tris[MAX_SMD_TRIS];
-smd_point_t smd_pts[MAX_SMD_VERTS+1];
-
-bodygroups_t bodygroups;
-
-char FixdTextures[1048576]; //?
-
-smd_texture_t* smd_textures;
-//Carl end
-
-// HLTOOLS: Introduce these calcs to make the block algorithm proportional to the proper 
-// world coordinate extents.  Assumes square spatial constraints.
-#define BLOCKS_SIZE		1024
-#define BLOCKS_SPACE	(COORD_EXTENT/BLOCKS_SIZE)
-#define BLOCKX_OFFSET	((BLOCKS_SPACE/2)+1)
-#define BLOCKY_OFFSET	((BLOCKS_SPACE/2)+1)
-#define BLOCKS_MIN		(-(BLOCKS_SPACE/2))
-#define BLOCKS_MAX		((BLOCKS_SPACE/2)-1)
-
-
-int			block_xl = BLOCKS_MIN, block_xh = BLOCKS_MAX, block_yl = BLOCKS_MIN, block_yh = BLOCKS_MAX;
-int			entity_num;
-node_t		*block_nodes[BLOCKS_SPACE+2][BLOCKS_SPACE+2];
+//Propper variables.
+int			num_models = 0;
+int			numverts = 0;
+int			smdmaterials = 0;
+int			entity_num = 0;
+bool		logging = false;
+bool		dobodygroup = false;
+bool		objExport = false;
+bool		studioCompile = true;
+bool		fixMaterials = true;
+bool		mat_nonormal = false;
+char*		sourcefolder;
+char		FixdTextures[1048576];	//1048576 why??
+char		targetPath[1024];		//This gets initialized twice. Hrm...
+model_t			propper_models[MAX_PROPPER_MODELS];
+smd_triangle_t	smd_tris[MAX_SMD_TRIS];
+smd_point_t		smd_pts[MAX_SMD_VERTS+1];
+bodygroups_t	bodygroups;
+smd_texture_t*	smd_textures;
+//Propper end.
 
 
 void LoadPhysicsDLL( void )
@@ -95,6 +75,7 @@ void PrintCommandLine( int argc, char **argv )
 	}
 	Warning( "\n\n" );
 }
+
 
 //Here starts the PROPPER-funtions.
 void EnsureFileDirectoryExists( const char *pFileName )
@@ -516,6 +497,7 @@ int fixupMaterial(const char* pMatName, const char* qc_cdmaterials, bool count)
 		EnsureFileDirectoryExists(&PathOut[0]);
 //		Msg(PathOut);
 		matfile2 = g_pFullFileSystem->Open( PathOut, "w" );
+
 		if (!matfile2) 
 			Error ("Could not open material %s for writing! Make sure the directory exists.\n", PathOut);
 
@@ -531,7 +513,9 @@ int fixupMaterial(const char* pMatName, const char* qc_cdmaterials, bool count)
 				addModel = false;
 			}
 			if (validateShaderParam(&Line[0])) 
-				g_pFullFileSystem->Write( Line, V_strlen(Line), matfile2 );
+			{
+				g_pFullFileSystem->Write(Line, V_strlen(Line), matfile2);
+			}
 		}
 		g_pFullFileSystem->Close(matfile2);
 	}
@@ -549,11 +533,13 @@ int OutputDisp(mapdispinfo_t* pMapDisp, smd_triangle_t *tri, smd_point_t *vertic
 	MaterialSystemMaterial_t hMaterial;
 	hMaterial = FindMaterial( cTexFileName, NULL, false );
 	smd_point_t dispVerts[MAX_DISPVERTS];
+
 	if (MaterialIsInvisible(hMaterial)) 
 	{
 		Msg("Displacement with invisible material found. Skipping...\n");
 		return num_tris;
 	}
+
 	int texHeight = 512, texWidth = 512;
 	GetMaterialDimensions( hMaterial, &texWidth, &texHeight );
 
@@ -764,10 +750,12 @@ void MakeSMD(bool phys, char *SMDfilename, int ent, float weldvertices, model_t*
 	int texHeight = 512, texWidth = 512;
 	brush_texture_t* pTexture;
 	MaterialSystemMaterial_t hMaterial;
+
 	if (phys) 
 		Msg("Building physics mesh...\n");
 	else 
 		Msg("Building mesh...\n");
+
 	//Displacements first. Why? Why not?
 	if (!phys)
 	{
@@ -789,7 +777,9 @@ void MakeSMD(bool phys, char *SMDfilename, int ent, float weldvertices, model_t*
 				Offset = g_MainMap->entities[g_MainMap->mapbrushes[i].entitynum].origin;
 			else 
 				VectorClear(Offset);
-			//if (phys && !thisBrushSolid)continue; //skip to the next solid.
+
+			//if (phys && !thisBrushSolid)
+			//		continue; //skip to the next solid.
 
 			//counting physics hulls
 			if (phys)
@@ -868,8 +858,10 @@ void MakeSMD(bool phys, char *SMDfilename, int ent, float weldvertices, model_t*
 						VectorCopy(wind->p[t-1], p2->p);
 						VectorCopy(normal,       p2->n);
 
-						if (phys) V_snprintf(smd_tris[num_tris].material, 128, "physbox.vmt\r\n"); //this avoids the "no refract on physbox" problem.
-						else V_snprintf(smd_tris[num_tris].material, 128, "%s.vmt\r\n", texname);
+						if (phys) 
+							V_snprintf(smd_tris[num_tris].material, 128, "physbox.vmt\r\n"); //this avoids the "no refract on physbox" problem.
+						else 
+							V_snprintf(smd_tris[num_tris].material, 128, "%s.vmt\r\n", texname);
 
 						p0->u = (DotProduct(wind->p[wind->numpoints-1] + Offset, *sVector)/pTexture->textureWorldUnitsPerTexel[0]+pTexture->shift[0])/texWidth;
 						p0->v = (DotProduct(wind->p[wind->numpoints-1] + Offset, *tVector)/pTexture->textureWorldUnitsPerTexel[1]-pTexture->shift[1])/texHeight;
@@ -901,9 +893,13 @@ void MakeSMD(bool phys, char *SMDfilename, int ent, float weldvertices, model_t*
 			Warning("That is a \"costly collision model\". Try using fewer brushes for collision to make the model more efficient.\n");
 	}
 	if (!phys && weldvertices > 0) 
+	{
 		WeldVertList(&smd_pts[0], weldvertices); //Might want to force some welding to overcome float errors.
+	}
 	if (phys) 
+	{
 		WeldVertList(&smd_pts[0], 0.1); //Physics models need welded regardless.
+	}
 	if (m->snaptogrid)
 	{
 		for (int v=1; v < numverts; v++)
@@ -934,6 +930,7 @@ void MakeSMD(bool phys, char *SMDfilename, int ent, float weldvertices, model_t*
 		{
 			if (smd_pts[v].smooth > 0) 
 				continue; 
+
 			smd_pts[v].smooth = v;
 			for (int s=v+1; s < numverts; s++)
 			{
@@ -984,6 +981,7 @@ void model_t::getMapProperties()
 			{
 				if (!phy) 
 					phy = new phys_data_t();
+
 				assert(phy != 0);
 				physicsprop = true;
 //				dophysmodel = true;
@@ -1003,6 +1001,7 @@ void model_t::getMapProperties()
 			{
 				if (!phys_int) 
 					phys_int = new phys_interactions_t();
+
 				assert(phys_int != 0);
 				phys_interactions = true;
 				GetVectorForKey( mapent, "angles", phys_int->angles);
@@ -1020,6 +1019,7 @@ void model_t::getMapProperties()
 			{
 				if (num_attachments == 16) 
 					Error("Too many \"propper_attachment\" entities in your map. 16 max.\n");
+
 				att[num_attachments].name = ValueForKey( mapent, "targetname" );
 				GetVectorForKey( mapent, "angles", att[num_attachments].angles);
 				GetVectorForKey( mapent, "origin", att[num_attachments].origin);
@@ -1033,8 +1033,10 @@ void model_t::getMapProperties()
 				dobodygroup = true;
 				bodygroups.groupname = ValueForKey(mapent, "groupname");
 				myent = EntityByName2(ValueForKey(mapent, "body01"));
+
 				if (myent!=0) 
 					bodygroups.body_ents[0] = g_MainMap->mapbrushes[myent->firstbrush].entitynum;
+
 				myent = EntityByName2(ValueForKey(mapent, "body02"));
 
 				if (myent!=0) 
@@ -1194,6 +1196,7 @@ void model_t::MakeQC()
 	CmdLib_FPrintf(QCFile, "$cdmaterials \"%s\"\r\n", qc_cdmaterials);
 	CmdLib_FPrintf(QCFile, "$sequence idle \"%s_ref\"\r\n", basename);
 	CmdLib_FPrintf(QCFile, "$surfaceprop \"%s\"\r\n", qc_surfaceprop);
+
 	if (qc_autocenter)
 		CmdLib_FPrintf(QCFile, "$autocenter\r\n");
 
@@ -1202,6 +1205,7 @@ void model_t::MakeQC()
 
 	char texname[128];
 	int max_skins = 1;
+
 	if (num_skinfamilies>0)
 	{
 		//Loop through first and see how many skins we'll have.
@@ -1210,10 +1214,8 @@ void model_t::MakeQC()
 			for (int i=0; i<num_skinfamilies; i++)
 			{
 				if (V_strlen(skins[i].mat[h]))
-				{
 					if (h > max_skins)
 						max_skins = h+1;
-				}
 			}
 		}
 		//Hack because I don't wanna fix the above for cases with one alt skin.
@@ -1228,10 +1230,9 @@ void model_t::MakeQC()
 			{
 				//no skin specified? ok, just use skin 0
 				if (!V_strlen(skins[i].mat[h]))
-				{
 					skins[i].mat[h] = skins[i].mat[0];
 					//V_strcpy (&texname[0], skins[i].mat[0]); 
-				}
+
 				V_FileBase( skins[i].mat[h], &texname[0], 128);
 
 				if (skins[i].suffix[h] > 0)	
@@ -1250,6 +1251,7 @@ void model_t::MakeQC()
 			CmdLib_FPrintf(QCFile, "$collisionmodel \"%s_phys\"  {\r\n	$concave\r\n", basename);
 		else 
 			CmdLib_FPrintf(QCFile, "$collisionmodel \"%s_phys\"  {\r\n", basename); //Use phys model here also because it might differ from ref.
+
 //VERSIONSHIT
 //		CmdLib_FPrintf(QCFile, "	$maxconvexpieces %i\r\n", num_physhulls);
 		if (mass > 0)
@@ -1297,8 +1299,12 @@ void model_t::MakeQC()
 		if (physicsprop)
 		{
 			CmdLib_FPrintf(QCFile, "	\"prop_data\" {\r\n		base		%s\r\n", phy->base);
-			if (phy->health>-1) CmdLib_FPrintf(QCFile, "		health		%i\r\n", phy->health);
-			if (phy->physicsmode) CmdLib_FPrintf(QCFile, "		physicsmode	%i\r\n", phy->physicsmode);
+
+			if (phy->health>-1) 
+				CmdLib_FPrintf(QCFile, "		health		%i\r\n", phy->health);
+			if (phy->physicsmode) 
+				CmdLib_FPrintf(QCFile, "		physicsmode	%i\r\n", phy->physicsmode);
+
 			CmdLib_FPrintf(QCFile, "		allowstatic	true\r\n");
 
 			if(phy->explosive_damage > 0 && phy->explosive_radius > 0)
@@ -1420,15 +1426,14 @@ int RunPROPPER( int argc, char **argv )
 	for (int i=0; i<strlen(source); i++)
 	{
 		if (source[i] < 0x20) 
-		{ //Everything below here is control/break chracters
-			source[i] = 0x0; 
+		{
+			source[i] = 0x0;  //Everything below here is control/break chracters
 			break;
 		}
 	}
 	Q_FileBase( source, mapbase, sizeof( mapbase ) );
 	strlwr( mapbase );
 
-	//Carl
 	V_memcpy(&targetPath, &source, 1024);
 	V_StripFilename( &targetPath[0] );
 
@@ -1527,10 +1532,9 @@ int RunPROPPER( int argc, char **argv )
 	if ( !pszExtension )
 	{
 		V_SetExtension( name, ".vmm", sizeof( name ) );
+
 		if ( !FileExists( name ) )
-		{
 			V_SetExtension( name, ".vmf", sizeof( name ) );
-		}
 	}
 
 	char platformBSPFileName[1024];
@@ -1594,7 +1598,6 @@ int RunPROPPER( int argc, char **argv )
 			V_snprintf(SMDfilename, 1024, "%s\\%s_phys.smd", sourcefolder, m->qc_modelname);
 			MakeSMD(true, SMDfilename, m->phys_entnum, 0.01, m);
 		}
-
 		if (dobodygroup) 
 		{
 			for (int i = 0; i < 16; i++) 
@@ -1626,7 +1629,6 @@ int RunPROPPER( int argc, char **argv )
 				}
 			}
 		}
-
 		if (studioCompile) 
 		{
 			V_snprintf(QCfilename, 1024, "%s\\%s.qc", sourcefolder, m->qc_modelname);
@@ -1642,15 +1644,7 @@ int RunPROPPER( int argc, char **argv )
 			si.cb = sizeof(si);
 			ZeroMemory(&pi, sizeof(pi));
 
-			if (!CreateProcess(
-				NULL,
-				studioCommand,
-				NULL,
-				NULL,
-				false,
-				0x00000000,
-				NULL,
-				NULL,
+			if (!CreateProcess(NULL, studioCommand, NULL, NULL, false, 0x00000000, NULL, NULL,
 				&si,  // Pointer to STARTUPINFO structure
 				&pi   // Pointer to PROCESS_INFORMATION structure
 			)) 

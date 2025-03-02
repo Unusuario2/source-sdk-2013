@@ -255,6 +255,7 @@ struct tree_t
 
 extern	int			entity_num;
 
+
 struct LoadSide_t;
 struct LoadEntity_t;
 class CManifest;
