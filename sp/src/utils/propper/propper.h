@@ -53,11 +53,11 @@ extern char		FixdTextures[1048576]; //1048576 why???
 
 struct smd_point_t 
 {
-	Vector p, n;
-	double u, v;
-	int smooth;//what group of verts will this smooth with
-	int weld;
-	int brush;
+	Vector	p, n;
+	double	u, v;
+	int		smooth;//what group of verts will this smooth with
+	int		weld;
+	int		brush;
 	unsigned int wcSmooth;//smoothing in Hammer. This is a bitmask. 32 bits.
 };
 //leave [0] blank. Why? Ive slept since I wrote this...
@@ -70,7 +70,7 @@ extern smd_point_t smd_pts[MAX_SMD_VERTS + 1];
 struct smd_triangle_t
 {
 	int		brush;
-	int p[3];
+	int		p[3];
 	char	material[128];
 };
 
@@ -79,39 +79,39 @@ extern smd_triangle_t smd_tris[MAX_SMD_TRIS];
 
 struct phys_data_t 
 {
-	char* model;
+	char*	model;
 	const char* base;
-	int health;
-	int physicsmode;
-	bool flammable;
-	bool ignite;
-	bool explosive_resist;
-	float explosive_damage;
-	float explosive_radius;
+	int		health;
+	int		physicsmode;
+	bool	flammable;
+	bool	ignite;
+	bool	explosive_resist;
+	float	explosive_damage;
+	float	explosive_radius;
 	const char* breakable_model;
-	int breakable_count;
-	int breakable_skin;
+	int		breakable_count;
+	int		breakable_skin;
 };
 
 
 struct phys_interactions_t 
 {
-	Vector angles;
-	bool preferred_carryangles;
-	bool stick;
-	bool bloodsplat;
-	bool break_;
-	bool paintsplat;
-	bool impale;
+	Vector	angles;
+	bool	preferred_carryangles;
+	bool	stick;
+	bool	bloodsplat;
+	bool	break_;
+	bool	paintsplat;
+	bool	impale;
 	const char* onlaunch;
-	bool explode_fire;
+	bool	explode_fire;
 };
 
 
 struct skins_t 
 {
 	const char* mat[15];
-	int suffix[15];
+	int		suffix[15];
 };
 
 
@@ -119,21 +119,21 @@ struct gibs_t
 {
 	const char* gibmodel;
 	const char* ragdoll;
-	int debris;
-	int burst;
-	int fadetime;
-	int fademindist;
-	int fademaxdist;
+	int		debris;
+	int		burst;
+	int		fadetime;
+	int		fademindist;
+	int		fademaxdist;
 };
 
 
 struct lods_t 
 {
 	//	const char* entname;
-	int entnum;
-	float weldvertices;
-	int distance;
-	bool written;
+	int		entnum;
+	float	weldvertices;
+	int		distance;
+	bool	written;
 };
 
 
@@ -150,24 +150,24 @@ struct cables_t
 	const char* start;
 	const char* end;
 	const char* mat;
-	int width;
-	int segments;
-	int length;
+	int		width;
+	int		segments;
+	int		length;
 };
 
 
 struct attachments_t 
 {
 	const char* name;
-	Vector angles;
-	Vector origin;
+	Vector	angles;
+	Vector	origin;
 };
 
 
 struct bodygroups_t 
 {
-	char* groupname;
-	int body_ents[16];
+	char*	groupname;
+	int		body_ents[16];
 };
 
 extern bodygroups_t bodygroups;
@@ -175,42 +175,42 @@ extern bodygroups_t bodygroups;
 
 struct model_t 
 { 
-	char* ent_name;
-	char* qc_cdmaterials;
-	char* qc_surfaceprop;
-	float qc_scale;
-	char* qc_modelname;
-	char basename[128];
-	int phys_entnum;
-	int ref_entnum;
-	int smoothing;
-	int smoothangle;
-	bool qc_concave;
-	bool qc_autocenter;
-	bool snaptogrid;
-	float ref_weldvertices;
-	char* phys_entname;
-	bool dophysmodel;
-	bool disp_nowarp;
-	bool physicsprop;
-	bool phys_interactions;
-	float mass;
-	Vector origin;
+	char*	ent_name;
+	char*	qc_cdmaterials;
+	char*	qc_surfaceprop;
+	float	qc_scale;
+	char*	qc_modelname;
+	char	basename[128];
+	int		phys_entnum;
+	int		ref_entnum;
+	int		smoothing;
+	int		smoothangle;
+	bool	qc_concave;
+	bool	qc_autocenter;
+	bool	snaptogrid;
+	float	ref_weldvertices;
+	char*	phys_entname;
+	bool	dophysmodel;
+	bool	disp_nowarp;
+	bool	physicsprop;
+	bool	phys_interactions;
+	float	mass;
+	Vector	origin;
 	phys_data_t* phy;
 	phys_interactions_t* phys_int;
 	skins_t skins[MAX_PROPPER_ENTITIES_PER_MAP/8]; //This is hardcoded to 16!
-	int num_skinfamilies;
-	int num_gibs;
+	int		num_skinfamilies;
+	int		num_gibs;
 	gibs_t gibs[MAX_PROPPER_ENTITIES_PER_MAP];//allocate with new [16];
-	int num_lods;
+	int		num_lods;
 	lods_t lods[MAX_PROPPER_ENTITIES_PER_MAP];
-	int num_particles;
+	int		num_particles;
 	particles_t particles[MAX_PROPPER_ENTITIES_PER_MAP];
-	int num_cables;
+	int		num_cables;
 	cables_t cables[MAX_PROPPER_ENTITIES_PER_MAP];
-	int num_attachments;
+	int		num_attachments;
 	attachments_t att[MAX_PROPPER_ENTITIES_PER_MAP];
-	int num_physhulls;
+	int		num_physhulls;
 public:
 	void MakeQC();
 	void getMapProperties();
@@ -221,8 +221,8 @@ extern model_t propper_models[MAX_PROPPER_MODELS];
 
 struct smd_texture_t 
 {
-	char* texpath;
-	char* texname;
+	char*	texpath;
+	char*	texname;
 	smd_texture_t* next;
 };
 
