@@ -1414,7 +1414,7 @@ tree_t *BrushBSP (bspbrush_t *brushlist, Vector& mins, Vector& maxs)
 		volume = BrushVolume (b);
 		if (volume < microvolume)
 		{
-			Warning("\tBrush %i: WARNING, microbrush\n", b->original->id);
+			Warning("\tBrush [%i]: WARNING, microbrush\n", b->original->id);
 		}
 
 		for (i=0 ; i<b->numsides ; i++)

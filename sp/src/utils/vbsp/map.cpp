@@ -1801,7 +1801,7 @@ ChunkFileResult_t CMapFile::LoadEntityCallback(CChunkFile *pFile, int nParam)
 
 			if (mapent->numbrushes != 1)
 			{
-				Error ("\tEntity %i: func_areaportal can only be a single brush", num_entities-1);
+				Error ("\tEntity [%i]: func_areaportal can only be a single brush", num_entities-1);
 			}
 
 			mapbrush_t *b = &mapbrushes[nummapbrushes-1];
@@ -3356,7 +3356,7 @@ ChunkFileResult_t CMapFile::LoadSolidCallback(CChunkFile *pFile, LoadEntity_t *p
 
 			if (num_entities == 1)
 			{
-				Error("\tBrush %i: origin brushes not allowed in world", b->id);
+				Error("\tBrush [%i]: origin brushes not allowed in world", b->id);
 			}
 
 			VectorAdd (b->mins, b->maxs, origin);
