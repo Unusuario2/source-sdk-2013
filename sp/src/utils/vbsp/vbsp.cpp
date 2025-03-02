@@ -1394,6 +1394,13 @@ int RunVBSP( int argc, char **argv )
 				"  -FullMinidumps  : Write large minidumps on crash.\n"
 				"  -nohiddenmaps   : Exclude manifest maps if they are currently hidden.\n"
 #ifdef MAPBASE
+				"  -defaultcubemap : Makes a dummy cubemap.\n"
+				"  -skyboxcubemap  : Makes a skybox cubemaps for LDR cubemaps. (HDR skybox cubemaps are not supported)\n"
+				"  -defaultcubemapres  : Sets the dummy cubemap resolution. (Default 32)\n"
+				"  -defaultproppermodelsstatic  : Inserts propper_model into the level.\n"
+				"  -strippropperentities  : Strip out any entities with 'propper_' in their classname, as they don't actually exist in-game.\n"
+				"  -scripting      : Vscript vbsp system.\n"
+				"  -doc			   : Prints all the related documentation of vbsp Vscript.\n"
 				"  -NoColorHighlighting: Disables all highlighted colors in the console, except for warnings and errors.\n"
 #endif
 				);
