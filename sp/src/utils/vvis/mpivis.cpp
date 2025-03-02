@@ -181,7 +181,7 @@ void ReceiveBasePortalVis( uint64 iWorkUnit, MessageBuffer *pBuf, int iWorker )
 	portal_t * p = &portals[iWorkUnit];
 	if ( p->portalflood != 0 || p->portalfront != 0 || p->portalvis != 0) 
 	{
-		Msg("Duplicate portal %llu\n", iWorkUnit);
+		Warning("Duplicate portal %llu\n", iWorkUnit);
 	}
 	
 	if ( pBuf->getLen() - pBuf->getOffset() != portalbytes*2 )

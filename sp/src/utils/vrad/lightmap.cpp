@@ -803,7 +803,11 @@ bool BuildFacesamples( lightinfo_t *pLightInfo, facelight_t *pFaceLight )
 	// statistics - warning?!
 	if( pFaceLight->numsamples == 0 )
 	{
+#ifdef MAPBASE
+		Warning( "\tNo samples [%d]\n", pLightInfo->face - g_pFaces );
+#else
 		Msg( "no samples %d\n", pLightInfo->face - g_pFaces );
+#endif
 	}
 
 	return true;
@@ -910,7 +914,11 @@ void CalcPoints( lightinfo_t *pLightInfo, facelight_t *pFaceLight, int ndxFace )
 	{
 		if( !BuildSamplesAndLuxels_DoFast( pLightInfo, pFaceLight, ndxFace ) )
 		{
+#ifdef MAPBASE
+			Warning( "Face [%d]: (Fast)Error Building Samples and Luxels\n", ndxFace );
+#else
 			Msg( "Face %d: (Fast)Error Building Samples and Luxels\n", ndxFace );
+#endif
 		}
 		return;
 	}
@@ -918,13 +926,21 @@ void CalcPoints( lightinfo_t *pLightInfo, facelight_t *pFaceLight, int ndxFace )
 	// build the samples
 	if( !BuildSamples( pLightInfo, pFaceLight, ndxFace ) )
 	{
+#ifdef MAPBASE
+		Warning( "\tFace [%d]: Error Building Samples\n", ndxFace );
+#else
 		Msg( "Face %d: Error Building Samples\n", ndxFace );
+#endif
 	}
 
 	// build the luxels
 	if( !BuildLuxels( pLightInfo, pFaceLight, ndxFace ) )
 	{
+#ifdef MAPBASE
+		Warning( "Face [%d]: Error Building Luxels\n", ndxFace );
+#else
 		Msg( "Face %d: Error Building Luxels\n", ndxFace );
+#endif
 	}
 }
 
@@ -1148,7 +1164,7 @@ static void ParseLightGeneric( entity_t *e, directlight_t *dl )
 	{	// point towards target
 		e2 = FindTargetEntity (target);
 		if (!e2)
-			Warning("\tWARNING: light at (%i %i %i) has missing target\n",
+			Warning("\tWARNING: light at [%i %i %i] has missing target\n",
 					(int)dl->light.origin[0], (int)dl->light.origin[1], (int)dl->light.origin[2]);
 		else
 		{
@@ -1294,14 +1310,14 @@ static void ParseLightSpot( entity_t* e, directlight_t* dl )
 		// Clamp to 90, that's all DX8 can handle! 
 		if (dl->light.stopdot > 90)
 		{
-			Warning("\tWARNING: light_spot at (%i %i %i) has inner angle larger than 90 degrees! Clamping to 90...\n",
+			Warning("\tWARNING: light_spot at [%i %i %i] has inner angle larger than 90 degrees! Clamping to 90...\n",
 					(int)dl->light.origin[0], (int)dl->light.origin[1], (int)dl->light.origin[2]);
 			dl->light.stopdot = 90;
 		}
 
 		if (dl->light.stopdot2 > 90)
 		{
-			Warning("\tWARNING: light_spot at (%i %i %i) has outer angle larger than 90 degrees! Clamping to 90...\n",
+			Warning("\tWARNING: light_spot at [%i %i %i] has outer angle larger than 90 degrees! Clamping to 90...\n",
 					(int)dl->light.origin[0], (int)dl->light.origin[1], (int)dl->light.origin[2]);
 			dl->light.stopdot2 = 90;
 		}
@@ -1652,7 +1668,7 @@ void ExportDirectLightsToWorldLights()
 
 		if (*pNumworldlights > MAX_MAP_WORLDLIGHTS)
 		{
-			Error("\ttoo many lights %d / %d\n", *pNumworldlights, MAX_MAP_WORLDLIGHTS );
+			Error("\tToo many lights [%d] / [%d]\n", *pNumworldlights, MAX_MAP_WORLDLIGHTS );
 		}
 
 		wl->cluster	= dl->light.cluster;

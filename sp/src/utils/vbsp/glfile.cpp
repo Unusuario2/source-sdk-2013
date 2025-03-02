@@ -8,6 +8,10 @@
 
 #include "vbsp.h"
 
+#ifdef MAPBASE
+#include "../common/StandardColorFormat.h" // Controls the color formatting of the console output.
+#endif 
+
 int		c_glfaces;
 
 int PortalVisibleSides (portal_t *p)
@@ -168,11 +172,23 @@ void WriteGLView (tree_t *tree, char *source)
 
 	c_glfaces = 0;
 	sprintf (name, "%s%s.gl",outbase, source);
+
+#ifdef MAPBASE
+	Msg("Writing: +- ");
+	ColorSpewMessage(SPEW_MESSAGE, &blue, "%s", name);
+	ColorSpewMessage(SPEW_MESSAGE, &green, " done (0)\n");
+#else
 	Msg("Writing %s\n", name);
+#endif
 
 	glview = g_pFileSystem->Open( name, "w" );
 	if (!glview)
-		Error ("\tCouldn't open %s", name);
+#ifdef MAPBASE
+		Error ("\tCouldn't open: +- %s", name);
+#else
+		Error ("Couldn't open %s", name);
+#endif
+
 	WriteGLView_r (tree->headnode, glview);
 	g_pFileSystem->Close( glview );
 
@@ -187,11 +203,22 @@ void WriteGLViewFaces( tree_t *tree, const char *pName )
 
 	c_glfaces = 0;
 	sprintf (name, "%s%s.gl", outbase, pName);
+#ifdef MAPBASE
+	Msg("Writing: +- ");
+	ColorSpewMessage(SPEW_MESSAGE, &blue, "%s", name);
+	ColorSpewMessage(SPEW_MESSAGE, &green, " done (0)\n");
+#else
 	Msg("Writing %s\n", name);
+#endif
 
 	glview = g_pFileSystem->Open( name, "w" );
 	if (!glview)
-		Error ("\tCouldn't open %s", name);
+#ifdef MAPBASE
+		Error("\tCouldn't open: +- %s", name);
+#else
+		Error("Couldn't open %s", name);
+#endif
+
 	WriteGLViewFaces_r (tree->headnode, glview);
 	g_pFileSystem->Close( glview );
 
@@ -205,11 +232,22 @@ void WriteGLViewBrushList( bspbrush_t *pList, const char *pName )
 	FileHandle_t glview;
 
 	sprintf (name, "%s%s.gl", outbase, pName );
+#ifdef MAPBASE
+	Msg("Writing: +- ");
+	ColorSpewMessage(SPEW_MESSAGE, &blue, "%s", name);
+	ColorSpewMessage(SPEW_MESSAGE, &green, " done (0)\n");
+#else
 	Msg("Writing %s\n", name);
+#endif
 
 	glview = g_pFileSystem->Open( name, "w" );
 	if (!glview)
-	Error ("\tCouldn't open %s", name);
+#ifdef MAPBASE
+		Error("\tCouldn't open: +- %s", name);
+#else
+		Error("Couldn't open %s", name);
+#endif
+	
 	for ( bspbrush_t *pBrush = pList; pBrush; pBrush = pBrush->next )
 	{
 		for (int i =  0; i < pBrush->numsides; i++ )

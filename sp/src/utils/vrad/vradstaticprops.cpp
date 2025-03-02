@@ -37,6 +37,9 @@
 #include "vmpi.h"
 #include "vmpi_distribute_work.h"
 
+#ifdef MAPBASE
+#include "../common/StandardColorFormat.h" // Controls the color formatting of the console output.
+#endif 
 
 #define ALIGN_TO_POW2(x,y) (((x)+(y-1))&~(y-1))
 
@@ -358,7 +361,11 @@ bool LoadVTXFile( char const* pModelName, const studiohdr_t *pStudioHdr, CUtlBuf
 
 	if ( !LoadFile( filename, buf ) )
 	{
-		Warning("\tError! Unable to load file \"%s\"\n", filename );
+#ifdef MAPBASE
+		Warning("\tError! Unable to load file: +- \"%s\"\n", filename );
+#else
+		Warning("Error! Unable to load file \"%s\"\n", filename );
+#endif
 		return false;
 	}
 
@@ -367,12 +374,20 @@ bool LoadVTXFile( char const* pModelName, const studiohdr_t *pStudioHdr, CUtlBuf
 	// Check that it's valid
 	if ( pVtxHdr->version != OPTIMIZED_MODEL_FILE_VERSION )
 	{
-		Warning("\tError! Invalid VTX file version: %d, expected %d \"%s\"\n", pVtxHdr->version, OPTIMIZED_MODEL_FILE_VERSION, filename );
+#ifdef MAPBASE
+		Warning("\tError! Invalid VTX file version: [%d], expected [%d]: +- \"%s\"\n", pVtxHdr->version, OPTIMIZED_MODEL_FILE_VERSION, filename );
+#else
+		Warning("\tError! Invalid VTX file version: [%d], expected [%d] \"%s\"\n", pVtxHdr->version, OPTIMIZED_MODEL_FILE_VERSION, filename );
+#endif
 		return false;
 	}
 	if ( pVtxHdr->checkSum != pStudioHdr->checksum )
 	{
+#ifdef MAPBASE
+		Warning("\tError! Invalid VTX file checksum: [%d], expected [%d]: +- \"%s\"\n", pVtxHdr->checkSum, pStudioHdr->checksum, filename );
+#else
 		Warning("\tError! Invalid VTX file checksum: %d, expected %d \"%s\"\n", pVtxHdr->checkSum, pStudioHdr->checksum, filename );
+#endif
 		return false;
 	}
 
@@ -399,7 +414,13 @@ void DumpCollideToGlView( vcollide_t *pCollide, const char *pFilename )
 	if ( !pCollide )
 		return;
 
-	Msg("Writing %s...\n", pFilename );
+#ifdef MAPBASE
+	Msg("Writing: +- ");
+	ColorSpewMessage(SPEW_MESSAGE, &blue, "%s", pFilename);
+	ColorSpewMessage(SPEW_MESSAGE, &green, " done (0)\n");
+#else
+	Msg("Writing %s...\n", pFilename);
+#endif
 
 	FILE *fp = fopen( pFilename, "w" );
 	for (int i = 0; i < pCollide->solidCount; ++i)
@@ -486,7 +507,13 @@ public:
 		IVTFTexture *pTex = CreateVTFTexture();
 		if (!pTex->Unserialize( buf ))
 			return NULL;
-		Msg("Loaded alpha texture %s\n", szPath );
+#ifdef MAPBASE
+		Msg("Loaded alpha texture: +- ");
+		ColorSpewMessage(SPEW_MESSAGE, &blue, " %s", szPath);
+		ColorSpewMessage(SPEW_MESSAGE, &green, " done (0)\n");
+#else
+		Msg("Loaded alpha texture %s\n", szPath);
+#endif
 		unsigned char *pSrcImage = pTex->ImageData( 0, 0, 0, 0, 0, 0 );
 		int iWidth = pTex->Width();
 		int iHeight = pTex->Height();
@@ -1833,7 +1860,11 @@ void CVradStaticPropMgr::BuildTriList( CStaticProp &prop )
 						{
 							// all tris expected to be discrete tri lists
 							// must fixme if stripping ever occurs
+#ifdef MAPBASE
+							Warning( "\tUnexpected strips found\n" );
+#else
 							printf( "unexpected strips found\n" );
+#endif
 							Assert( 0 );
 							return;
 						}
@@ -1866,7 +1897,11 @@ const vertexFileHeader_t * mstudiomodel_t::CacheVertexData( void *pModelData )
 	FileHandle_t fileHandle = g_pFileSystem->Open( fileName, "rb" );
 	if ( !fileHandle )
 	{
-		Error( "\tUnable to load vertex data \"%s\"\n", fileName );
+#ifdef MAPBASE
+		Error( "\tUnable to load vertex data: +- %s\n", fileName );
+#else
+		Error( "Unable to load vertex data \"%s\"\n", fileName );
+#endif
 	}
 
 	// Get the file size
@@ -1874,7 +1909,11 @@ const vertexFileHeader_t * mstudiomodel_t::CacheVertexData( void *pModelData )
 	if ( vvdSize == 0 )
 	{
 		g_pFileSystem->Close( fileHandle );
-		Error( "\tBad size for vertex data \"%s\"\n", fileName );
+#ifdef MAPBASE
+		Error( "\tBad size for vertex data: +- %s\n", fileName );
+#else
+		Error( "Bad size for vertex data \"%s\"\n", fileName );
+#endif
 	}
 
 	vertexFileHeader_t *pVvdHdr = (vertexFileHeader_t *)malloc( vvdSize );
@@ -1884,15 +1923,27 @@ const vertexFileHeader_t * mstudiomodel_t::CacheVertexData( void *pModelData )
 	// check header
 	if ( pVvdHdr->id != MODEL_VERTEX_FILE_ID )
 	{
-		Error("\tError Vertex File %s id %d should be %d\n", fileName, pVvdHdr->id, MODEL_VERTEX_FILE_ID);
+#ifdef MAPBASE
+		Error("\tError Vertex File: +- %s id [%d] should be [%d]\n", fileName, pVvdHdr->id, MODEL_VERTEX_FILE_ID);
+#else
+		Error("Error Vertex File %s id %d should be %d\n", fileName, pVvdHdr->id, MODEL_VERTEX_FILE_ID);
+#endif
 	}
 	if ( pVvdHdr->version != MODEL_VERTEX_FILE_VERSION )
 	{
-		Error("\tError Vertex File %s version %d should be %d\n", fileName, pVvdHdr->version, MODEL_VERTEX_FILE_VERSION);
+#ifdef MAPBASE
+		Error("\tError Vertex File: +- %s version [%d] should be [%d]\n", fileName, pVvdHdr->version, MODEL_VERTEX_FILE_VERSION);
+#else
+		Error("Error Vertex File %s version %d should be %d\n", fileName, pVvdHdr->version, MODEL_VERTEX_FILE_VERSION);
+#endif
 	}
 	if ( pVvdHdr->checksum != pActiveStudioHdr->checksum )
 	{
-		Error("\tError Vertex File %s checksum %d should be %d\n", fileName, pVvdHdr->checksum, pActiveStudioHdr->checksum);
+#ifdef MAPBASE
+		Error("\tError Vertex File: +- %s checksum [%d] should be [%d]\n", fileName, pVvdHdr->checksum, pActiveStudioHdr->checksum);
+#else
+		Error("Error Vertex File %s checksum %d should be %d\n", fileName, pVvdHdr->checksum, pActiveStudioHdr->checksum);
+#endif
 	}
 
 	// need to perform mesh relocation fixups
@@ -1900,7 +1951,11 @@ const vertexFileHeader_t * mstudiomodel_t::CacheVertexData( void *pModelData )
 	vertexFileHeader_t *pNewVvdHdr = (vertexFileHeader_t *)malloc( vvdSize );
 	if ( !pNewVvdHdr )
 	{
-		Error( "\tError allocating %d bytes for Vertex File '%s'\n", vvdSize, fileName );
+#ifdef MAPBASE
+		Error( "\tError allocating [%d] bytes for Vertex File: +- %s\n", vvdSize, fileName );
+#else
+		Error( "Error allocating %d bytes for Vertex File '%s'\n", vvdSize, fileName );
+#endif
 	}
 
 	// load vertexes and run fixups

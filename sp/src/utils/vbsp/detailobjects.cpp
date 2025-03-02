@@ -965,6 +965,6 @@ void EmitDetailObjects()
 
 	if ( s_nDetailOverflow != 0 )
 	{
-		Warning("\tError! Too many detail props on this map. %d were not emitted!\n", s_nDetailOverflow );
+		Warning("\tError! Too many detail props on this map. [%d] were not emitted!\n", s_nDetailOverflow );
 	}
 }

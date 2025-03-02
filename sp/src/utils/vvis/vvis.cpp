@@ -1252,7 +1252,7 @@ int RunVVis( int argc, char **argv )
 		visdatasize = vismap_p - dvisdata;
 
 #ifdef MAPBASE
-		Msg("Visdatasize");
+		Msg("VisDataSize");
 		ColorSpewMessage(SPEW_MESSAGE, &magenta, " [%i] ", visdatasize);
 		Msg("compressed from");
 		ColorSpewMessage(SPEW_MESSAGE, &magenta, " [%i]\n", originalvismapsize * 2);

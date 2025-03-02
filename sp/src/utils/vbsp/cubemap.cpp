@@ -388,7 +388,7 @@ void CreateDefaultCubemaps( bool bHDR )
 				{
 					if ( iSrcMipSize != iSize )
 					{
-						Warning("\t%s - ERROR! Cannot copy square face for default cubemap! iSrcMipSize(%d) != iSize(%d)\n", skyboxMaterialName, iSrcMipSize, iSize );
+						Warning("\t%s - ERROR! Cannot copy square face for default cubemap! iSrcMipSize[%d] != iSize[%d]\n", skyboxMaterialName, iSrcMipSize, iSize );
 						memset( pDstBits, 0, iSize );
 					}
 					else
@@ -403,7 +403,7 @@ void CreateDefaultCubemaps( bool bHDR )
 					pDstCubemap->ComputeMipLevelDimensions( iMip, &iMipWidth, &iMipHeight, &iMipDepth );
 					if ( ( iMipHeight > 1 ) && ( iSrcMipSize*2 != iSize ) )
 					{
-						Warning("\t%s - ERROR building default cube map! %d*2 != %d\n", skyboxMaterialName, iSrcMipSize, iSize );
+						Warning("\t%s - ERROR building default cube map! [%d*2] != [%d]\n", skyboxMaterialName, iSrcMipSize, iSize );
 						memset( pDstBits, 0, iSize );
 					}
 					else
@@ -415,7 +415,7 @@ void CreateDefaultCubemaps( bool bHDR )
 						int nDstRowSize = pDstCubemap->RowSizeInBytes( iMip );
 						if ( nSrcRowSize != nDstRowSize )
 						{
-							Warning("\t%s - ERROR building default cube map! nSrcRowSize(%d) != nDstRowSize(%d)!\n", skyboxMaterialName, nSrcRowSize, nDstRowSize );
+							Warning("\t%s - ERROR building default cube map! nSrcRowSize[%d] != nDstRowSize[%d]!\n", skyboxMaterialName, nSrcRowSize, nDstRowSize );
 							memset( pDstBits, 0, iSize );
 						}
 						else
@@ -552,7 +552,7 @@ static void GeneratePatchedName( const char *pMaterialName, const PatchInfo_t &i
 		Assert( nLen < TEXTURE_NAME_LENGTH - 1 );
 		if ( nLen >= TEXTURE_NAME_LENGTH - 1 )
 		{
-			Error("\tGenerated env_cubemap patch name : %s too long! (max = %d)\n", pBuffer, TEXTURE_NAME_LENGTH );
+			Error("\tGenerated env_cubemap patch name : %s too long! [max = %d]\n", pBuffer, TEXTURE_NAME_LENGTH );
 		}
 	}
 
@@ -814,7 +814,7 @@ void Cubemap_FixupBrushSidesMaterials( void )
 			int sideIndex = SideIDToIndex( brushSideID );
 			if( sideIndex < 0 )
 			{
-				Warning("\tenv_cubemap pointing at deleted brushside near (%d, %d, %d)\n", 
+				Warning("\tenv_cubemap pointing at deleted brushside near [%d, %d, %d]\n", 
 					g_CubemapSamples[cubemapID].origin[0], g_CubemapSamples[cubemapID].origin[1], g_CubemapSamples[cubemapID].origin[2] );
 
 				continue;

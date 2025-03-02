@@ -199,11 +199,20 @@ void ReadLightFile (char *filename)
 	FileHandle_t f = g_pFileSystem->Open( filename, "r" );
 	if (!f)
 	{
-		Warning("\tWarning: Couldn't open texlight file %s.\n", filename);
+#ifdef MAPBASE
+		Warning("\tCouldn't open texlight file: +- %s.\n", filename);
+#else
+		Warning("Warning: Couldn't open texlight file %s.\n", filename);
+#endif
 		return;
 	}
 
+#ifdef MAPBASE
+	Msg("Reading texlights from: +- ");
+	ColorSpewMessage(SPEW_MESSAGE, &blue, "%s", filename);
+#else
 	Msg("[Reading texlights from '%s']\n", filename);
+#endif
 	while ( CmdLib_FGets( buf, sizeof( buf ), f ) )
 	{
 		// check ldr/hdr
@@ -252,7 +261,11 @@ void ReadLightFile (char *filename)
 			if( argCnt != 1 )
 			{
 				if ( strlen( scan ) > 4 )
+#ifdef MAPBASE
+					Warning( "\tIgnoring bad texlight '%s' in: +- %s", scan, filename );
+#else
 					Msg( "ignoring bad texlight '%s' in %s", scan, filename );
+#endif
 				continue;
 			}
 
@@ -265,20 +278,33 @@ void ReadLightFile (char *filename)
 				{
 					if ( strcmp( texlights[j].filename, filename ) == 0 )
 					{
+#ifdef MAPBASE
+						Warning( "\tERROR\a: Duplication of '%s' in file: +- '%s!\n", texlights[j].name, texlights[j].filename );
+#else
 						Msg( "ERROR\a: Duplication of '%s' in file '%s'!\n",
 							 texlights[j].name, texlights[j].filename );
+#endif
 					}
 					else if ( texlights[j].value[0] != value[0]
 							  || texlights[j].value[1] != value[1]
 							  || texlights[j].value[2] != value[2] )
 					{
-						Warning("\tWarning: Overriding '%s' from '%s' with '%s'!\n",
+#ifdef MAPBASE
+						Warning("\tOverriding '%s' from '%s' with: +- '%s'!\n",texlights[j].name, texlights[j].filename, filename );
+#else
+						Warning("Warning: Overriding '%s' from '%s' with '%s'!\n",
 								texlights[j].name, texlights[j].filename, filename );
+#endif
 					}
 					else
 					{
-						Warning("\tWarning: Redundant '%s' def in '%s' AND '%s'!\n",
+#ifdef MAPBASE
+						Warning("\tRedundant '%s' def in '%s' AND: +- '%s'!\n",
 								 texlights[j].name, texlights[j].filename, filename );
+#else
+						Warning("Warning: Redundant '%s' def in '%s' AND '%s'!\n",
+								 texlights[j].name, texlights[j].filename, filename );
+#endif
 					}
 					break;
 				}
@@ -291,6 +317,9 @@ void ReadLightFile (char *filename)
 			num_texlights = max( num_texlights, j + 1 );
 		}
 	}
+#ifdef MAPBASE
+	ColorSpewMessage(SPEW_MESSAGE, &green, " done (0)\n");
+#endif
 	qprintf ( "[%i texlights parsed from '%s']\n\n", file_texlights, filename);
 	g_pFileSystem->Close( f );
 }
@@ -736,7 +765,7 @@ void MakePatches (void)
 
 	if (num_degenerate_faces > 0)
 	{
-		Warning("\t%d degenerate faces\n", num_degenerate_faces );
+		Warning("\t[%d] degenerate faces\n", num_degenerate_faces );
 	}
 
 #ifdef MAPBASE
@@ -806,7 +835,11 @@ int CreateChildPatch( int nParentIndex, winding_t *pWinding, float flArea, const
 	if ( ValidDispFace( g_pFaces + child->faceNumber ) )
 	{
 		// shouldn't get here anymore!!
+#ifdef MAPBASE
+		Warning( "\tSubdividePatch: Error - Should not be here!\n" );
+#else
 		Msg( "SubdividePatch: Error - Should not be here!\n" );
+#endif
 		StaticDispMgr()->GetDispSurfNormal( child->faceNumber, child->origin, child->normal, true );
 	}
 	else
@@ -915,7 +948,11 @@ void SubdividePatch( int ndxPatch )
 
 	if( area1 == 0 || area2 == 0 )
 	{
+#ifdef MAPBASE
+		Warning( "\tZero area child patch\n" );
+#else
 		Msg( "zero area child patch\n" );
+#endif
 		return;
 	}
 
@@ -1737,10 +1774,7 @@ void BounceLight (void)
 		CollectLight( added );
 
 #ifdef MAPBASE
-		Msg("\tBounce #%i added ", i + 1);
-		ColorSpewMessage(SPEW_MESSAGE, &red, "R");
-		ColorSpewMessage(SPEW_MESSAGE, &green, "G");
-		ColorSpewMessage(SPEW_MESSAGE, &blue, "B");
+		Msg("\tBounce #%i added RGB", i + 1);
 		ColorSpewMessage(SPEW_MESSAGE, &magenta, " [%.0f, %.0f, %.0f]\n", added[0], added[1], added[2]);
 #else
 		qprintf ("\tBounce #%i added RGB(%.0f, %.0f, %.0f)\n", i+1, added[0], added[1], added[2] );
@@ -2281,7 +2315,11 @@ void VRAD_LoadBSP( char const *pFilename )
 
 	if (!visdatasize)
 	{
+#ifdef MAPBASE
+		Warning("\tNo vis information, direct lighting only.\n");
+#else
 		Msg("No vis information, direct lighting only.\n");
+#endif
 		numbounce = 0;
 		ambient[0] = ambient[1] = ambient[2] = 0.1f;
 		dvis->numclusters = CountClusters();
@@ -2343,7 +2381,7 @@ void VRAD_LoadBSP( char const *pFilename )
 	{
 		if( !g_pIncremental->Init( source, incrementfile ) )
 		{
-			Error( "\tUnable to load incremental lighting file in %s.\n", incrementfile );
+			Error( "\tUnable to load incremental lighting file in: +- %s.\n", incrementfile );
 			return;
 		}
 	}
@@ -2387,13 +2425,16 @@ void VRAD_Finish()
 #ifdef MAPBASE
 	Msg("Writing Bsp file: +- ");
 	ColorSpewMessage(SPEW_MESSAGE, &blue, "%s ", platformPath);
-	ColorSpewMessage(SPEW_MESSAGE, &green, "done (0)\n");
 #else
 	Msg("Writing %s\n", platformPath);
 #endif
 
 	VMPI_SetCurrentStage( "WriteBSPFile" );
 	WriteBSPFile(platformPath);
+
+#ifdef MAPBASE
+	ColorSpewMessage(SPEW_MESSAGE, &green, "done (0)\n");
+#endif
 
 	if ( g_bDumpPatches )
 	{

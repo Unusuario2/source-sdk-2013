@@ -72,7 +72,11 @@ void CTextBuffer::WriteIntKey( const char *pKeyName, int outputData )
 	// FAIL!
 	if ( strlen(pKeyName) > 1000 )
 	{
+#ifdef MAPBASE
+		Warning("\tError writing collision data %s\n", pKeyName );
+#else
 		Msg("Error writing collision data %s\n", pKeyName );
+#endif
 		return;
 	}
 	sprintf( tmp, "\"%s\" \"%d\"\n", pKeyName, outputData );
@@ -94,7 +98,11 @@ void CTextBuffer::WriteFloatKey( const char *pKeyName, float outputData )
 	// FAIL!
 	if ( strlen(pKeyName) > 1000 )
 	{
-		Msg("Error writing collision data %s\n", pKeyName );
+#ifdef MAPBASE
+		Warning("\tError writing collision data %s\n", pKeyName);
+#else
+		Msg("Error writing collision data %s\n", pKeyName);
+#endif
 		return;
 	}
 	sprintf( tmp, "\"%s\" \"%f\"\n", pKeyName, outputData );
@@ -108,7 +116,11 @@ void CTextBuffer::WriteFloatArrayKey( const char *pKeyName, const float *outputD
 	// FAIL!
 	if ( strlen(pKeyName) > 1000 )
 	{
-		Msg("Error writing collision data %s\n", pKeyName );
+#ifdef MAPBASE
+		Warning("\tError writing collision data %s\n", pKeyName);
+#else
+		Msg("Error writing collision data %s\n", pKeyName);
+#endif
 		return;
 	}
 	sprintf( tmp, "\"%s\" \"", pKeyName );
@@ -152,8 +164,14 @@ void DumpCollideToGlView( CPhysCollide *pCollide, const char *pFilename )
 {
 	if ( !pCollide )
 		return;
-
-	Msg("Writing %s...\n", pFilename );
+#ifdef MAPBASE
+	Msg("Writing: +- ");
+	ColorSpewMessage(SPEW_MESSAGE, &blue, "%s", pFilename);
+	ColorSpewMessage(SPEW_MESSAGE, &green, " done (0)\n");
+#else
+	Msg("Writing %s...\n", pFilename);
+#endif
+	
 	Vector *outVerts;
 	int vertCount = physcollision->CreateDebugMesh( pCollide, &outVerts );
 	FILE *fp = fopen( pFilename, "w" );
@@ -176,7 +194,14 @@ void DumpCollideToGlView( CPhysCollide *pCollide, const char *pFilename )
 
 void DumpCollideToPHY( CPhysCollide *pCollide, CTextBuffer *text,   const char *pFilename )
 {
-	Msg("Writing %s...\n", pFilename );
+#ifdef MAPBASE
+	Msg("Writing: +- ");
+	ColorSpewMessage(SPEW_MESSAGE, &blue, "%s", pFilename);
+	ColorSpewMessage(SPEW_MESSAGE, &green, " done (0)\n");
+#else
+	Msg("Writing %s...\n", pFilename);
+#endif
+
 	FILE *fp = fopen( pFilename, "wb" );
 	phyheader_t header;
 	header.size = sizeof(header);

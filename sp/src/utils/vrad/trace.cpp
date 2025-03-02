@@ -637,7 +637,7 @@ void AddBrushesForRayTrace( void )
 				v = dedges[surfEdge].v[0];
 
 			if ( v >= ARRAYSIZE( dvertexes ) )
-				Error("\t***** ERROR! v(%u) >= ARRAYSIZE( dvertexes(%d) )!", ( unsigned int )v, ARRAYSIZE( dvertexes ) );
+				Error("\t***** ERROR! v(%u) >= ARRAYSIZE( dvertexes [%d] )!", ( unsigned int )v, ARRAYSIZE( dvertexes ) );
 
 			dvertex_t *dv = &dvertexes[v];
 			points[j] = dv->point;

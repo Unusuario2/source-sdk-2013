@@ -128,14 +128,14 @@ void PrintTree_r (node_t *node, int depth)
 		else
 		{
 			for (bb=node->brushlist ; bb ; bb=bb->next)
-				Msg ("%i ", bb->original->brushnum);
+				Msg ("[%i] ", bb->original->brushnum);
 			Msg ("\n");
 		}
 		return;
 	}
 
 	plane = &g_MainMap->mapplanes[node->planenum];
-	Msg ("#%i (%5.2f %5.2f %5.2f):%5.2f\n", node->planenum,
+	Msg ("#%i [%5.2f %5.2f %5.2f]:%5.2f\n", node->planenum,
 		plane->normal[0], plane->normal[1], plane->normal[2],
 		plane->dist);
 	PrintTree_r (node->children[0], depth+1);

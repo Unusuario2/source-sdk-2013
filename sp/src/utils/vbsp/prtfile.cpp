@@ -71,11 +71,11 @@ void WritePortalFile(FILE *pFile, const CUtlVector<cluster_portals_t> &list)
 			WindingPlane (w, normal, &dist);
 			if ( DotProduct (p->plane.normal, normal) < 0.99 )
 			{	// backwards...
-				fprintf (pFile,"%i %i %i ",w->numpoints, p->nodes[1]->cluster, p->nodes[0]->cluster);
+				fprintf (pFile,"[%i %i %i] ",w->numpoints, p->nodes[1]->cluster, p->nodes[0]->cluster);
 			}
 			else
 			{
-				fprintf (pFile,"%i %i %i ",w->numpoints, p->nodes[0]->cluster, p->nodes[1]->cluster);
+				fprintf (pFile,"[%i %i %i] ",w->numpoints, p->nodes[0]->cluster, p->nodes[1]->cluster);
 			}
 			
 			for (int i=0 ; i<w->numpoints ; i++)
@@ -363,14 +363,18 @@ void WritePortalFile (tree_t *tree)
 // write the file
 	FILE *pf = fopen (filename, "w");
 	if (!pf)
-		Error ("\t\nError opening %s", filename);
-		
+#ifdef MAPBASE
+		Error ("\t\nError opening: +- %s", filename);
+#else
+		Error("\nError opening %s", filename);
+#endif
+
 	fprintf (pf, "%s\n", PORTALFILE);
 	fprintf (pf, "%i\n", num_visclusters);
 	fprintf (pf, "%i\n", num_visportals);
 
-	qprintf ("%5i visclusters\n", num_visclusters);
-	qprintf ("%5i visportals\n", num_visportals);
+	qprintf ("[%5i] visclusters\n", num_visclusters);
+	qprintf ("[%5i] visportals\n", num_visportals);
 
 	WritePortalFile(pf, portalList);
 

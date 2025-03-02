@@ -705,7 +705,11 @@ void ComputePerLeafAmbientLighting()
 		{
 			if ( !(dleafs[i].contents & CONTENTS_SOLID) )
 			{
-				Msg("Bad leaf ambient for leaf %d\n", i );
+#ifdef MAPBASE
+				Warning("\tBad leaf ambient for leaf [%d]\n", i );
+#else
+				MSg("Bad leaf ambient for leaf %d\n", i );
+#endif
 			}
 
 			int refLeaf = NearestNeighborWithLight(i);

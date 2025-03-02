@@ -592,8 +592,7 @@ void EmitDispLMAlphaAndNeighbors()
 	SnapRemainingVertsToSurface( g_CoreDispInfos.Base(), g_dispinfo.Base(), nummapdispinfo );
 
 #ifdef MAPBASE
-		Msg("Finding lightmap sample positions... ");
-		ColorSpewMessage(SPEW_MESSAGE, &green, "done (0)\n");
+		Msg("Finding lightmap sample positions...");
 #else 
 	Msg("Finding lightmap sample positions...\n");
 #endif 
@@ -608,6 +607,10 @@ void EmitDispLMAlphaAndNeighbors()
 
 		CalculateLightmapSamplePositions( pCoreDispInfo, pFace, g_DispLightmapSamplePositions );
 	}
+
+#ifdef MAPBASE
+	ColorSpewMessage(SPEW_MESSAGE, &green, " done (0)\n");
+#endif
 
 	StartPacifier( "Displacement Alpha -> ");
 
@@ -641,7 +644,7 @@ void DispGetFaceInfo( mapbrush_t *pBrush )
 	if( pBrush->entitynum != 0 )
 	{
 		char* pszEntityName = ValueForKey( &g_LoadingMap->entities[pBrush->entitynum], "classname" );
-		Error("\tError: displacement found on a(n) %s entity - not supported (entity %d, brush %d)\n", pszEntityName, pBrush->entitynum, pBrush->brushnum );
+		Error("\tError: displacement found on a(n) %s entity - not supported [entity [%d], brush [%d]]\n", pszEntityName, pBrush->entitynum, pBrush->brushnum );
 	}
 
 	for( i = 0; i < pBrush->numsides; i++ )
@@ -651,7 +654,7 @@ void DispGetFaceInfo( mapbrush_t *pBrush )
 		{
 			// error checking!!
 			if( pSide->winding->numpoints != 4 )
-				Error("\tTrying to create a non-quad displacement! (entity %d, brush %d)\n", pBrush->entitynum, pBrush->brushnum );
+				Error("\tTrying to create a non-quad displacement! [entity [%d], brush [%d]]\n", pBrush->entitynum, pBrush->brushnum );
 			pSide->pMapDisp->face.originalface = pSide;
 			pSide->pMapDisp->face.texinfo = pSide->texinfo;
 			pSide->pMapDisp->face.dispinfo = -1;

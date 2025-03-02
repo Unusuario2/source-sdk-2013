@@ -1640,7 +1640,11 @@ bool CVRadDispMgr::BuildDispSamples( lightinfo_t *pLightInfo, facelight_t *pFace
 			}
 			else
 			{
+#ifdef MAPBASE
+				Warning( "\tBuildDispSamples: WARNING - failed winding allocation\n" );
+#else
 				Msg( "BuildDispSamples: WARNING - failed winding allocation\n" );
+#endif
 			}
 		}
 	}
@@ -1676,7 +1680,11 @@ bool CVRadDispMgr::BuildDispSamples( lightinfo_t *pLightInfo, facelight_t *pFace
 	// statistics - warning?!
 	if( pFaceLight->numsamples == 0 )
 	{
+#ifdef MAPBASE
+		Warning( "\tBuildDispSamples: WARNING - no samples [%d]\n", pLightInfo->face - g_pFaces );
+#else
 		Msg( "BuildDispSamples: WARNING - no samples %d\n", pLightInfo->face - g_pFaces );
+#endif
 	}
 
 	return true;

@@ -312,7 +312,11 @@ bool ExpandMacroToken( char *&token_p )
 		}
 		if (index >= script->nummacroparams)
 		{
-			Error("\tUnknown macro token \"%s\" in %s\n", tp, script->filename );
+#ifdef MAPBASE
+			Error("\tUnknown macro token \"%s\" in: +- %s\n", tp, script->filename );
+#else
+			Error("Unknown macro token \"%s\" in %s\n", tp, script->filename );
+#endif
 		}
 
 		// paste token into 
@@ -326,7 +330,7 @@ bool ExpandMacroToken( char *&token_p )
 			Error ("\tMacro expand overflow\n");
 
 		if (token_p >= &token[MAXTOKEN])
-			Error ("\tToken too large on line %i\n",scriptline);
+			Error ("\tToken too large on line [%i]\n",scriptline);
 
 		return true;
 	}
@@ -371,7 +375,11 @@ bool ExpandVariableToken( char *&token_p )
 	
 		if (index >= g_definevariable.Count() )
 		{
-			Error("\tUnknown variable token \"%s\" in %s\n", tp, script->filename );
+#ifdef MAPBASE
+			Error("\tUnknown variable token \"%s\" in: +- %s\n", tp, script->filename);
+#else
+			Error("Unknown variable token \"%s\" in %s\n", tp, script->filename);
+#endif
 		}
 
 		// paste token into 
@@ -385,7 +393,7 @@ bool ExpandVariableToken( char *&token_p )
 			Error ("\tMacro expand overflow\n");
 
 		if (token_p >= &token[MAXTOKEN])
-			Error ("\tToken too large on line %i\n",scriptline);
+			Error ("\tToken too large on line [%i]\n",scriptline);
 
 		return true;
 	}
@@ -492,7 +500,7 @@ void UnGetToken (void)
 qboolean EndOfScript (qboolean crossline)
 {
 	if (!crossline)
-		Error ("\tLine %i is incomplete\n",scriptline);
+		Error ("\tLine [%i] is incomplete\n",scriptline);
 
 	if (!strcmp (script->filename, "memory buffer"))
 	{
@@ -612,7 +620,7 @@ skipspace:
 		{
 			if (!crossline)
 			{
-				Error ("\tLine %i is incomplete\n",scriptline);
+				Error ("\tLine [%i] is incomplete\n",scriptline);
 			}
 			scriptline = ++script->line;
 		}
@@ -628,7 +636,7 @@ skipspace:
 		(*script->script_p == '/' && *((script->script_p)+1) == '/')) // also make // a comment field
 	{											
 		if (!crossline)
-			Error ("\tLine %i is incomplete\n",scriptline);
+			Error ("\tLine [%i] is incomplete\n",scriptline);
 		while (*script->script_p++ != '\n')
 		{
 			if (script->script_p >= script->end_p)
@@ -673,7 +681,7 @@ skipspace:
 			if (script->script_p == script->end_p)
 				break;
 			if (token_p == &token[MAXTOKEN])
-				Error ("\tToken too large on line %i\n",scriptline);
+				Error ("\tToken too large on line [%i]\n",scriptline);
 		}
 		script->script_p++;
 	}
@@ -692,7 +700,7 @@ skipspace:
 				if (script->script_p == script->end_p)
 					break;
 				if (token_p == &token[MAXTOKEN])
-					Error ("\tToken too large on line %i\n",scriptline);
+					Error ("\tToken too large on line [%i]\n",scriptline);
 
 			}
 		}
@@ -791,7 +799,7 @@ skipspace:
 		if (*script->script_p++ == '\n')
 		{
 			if (!crossline)
-				Error ("\tLine %i is incomplete\n",scriptline);
+				Error ("\tLine [%i] is incomplete\n",scriptline);
 			scriptline = ++script->line;
 		}
 	}
@@ -803,7 +811,7 @@ skipspace:
 		(*script->script_p == '/' && *((script->script_p)+1) == '/')) // also make // a comment field
 	{											
 		if (!crossline)
-			Error ("\tLine %i is incomplete\n",scriptline);
+			Error ("\tLine [%i] is incomplete\n",scriptline);
 		while (*script->script_p++ != '\n')
 			if (script->script_p >= script->end_p)
 				return EndOfScript (crossline);
@@ -825,7 +833,7 @@ skipspace:
 			if (script->script_p == script->end_p)
 				break;
 			if (token_p == &token[MAXTOKEN])
-				Error ("\tToken too large on line %i\n",scriptline);
+				Error ("\tToken too large on line [%i]\n",scriptline);
 		}
 		script->script_p++;
 	}
@@ -840,7 +848,7 @@ skipspace:
 				if (script->script_p == script->end_p)
 					break;
 				if (token_p == &token[MAXTOKEN])
-					Error ("\tToken too large on line %i\n",scriptline);
+					Error ("\tToken too large on line [%i]\n",scriptline);
 			}
 		}
 		else if ( V_isdigit( *script->script_p ) || *script->script_p == '.' )
@@ -852,7 +860,7 @@ skipspace:
 				if (script->script_p == script->end_p)
 					break;
 				if (token_p == &token[MAXTOKEN])
-					Error ("\tToken too large on line %i\n",scriptline);
+					Error ("\tToken too large on line [%i]\n",scriptline);
 			}
 		}
 		else

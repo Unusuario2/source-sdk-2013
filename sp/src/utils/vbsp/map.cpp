@@ -677,13 +677,13 @@ qboolean CMapFile::MakeBrushWindings (mapbrush_t *ob)
 	{
 		if (ob->mins[i] < MIN_COORD_INTEGER || ob->maxs[i] > MAX_COORD_INTEGER)
 #ifdef MAPBASE
-			Warning("\tBrush %i: bounds out of range\n", ob->id);
+			Warning("\tBrush [%i]: bounds out of range\n", ob->id);
 #else
 			Msg("Brush %i: bounds out of range\n", ob->id);
 #endif
 		if (ob->mins[i] > MAX_COORD_INTEGER || ob->maxs[i] < MIN_COORD_INTEGER)
 #ifdef MAPBASE
-			Warning("\tBrush %i: no visible sides on brush\n", ob->id);
+			Warning("\tBrush [%i]: no visible sides on brush\n", ob->id);
 #else
 			Msg("Brush %i: no visible sides on brush\n", ob->id);
 #endif
@@ -2819,7 +2819,6 @@ bool LoadMapFile( const char *pszFileName )
 			if ( g_MainMap == g_LoadingMap || verbose )
 			{
 #ifdef MAPBASE
-			//Msg("Loading vmf file: +- \033[33m%s\033[0m \033[32mdone(0)\033[0m\n", pszFileName);
 			Msg("Loading vmf file: +- ");
 			ColorSpewMessage(SPEW_MESSAGE, &blue, "%s", pszFileName);
 			ColorSpewMessage(SPEW_MESSAGE, &green, " done (0)\n");
@@ -3571,11 +3570,21 @@ void CMapFile::TestExpandBrushes (void)
 	mapbrush_t	*brush;
 	vec_t	dist;
 
-	Msg("writing %s\n", name);
+#ifdef MAPBASE
+	Msg("Writing: +- ");
+	ColorSpewMessage(SPEW_MESSAGE, &blue, "%s", name);
+	ColorSpewMessage(SPEW_MESSAGE, &green, " done (0)\n");
+#else
+	Msg("writing %s...\n", name);
+#endif
 
 	f = fopen (name, "wb");
 	if (!f)
-		Error ("\tCan't write %s\b", name);
+#ifdef MAPBASE
+		Error ("\tCan't write: +- %s\b", name);
+#else
+		Error("Can't write %s\b", name);
+#endif
 
 	fprintf (f, "{\n\"classname\" \"worldspawn\"\n");
 	fprintf( f, "\"mapversion\" \"220\"\n\"sounds\" \"1\"\n\"MaxRange\" \"4096\"\n\"mapversion\" \"220\"\n\"wad\" \"vert.wad;dev.wad;generic.wad;spire.wad;urb.wad;cit.wad;water.wad\"\n" );
@@ -3594,9 +3603,9 @@ void CMapFile::TestExpandBrushes (void)
 
 			w = BaseWindingForPlane (mapplanes[s->planenum].normal, dist);
 
-			fprintf (f,"( %i %i %i ) ", (int)w->p[0][0], (int)w->p[0][1], (int)w->p[0][2]);
-			fprintf (f,"( %i %i %i ) ", (int)w->p[1][0], (int)w->p[1][1], (int)w->p[1][2]);
-			fprintf (f,"( %i %i %i ) ", (int)w->p[2][0], (int)w->p[2][1], (int)w->p[2][2]);
+			fprintf (f,"[ %i %i %i ] ", (int)w->p[0][0], (int)w->p[0][1], (int)w->p[0][2]);
+			fprintf (f,"[ %i %i %i ] ", (int)w->p[1][0], (int)w->p[1][1], (int)w->p[1][2]);
+			fprintf (f,"[ %i %i %i ] ", (int)w->p[2][0], (int)w->p[2][1], (int)w->p[2][2]);
 
 			fprintf (f, "%s [ 0 0 1 -512 ] [ 0 -1 0 -256 ] 0 1 1 \n", 
 				TexDataStringTable_GetString( GetTexData( texinfo[s->texinfo].texdata )->nameStringTableID ) );
@@ -3609,7 +3618,7 @@ void CMapFile::TestExpandBrushes (void)
 
 	fclose (f);
 
-	Error ("\tcan't proceed after expanding brushes");
+	Error ("\tCan't proceed after expanding brushes");
 }
 
 

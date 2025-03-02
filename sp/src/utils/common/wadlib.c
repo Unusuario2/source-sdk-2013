@@ -189,7 +189,7 @@ void W_ReadLumpNum (int lump, void *dest)
 	lumpinfo_t	*l;
 	
 	if (lump >= numlumps)
-		Error ("W_ReadLump: %i >= numlumps",lump);
+		Error("W_ReadLump: %i >= numlumps",lump);
 	l = lumpinfo+lump;
 	
 	fseek (wadhandle, l->filepos, SEEK_SET);

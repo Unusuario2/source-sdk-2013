@@ -315,7 +315,7 @@ void ProcessWorldModel (void)
 		}
 		else
 		{
-			Warning("\n\t!========== Leak ==========!\n");
+			Warning("\n\t**** leaked ****\n");
 			leaked = true;
 			LeakFile (tree);
 #ifdef MAPBASE
@@ -324,7 +324,7 @@ void ProcessWorldModel (void)
 			if (leaktest)
 #endif
 			{
-				Warning("\t!======= Map Leaked =======!\n");
+				Error("\t--- MAP LEAKED ---\n");
 				exit (0);
 			}
 		}
@@ -375,7 +375,6 @@ void ProcessWorldModel (void)
 
 #ifdef MAPBASE
 		Msg("FixTjuncs...");
-		ColorSpewMessage(SPEW_MESSAGE, &green, " done (0)\n");
 #else
 		Msg("FixTjuncs...done (0)\n");
 #endif
@@ -384,16 +383,24 @@ void ProcessWorldModel (void)
 	// It also welds the list of vertices out of each winding/portal and rounds nearly integer verts to integer
 	pLeafFaceList = FixTjuncs (tree->headnode, pLeafFaceList);
 
+#ifdef MAPBASE
+	ColorSpewMessage(SPEW_MESSAGE, &green, " done (0)\n");
+#endif
+
 	// this merges all of the solid nodes that have separating planes
 	if (!noprune)
 	{
 #ifdef MAPBASE
 		Msg("PruneNodes... ");
-		ColorSpewMessage(SPEW_MESSAGE, &green, "done (0)\n");
 #else
 		Msg("PruneNodes...done (0)\n");
 #endif
+
 		PruneNodes (tree->headnode);
+
+#ifdef MAPBASE
+		ColorSpewMessage(SPEW_MESSAGE, &green, "done (0)\n");
+#endif
 	}
 
 //	Msg( "SplitSubdividedFaces...\n" );
@@ -1086,7 +1093,7 @@ int RunVBSP( int argc, char **argv )
 		{
 			block_xl = block_xh = atoi(argv[i+1]);
 			block_yl = block_yh = atoi(argv[i+2]);
-			Msg ("block: %i,%i\n", block_xl, block_yl);
+			Msg ("block: [%i,%i]\n", block_xl, block_yl);
 			i+=2;
 		}
 		else if (!Q_stricmp(argv[i], "-blocks"))
@@ -1095,7 +1102,7 @@ int RunVBSP( int argc, char **argv )
 			block_yl = atoi(argv[i+2]);
 			block_xh = atoi(argv[i+3]);
 			block_yh = atoi(argv[i+4]);
-			Msg ("blocks: %i,%i to %i,%i\n", 
+			Msg ("blocks: [%i,%i to %i,%i]\n", 
 				block_xl, block_yl, block_xh, block_yh);
 			i+=4;
 		}
@@ -1220,7 +1227,7 @@ int RunVBSP( int argc, char **argv )
 		else if ( !Q_stricmp( argv[i], "-defaultcubemapres" ) )
 		{
 			g_iDefaultCubemapSize = atoi( argv[i + 1] );
-			Msg( "Default cubemap size = %i\n", g_iDefaultCubemapSize );
+			Msg( "Default cubemap size = [%i]\n", g_iDefaultCubemapSize );
 			i++;
 		}
 		else if ( !Q_stricmp( argv[i], "-defaultproppermodelsstatic" ) )

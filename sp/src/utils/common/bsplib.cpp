@@ -1054,7 +1054,7 @@ void CGameLump::SwapGameLump( GameLumpId_t id, int version, byte *dest, byte *sr
 		{
 			if ( version != 6 )
 			{
-				Error( "\tUnknown Static Prop Lump version %d didn't get swapped!\n", version );
+				Error( "\tUnknown Static Prop Lump version [%d] didn't get swapped!\n", version );
 			}
 
 			StaticPropLump_t lump;
@@ -1782,12 +1782,12 @@ void ValidateLump( int lump, int length, int size, int forceVersion )
 {
 	if ( length % size )
 	{
-		Error( "\tValidateLump: odd size for lump %d", lump );
+		Error( "\tValidateLump: odd size for lump [%d]", lump );
 	}
 
 	if ( forceVersion >= 0 && forceVersion != g_pBSPHeader->lumps[lump].version )
 	{
-		Error( "\tValidateLump: old version for lump %d in map!", lump );
+		Error( "\tValidateLump: old version for lump [%d] in map!", lump );
 	}
 }
 
@@ -1946,7 +1946,11 @@ void Lumps_Parse( void )
 		if ( !g_Lumps.bLumpParsed[i] && g_pBSPHeader->lumps[i].filelen )
 		{
 			g_Lumps.size[i] = CopyVariableLump<byte>( FIELD_CHARACTER, i, &g_Lumps.pLumps[i], -1 );
-			Msg( "Reading unknown lump #%d (%d bytes)\n", i, g_Lumps.size[i] );
+#ifdef MAPBASE
+			Warning("\tReading unknown lump #%d [%d bytes]\n", i, g_Lumps.size[i]);
+#else
+			Msg("Reading unknown lump #%d (%d bytes)\n", i, g_Lumps.size[i]);
+#endif
 		}
 	}
 }
@@ -1959,7 +1963,11 @@ void Lumps_Write( void )
 	{
 		if ( g_Lumps.size[i] )
 		{
+#ifdef MAPBASE
+			Warning("\tWriting unknown lump #%d [%d bytes]\n", i, g_Lumps.size[i] );
+#else
 			Msg( "Writing unknown lump #%d (%d bytes)\n", i, g_Lumps.size[i] );
+#endif
 			AddLump( i, (byte*)g_Lumps.pLumps[i], g_Lumps.size[i] );
 		}
 		if ( g_Lumps.pLumps[i] )
@@ -2114,11 +2122,19 @@ void ValidateHeader( const char *filename, const dheader_t *pHeader )
 {
 	if ( pHeader->ident != IDBSPHEADER )
 	{
-		Error ("\t%s is not a IBSP file", filename);
+#if defined(MAPBASE) && defined(SDK_TOOLS)
+		Error ("\tFile: +- %s is not a IBSP", filename);
+#else
+		Error ("%s is not a IBSP file", filename);
+#endif
 	}
 	if ( pHeader->version < MINBSPVERSION || pHeader->version > BSPVERSION )
 	{
-		Error ("\t%s is version %i, not %i", filename, pHeader->version, BSPVERSION);
+#if defined(MAPBASE) && defined(SDK_TOOLS)
+		Error ("\tFile: +- %s is version [%i], not [%i]", filename, pHeader->version, BSPVERSION);
+#else
+		Error ("%s is version [%i], not [%i]", filename, pHeader->version, BSPVERSION);
+#endif
 	}
 }
 
@@ -2573,7 +2589,7 @@ void WriteBSPFile( const char *filename, char *pUnused )
 {		
 	if ( texinfo.Count() > MAX_MAP_TEXINFO )
 	{
-		Error( "\tMap has too many texinfos (has %d, can have at most %d)\n", texinfo.Count(), MAX_MAP_TEXINFO );
+		Error( "\tMap has too many texinfos [has %d, can have at most %d]\n", texinfo.Count(), MAX_MAP_TEXINFO );
 		return;
 	}
 
@@ -3312,10 +3328,10 @@ void CalcFaceExtents(dface_t *s, int lightmapTextureMinsInLuxels[2], int lightma
 				e = dsurfedges[s->firstedge+j];
 				v = (e<0)?dvertexes + dedges[-e].v[1] : dvertexes + dedges[e].v[0];
 				point += v->point;
-				Warning("\tBad surface extents point: %f %f %f\n", v->point.x, v->point.y, v->point.z );
+				Warning("\tBad surface extents point: [%f %f %f]\n", v->point.x, v->point.y, v->point.z );
 			}
 			point *= 1.0f/s->numedges;
-			Error( "\tBad surface extents - surface is too big to have a lightmap\n\tmaterial %s around point (%.1f %.1f %.1f)\n\t(dimension: %d, %d>%d)\n", 
+			Error( "\tBad surface extents - surface is too big to have a lightmap\n\tmaterial %s around point [%.1f %.1f %.1f]\n\t[dimension: %d, %d>%d]\n", 
 				TexDataStringTable_GetString( dtexdata[texinfo[s->texinfo].texdata].nameStringTableID ), 
 				point.x, point.y, point.z,
 				( int )i,
@@ -4314,7 +4330,7 @@ void BuildStaticPropNameTable()
 
 		if ( nVersion != 4 && nVersion != 5 && nVersion != 6 )
 		{
-			Error( "\tUnknown Static Prop Lump version %d!\n", nVersion );
+			Error( "\tUnknown Static Prop Lump version [%d]!\n", nVersion );
 		}
 
 		byte *pGameLumpData = (byte *)g_GameLumps.GetGameLump( hGameLump );

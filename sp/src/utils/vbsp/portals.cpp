@@ -853,7 +853,7 @@ void FloodAreas_r (node_t *node, portal_t *pSeeThrough)
 		// note the current area as bounding the portal
 		if (e->portalareas[1])
 		{
-			Warning("\tWARNING: areaportal entity %i (brush %i) touches > 2 areas\n", b->original->entitynum, b->original->id );
+			Warning("\tWARNING: areaportal entity [%i], brush [%i] touches > 2 areas\n", b->original->entitynum, b->original->id );
 			return;
 		}
 		
@@ -979,7 +979,7 @@ void ReportAreaportalLeak( tree_t *tree, node_t *node )
 #ifdef MAPBASE
 	if (!noleaktest)
 	{
-		Warning("\n\t|======= AreaPortal Leak =======|\n");
+		Error("\n\t--- AREAPORTAL LEAK--- \n");
 		exit(0);
 	}
 #endif
@@ -1017,7 +1017,7 @@ void SetAreaPortalAreas_r (tree_t *tree, node_t *node)
 		if (!e->portalareas[1])
 		{
 			ReportAreaportalLeak( tree, node );
-			Warning("\t\nBrush %i: areaportal brush doesn't touch two areas\n", b->original->id);
+			Warning("\n\tBrush [%i]: areaportal brush doesn't touch two areas\n", b->original->id);
 			return;
 		}
 	}
