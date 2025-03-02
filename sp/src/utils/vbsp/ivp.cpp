@@ -1685,7 +1685,7 @@ void EmitPhysCollision()
 	Assert( (ptr-g_pPhysCollide) == g_PhysCollideSize);
 
 #ifdef MAPBASE
-	ColorSpewMessage(SPEW_MESSAGE, &magenta, " (%d bytes)", g_PhysCollideSize);
+	ColorSpewMessage(SPEW_MESSAGE, &magenta, " [%d bytes]", g_PhysCollideSize);
 	ColorSpewMessage(SPEW_MESSAGE, &green, " done(%d)\n", (int)(Plat_FloatTime() - start));
 #else
 	Msg("done (%d)\n", (int)(Plat_FloatTime() - start));

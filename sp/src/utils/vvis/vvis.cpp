@@ -536,12 +536,12 @@ void LoadPortals (char *name)
 	{
 		if (fscanf (f, "%i %i %i ", &numpoints, &leafnums[0], &leafnums[1])
 			!= 3)
-			Error ("\tLoadPortals: reading portal %i", i);
+			Error ("\tLoadPortals: reading portal [%i]", i);
 		if (numpoints > MAX_POINTS_ON_WINDING)
-			Error ("\tLoadPortals: portal %i has too many points", i);
+			Error ("\tLoadPortals: portal [%i] has too many points", i);
 		if ( (unsigned)leafnums[0] > portalclusters
 		|| (unsigned)leafnums[1] > portalclusters)
-			Error ("\tLoadPortals: reading portal %i", i);
+			Error ("\tLoadPortals: reading portal [%i]", i);
 		
 		w = p->winding = NewWinding (numpoints);
 		w->original = true;
@@ -556,7 +556,7 @@ void LoadPortals (char *name)
 			// so we don't care what size vec_t is
 			if (fscanf (f, "(%lf %lf %lf ) "
 			, &v[0], &v[1], &v[2]) != 3)
-				Error ("\tLoadPortals: reading portal %i", i);
+				Error ("\tLoadPortals: reading portal [%i]", i);
 			for (k=0 ; k<3 ; k++)
 				w->points[j][k] = v[k];
 		}

@@ -2851,7 +2851,7 @@ bool LoadMapFile( const char *pszFileName )
 		}
 		else
 		{
-			Error("\tError opening %s: %s.\n", pszFileName, File.GetErrorText(eResult));
+			Error("\tError opening: +- %s: %s.\n", pszFileName, File.GetErrorText(eResult));
 		}
 	}
 

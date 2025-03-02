@@ -896,7 +896,7 @@ void CompactTexinfos()
 	ColorSpewMessage(SPEW_MESSAGE,  &magenta, "[%d]", oldTexdataCount);
 	Msg(" texinfos to ");
 	ColorSpewMessage(SPEW_MESSAGE,  &magenta, "[%d] ", numtexdata);
-	ColorSpewMessage(SPEW_MESSAGE,  &magenta, "(%d bytes to %d)\n", oldTexdataString, g_TexDataStringData.Count());
+	ColorSpewMessage(SPEW_MESSAGE,  &magenta, "[%d bytes to %d]\n", oldTexdataString, g_TexDataStringData.Count());
 #else
 	Msg(" done\n");
 
