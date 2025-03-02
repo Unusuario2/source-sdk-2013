@@ -243,6 +243,7 @@ extern smd_texture_t* smd_textures;
 //--------------------------------+---------------+--------------------------------------//
 //--------------------------------|  vbsp.h code  |--------------------------------------//
 //--------------------------------+---------------+--------------------------------------//
+//Note: The vbsp.h code couldn`t be moved to propper_garbagecollector.cpp/.h (too many linking issues) 
 class CUtlBuffer;
 
 #define	MAX_BRUSH_SIDES	128
