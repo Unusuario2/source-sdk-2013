@@ -507,7 +507,7 @@ int fixupMaterial(const char* pMatName, const char* qc_cdmaterials, bool count)
 			buffer.GetLine( &LineIn[0], 1024 );
 #ifdef MAPBASE
 			// If are not in Mapbase mode or the line already contains the "SDK_" prefix, do not fix up the material with the "SDK_" prefix
-			if ( !useMapbase || strstr( &LineIn[0], "SDK_") )
+			if (strstr( &LineIn[0], "SDK_") )
 			{
 				V_StrSubst( &LineIn[0], subShaderName, "VertexLitGeneric", &Line[0], 1024, false );
 			}
