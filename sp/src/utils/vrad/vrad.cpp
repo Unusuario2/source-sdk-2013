@@ -2412,7 +2412,7 @@ extern void CloseDispLuxels();
 void VRAD_Finish()
 {
 #ifdef MAPBASE
-	ColorSpewMessage(SPEW_MESSAGE, &sucesfullprocess_color, "--> Map build ready to finish\n");
+	ColorSpewMessage(SPEW_MESSAGE, &sucesfullprocess_color, "--> Map build ready to finish.\n");
 #else
 	Msg( "Ready to Finish\n" );
 #endif
