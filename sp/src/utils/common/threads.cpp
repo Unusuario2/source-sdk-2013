@@ -241,7 +241,7 @@ RunThreadsOn
 */
 void RunThreadsOn( int workcnt, qboolean showpacifier, RunThreadsFn fn, void *pUserData )
 {
-	int		start, end;
+	float		start, end;
 
 	start = Plat_FloatTime();
 	dispatch = 0;
@@ -264,7 +264,7 @@ void RunThreadsOn( int workcnt, qboolean showpacifier, RunThreadsFn fn, void *pU
 		EndPacifier(false);
 #ifdef MAPBASE
 		printf("]");
-		ColorSpewMessage(SPEW_MESSAGE, &done_color, " (%is)\n", end - start);
+		ColorSpewMessage(SPEW_MESSAGE, &done_color, " (%.2fs)\n", end - start);
 #else
 		printf (" (%i)\n", end-start);
 #endif
