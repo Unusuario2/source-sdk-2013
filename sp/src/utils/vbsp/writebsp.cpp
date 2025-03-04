@@ -771,6 +771,11 @@ void CompactTexdataArray( texdatamap_t *pMap )
 
 void CompactTexinfos()
 {
+#ifdef MAPBASE
+	float time_process;
+	TimerStart(time_process);
+#endif
+
 	Msg("Compacting texture/material tables...");
 	texinfomap_t *texinfoMap = new texinfomap_t[texinfo.Count()];
 	texdatamap_t *texdataMap = new texdatamap_t[numtexdata];
@@ -886,7 +891,8 @@ void CompactTexinfos()
 		}
 	}
 #ifdef MAPBASE
-	ColorSpewMessage(SPEW_MESSAGE, &done_color, " done (0s)\n");
+	TimerEnd(time_process);
+	ColorSpewMessage(SPEW_MESSAGE, &done_color, " done (%.2fs)\n", time_process);
 	Msg("  Reduced ");
 	ColorSpewMessage(SPEW_MESSAGE,  &number_color, "[%d]", oldCount);
 	Msg(" texinfos to ");

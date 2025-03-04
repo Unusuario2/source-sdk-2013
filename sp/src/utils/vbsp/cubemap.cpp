@@ -800,6 +800,10 @@ static int SideIDToIndex( int brushSideID )
 //-----------------------------------------------------------------------------
 void Cubemap_FixupBrushSidesMaterials( void )
 {
+#ifdef MAPBASE
+	float time_process;
+	TimerStart(time_process);
+#endif
 	Msg( "Fixing up env_cubemap materials on brush sides..." );
 	Assert( s_EnvCubemapToBrushSides.Count() == g_nCubemapSamples );
 
@@ -842,7 +846,8 @@ void Cubemap_FixupBrushSidesMaterials( void )
 	}
 
 #ifdef MAPBASE
-	ColorSpewMessage(SPEW_MESSAGE, &done_color, " done (0s)\n");
+	TimerEnd(time_process);
+	ColorSpewMessage(SPEW_MESSAGE, &done_color, " done (%.2fs)\n", time_process);
 #else
 	Msg("done(0)\n");
 #endif 

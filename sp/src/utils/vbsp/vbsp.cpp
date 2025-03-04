@@ -346,14 +346,21 @@ void ProcessWorldModel (void)
 
 	RemoveAreaPortalBrushes_R( tree->headnode );
 
+#ifdef MAPBASE
+	float time_process;
+	TimerStart(time_process);
+#else
 	start = Plat_FloatTime();
+#endif
+
 	Msg("Building Faces...");
 	// this turns portals with one solid side into faces
 	// it also subdivides each face if necessary to fit max lightmap dimensions
 	MakeFaces (tree->headnode);
 
 #ifdef MAPBASE
-	ColorSpewMessage(SPEW_MESSAGE, &done_color, " done (%ds)\n", (int)(Plat_FloatTime() - start));
+	TimerEnd(time_process);
+	ColorSpewMessage(SPEW_MESSAGE, &done_color, " done (%.2fs)\n", time_process);
 #else
 	Msg("done (%d)\n", (int)(Plat_FloatTime() - start) );
 #endif
@@ -374,7 +381,8 @@ void ProcessWorldModel (void)
 	start = Plat_FloatTime();
 
 #ifdef MAPBASE
-		Msg("FixTjuncs...");
+	TimerStart(time_process);
+	Msg("FixTjuncs...");
 #else
 		Msg("FixTjuncs...done (0)\n");
 #endif
@@ -384,13 +392,15 @@ void ProcessWorldModel (void)
 	pLeafFaceList = FixTjuncs (tree->headnode, pLeafFaceList);
 
 #ifdef MAPBASE
-	ColorSpewMessage(SPEW_MESSAGE, &done_color, " done (0s)\n");
+	TimerEnd(time_process);
+	ColorSpewMessage(SPEW_MESSAGE, &done_color, " done (%.2fs)\n", time_process);
 #endif
 
 	// this merges all of the solid nodes that have separating planes
 	if (!noprune)
 	{
 #ifdef MAPBASE
+		TimerStart(time_process);
 		Msg("PruneNodes...");
 #else
 		Msg("PruneNodes...done (0)\n");
@@ -399,7 +409,8 @@ void ProcessWorldModel (void)
 		PruneNodes (tree->headnode);
 
 #ifdef MAPBASE
-		ColorSpewMessage(SPEW_MESSAGE, &done_color, " done (0s)\n");
+		TimerEnd(time_process);
+		ColorSpewMessage(SPEW_MESSAGE, &done_color, " done (%.2fs)\n", time_process);
 #endif
 	}
 

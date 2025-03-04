@@ -208,6 +208,8 @@ void ReadLightFile (char *filename)
 	}
 
 #ifdef MAPBASE
+	float time_process;
+	TimerStart(time_process);
 	Msg("Reading texlights from: +- ");
 	ColorSpewMessage(SPEW_MESSAGE, &path_color, "%s", filename);
 #else
@@ -318,7 +320,8 @@ void ReadLightFile (char *filename)
 		}
 	}
 #ifdef MAPBASE
-	ColorSpewMessage(SPEW_MESSAGE, &done_color, " done (0s)\n");
+	TimerEnd(time_process);
+	ColorSpewMessage(SPEW_MESSAGE, &done_color, " done (%.2fs)\n", time_process);
 #endif
 	qprintf ( "[%i texlights parsed from '%s']\n\n", file_texlights, filename);
 	g_pFileSystem->Close( f );
@@ -2427,16 +2430,13 @@ void VRAD_Finish()
 #ifdef MAPBASE
 	Msg("Writing Bsp file: +- ");
 	ColorSpewMessage(SPEW_MESSAGE, &path_color, "%s ", platformPath);
+	ColorSpewMessage(SPEW_MESSAGE, &done_color, " done (0s)\n");
 #else
 	Msg("Writing %s\n", platformPath);
 #endif
 
 	VMPI_SetCurrentStage( "WriteBSPFile" );
 	WriteBSPFile(platformPath);
-
-#ifdef MAPBASE
-	ColorSpewMessage(SPEW_MESSAGE, &done_color, " done (0s)\n");
-#endif
 
 	if ( g_bDumpPatches )
 	{

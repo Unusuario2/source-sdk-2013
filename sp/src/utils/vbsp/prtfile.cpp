@@ -386,7 +386,7 @@ void WritePortalFile (tree_t *tree)
 	SaveClusters_r (headnode);
 
 #ifdef MAPBASE
-	ColorSpewMessage(SPEW_MESSAGE, &done_color, " done (%ds)\n", (int)(Plat_FloatTime() - start));
+	ColorSpewMessage(SPEW_MESSAGE, &done_color, " done (%.2fs)\n", (Plat_FloatTime() - start));
 #else
 	Msg("done (%d)\n", (int)(Plat_FloatTime() - start));
 #endif

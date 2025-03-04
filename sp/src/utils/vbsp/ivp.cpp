@@ -1688,7 +1688,7 @@ void EmitPhysCollision()
 
 #ifdef MAPBASE
 	ColorSpewMessage(SPEW_MESSAGE, &number_color, " [%d bytes]", g_PhysCollideSize);
-	ColorSpewMessage(SPEW_MESSAGE, &done_color, " done(%ds)\n", (int)(Plat_FloatTime() - start));
+	ColorSpewMessage(SPEW_MESSAGE, &done_color, " done(%.2ds)\n", (int)(Plat_FloatTime() - start));
 #else
 	Msg("done (%d)\n", (int)(Plat_FloatTime() - start));
 #endif

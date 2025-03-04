@@ -1386,7 +1386,12 @@ Mark each leaf with an area, bounded by CONTENTS_AREAPORTAL
 */
 void FloodAreas (tree_t *tree)
 {
+#ifdef MAPBASE
+	float time_process;
+	TimerStart(time_process);
+#else
 	int start = Plat_FloatTime();
+#endif
 	qprintf ("--- FloodAreas ---\n");
 	Msg("Processing areas...");
 	FindAreas_r (tree->headnode);
@@ -1394,7 +1399,8 @@ void FloodAreas (tree_t *tree)
 	qprintf ("%5i areas\n", c_areas);
 
 #ifdef MAPBASE
-	ColorSpewMessage(SPEW_MESSAGE, &done_color, " done (%ds)\n", (int)(Plat_FloatTime() - start));
+	TimerEnd(time_process);
+	ColorSpewMessage(SPEW_MESSAGE, &done_color, " done (%.2fs)\n", time_process);
 #else
 	Msg("done (%d)\n", (int)(Plat_FloatTime() - start));
 #endif

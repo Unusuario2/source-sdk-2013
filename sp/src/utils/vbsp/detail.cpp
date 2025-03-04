@@ -192,6 +192,10 @@ face_t *FilterFacesIntoTree( tree_t *out, face_t *pFaces )
 //-----------------------------------------------------------------------------
 void TryMergeFaceList( face_t **pFaceList )
 {
+#ifdef MAPBASE
+	float time_process;
+	TimerStart(time_process);
+#endif
 	face_t **pPlaneList = NULL;
 
 	// divide the list into buckets by plane number
@@ -250,7 +254,8 @@ void TryMergeFaceList( face_t **pFaceList )
 	Msg("\nMerged");
 	ColorSpewMessage(SPEW_MESSAGE, &number_color, " [%d] ", merged);
 	Msg("detail faces...");
-	ColorSpewMessage(SPEW_MESSAGE, &done_color, " done (0s)\n");
+	TimerEnd(time_process);
+	ColorSpewMessage(SPEW_MESSAGE, &done_color, " done (%.2fs)\n", time_process);
 #else
 	Msg("Merged %d detail faces... done(0)\n", merged );
 #endif 
@@ -284,7 +289,6 @@ void FilterBrushesIntoTree( tree_t *out, bspbrush_t *brushes )
 //-----------------------------------------------------------------------------
 face_t *MergeDetailTree( tree_t *worldtree, int brush_start, int brush_end )
 {
-	int			start;
 	bspbrush_t	*detailbrushes = NULL;
 	face_t		*pFaces = NULL;
 	face_t		*pLeafFaceList = NULL;
@@ -293,14 +297,20 @@ face_t *MergeDetailTree( tree_t *worldtree, int brush_start, int brush_end )
 	detailbrushes = MakeBspBrushList (brush_start, brush_end, g_MainMap->map_mins, g_MainMap->map_maxs, ONLY_DETAIL );
 	if (detailbrushes)
 	{
+#ifdef MAPBASE
+		float time_process;
+		TimerStart(time_process);
+#else
 		start = Plat_FloatTime();
+#endif
 		Msg("Chop Details...");
 		// if there are detail brushes, chop them against each other
 		if (!nocsg)
 			detailbrushes = ChopBrushes (detailbrushes);
 
 #ifdef MAPBASE
-	ColorSpewMessage(SPEW_MESSAGE, &done_color, " done (%ds)\n", (int)(Plat_FloatTime() - start));
+		TimerEnd(time_process);
+		ColorSpewMessage(SPEW_MESSAGE, &done_color, " done (%.2fs)\n", time_process);
 #else
 	Msg("done (%d)\n", (int)(Plat_FloatTime() - start));
 #endif
@@ -308,18 +318,26 @@ face_t *MergeDetailTree( tree_t *worldtree, int brush_start, int brush_end )
 		// Now mark the visible sides so we can eliminate all detail brush sides
 		// that are covered by other detail brush sides
 		// NOTE: This still leaves detail brush sides that are covered by the world. (these are removed in the merge operation)
+#ifdef MAPBASE
+		TimerStart(time_process);
+#endif
 		Msg("Find Visible Detail Sides...");
 		pFaces = ComputeVisibleBrushSides( detailbrushes );
 		TryMergeFaceList( &pFaces );
 		SubdivideFaceList( &pFaces );
 
 #ifdef MAPBASE
-		ColorSpewMessage(SPEW_MESSAGE, &done_color, " done (%ds)\n", (int)(Plat_FloatTime() - start));
+		TimerEnd(time_process);
+		ColorSpewMessage(SPEW_MESSAGE, &done_color, " done (%.2fs)\n", time_process);
 #else
 		Msg("done (%d)\n", (int)(Plat_FloatTime() - start));
 #endif
 
+#ifdef MAPBASE
+		TimerStart(time_process);
+#else
 		start = Plat_FloatTime();
+#endif
 		Msg("Merging details...");
 		// Merge the detail solids and faces into the world tree
 		// Merge all of the faces into the world tree
@@ -330,7 +348,8 @@ face_t *MergeDetailTree( tree_t *worldtree, int brush_start, int brush_end )
 		FreeBrushList(detailbrushes);
 
 #ifdef MAPBASE
-		ColorSpewMessage(SPEW_MESSAGE, &done_color, " done (%ds)\n", (int)(Plat_FloatTime() - start));
+		TimerEnd(time_process);
+		ColorSpewMessage(SPEW_MESSAGE, &done_color, " done (%.2fs)\n", time_process);
 #else
 		Msg("done (%d)\n", (int)(Plat_FloatTime() - start));
 #endif

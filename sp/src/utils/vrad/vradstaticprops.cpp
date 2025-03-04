@@ -508,9 +508,10 @@ public:
 		if (!pTex->Unserialize( buf ))
 			return NULL;
 #ifdef MAPBASE
+		float time_process;
+		TimerStart(time_process);
 		Msg("Loaded alpha texture: +- ");
 		ColorSpewMessage(SPEW_MESSAGE, &path_color, " %s", szPath);
-		ColorSpewMessage(SPEW_MESSAGE, &done_color, " done (0s)\n");
 #else
 		Msg("Loaded alpha texture %s\n", szPath);
 #endif
@@ -532,6 +533,10 @@ public:
 
 		*pWidth = iWidth;
 		*pHeight = iHeight;
+#ifdef MAPBASE
+		TimerEnd(time_process);
+		ColorSpewMessage(SPEW_MESSAGE, &done_color, " done (%.2fs)\n", time_process);
+#endif
 		return pDstImage;
 	}
 

@@ -54,4 +54,7 @@ void InitColorCmd();
 void DisableColorHighlighting();
 void HighlightingSaturated();
 
+void TimerStart(float &var);
+void TimerEnd(float &var);
+
 #endif //STANDARDCOLORFORMAT_H

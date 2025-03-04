@@ -8,6 +8,7 @@
 //=============================================================================
 
 #include "StandardColorFormat.h"
+#include "platform.h"
 #include <windows.h>
 
 // We will use the next color format in the tools.
@@ -103,4 +104,17 @@ void DisableColorHighlighting()
 {		
 	header_color = white;		path_color = white;		number_color = white;
 	sucesfullprocess_color = white;		done_color = white;
+}
+
+
+void TimerStart(float &var)
+{
+	var = Plat_FloatTime();
+}
+
+
+void TimerEnd(float &var)
+{
+	int var_end = Plat_FloatTime();
+	var = var - var_end;
 }

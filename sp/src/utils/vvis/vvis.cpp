@@ -616,6 +616,10 @@ void CalcPAS (void)
 	byte	uncompressed[MAX_MAP_LEAFS/8];
 	byte	compressed[MAX_MAP_LEAFS/8];
 
+#ifdef MAPBASE
+	float time_process;
+	TimerStart(time_process);
+#endif
 	Msg ("Building PAS... ");
 
 	count = 0;
@@ -667,7 +671,8 @@ void CalcPAS (void)
 	}
 
 #ifdef MAPBASE
-	ColorSpewMessage(SPEW_MESSAGE, &done_color, " done (0s)\n");
+	TimerEnd(time_process);
+	ColorSpewMessage(SPEW_MESSAGE, &done_color, " done (%.2fs)\n", time_process);
 #endif 
 
 #ifdef MAPBASE
@@ -1266,13 +1271,19 @@ int RunVVis( int argc, char **argv )
 #endif 
 
 #ifdef MAPBASE
+		float time_process;
+		TimerStart(time_process);
 		Msg("Writing Bsp file: +- ");
 		ColorSpewMessage(SPEW_MESSAGE, &path_color, "%s", targetPath);
-		ColorSpewMessage(SPEW_MESSAGE, &done_color, " done (0s)\n");
 #else
 		Msg("Writing %s\n", targetPath);
 #endif
 		WriteBSPFile (targetPath);	
+
+#ifdef MAPBASE
+		TimerEnd(time_process);
+		ColorSpewMessage(SPEW_MESSAGE, &done_color, " done (%.2fs)\n", time_process);
+#endif
 	}
 	else
 	{

@@ -663,6 +663,10 @@ void ComputePerLeafAmbientLighting()
 		RunThreadsOn(numleafs, true, ThreadComputeLeafAmbient);
 	}
 
+#ifdef MAPBASE
+	float time_process;
+	TimerStart(time_process);
+#endif
 	// now write out the data
 	Msg("Writing leaf ambient...");
 	g_pLeafAmbientIndex->RemoveAll();
@@ -719,7 +723,8 @@ void ComputePerLeafAmbientLighting()
 	}
 
 #ifdef MAPBASE
-	ColorSpewMessage(SPEW_MESSAGE, &done_color, " done (0s)\n");
+	TimerEnd(time_process);
+	ColorSpewMessage(SPEW_MESSAGE, &done_color, " done (%.2fs)\n", time_process);
 #else
 	Msg("done\n");
 #endif

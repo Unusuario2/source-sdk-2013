@@ -569,6 +569,10 @@ static void SetLumpData( )
 
 void EmitStaticProps()
 {
+#ifdef MAPBASE
+	float time_process;
+	TimerStart(time_process);
+#endif
 	Msg("Placing static props...");
 
 	CreateInterfaceFn physicsFactory = GetPhysicsFactory();
@@ -706,8 +710,10 @@ void EmitStaticProps()
 
 
 	SetLumpData( );
+
 #ifdef MAPBASE
-	ColorSpewMessage(SPEW_MESSAGE, &done_color, " done (0s)\n");
+	TimerEnd(time_process);
+	ColorSpewMessage(SPEW_MESSAGE, &done_color, " done (%.2fs)\n", time_process);
 #else
 	Msg("done (%d)\n", (int)(Plat_FloatTime() - start));
 #endif

@@ -524,8 +524,9 @@ void EmitDispLMAlphaAndNeighbors()
 {
 	int i;
 #ifdef MAPBASE
+	float time_process;
+	TimerStart(time_process);
 	Msg("Finding displacement neighbors...");
-	ColorSpewMessage(SPEW_MESSAGE, &done_color, " done (0s)\n");
 #else 
 	Msg("Finding displacement neighbors...\n");
 #endif 
@@ -585,6 +586,10 @@ void EmitDispLMAlphaAndNeighbors()
 	// Generate and export the active vert lists.
 	ExportAllowedVertLists( g_CoreDispInfos.Base(), g_dispinfo.Base(), nummapdispinfo );
 
+#ifdef MAPBASE
+	TimerEnd(time_process);
+	ColorSpewMessage(SPEW_MESSAGE, &done_color, " done (%.2fs)\n", time_process);
+#endif
 	
 	// Now that we know which vertices are actually going to be around, snap the ones that won't
 	// be around onto the slightly-reduced mesh. This is so the engine's ray test code and 
@@ -592,7 +597,8 @@ void EmitDispLMAlphaAndNeighbors()
 	SnapRemainingVertsToSurface( g_CoreDispInfos.Base(), g_dispinfo.Base(), nummapdispinfo );
 
 #ifdef MAPBASE
-		Msg("Finding lightmap sample positions...");
+	Msg("Finding lightmap sample positions...");
+	TimerStart(time_process);
 #else 
 	Msg("Finding lightmap sample positions...\n");
 #endif 
@@ -609,7 +615,8 @@ void EmitDispLMAlphaAndNeighbors()
 	}
 
 #ifdef MAPBASE
-	ColorSpewMessage(SPEW_MESSAGE, &done_color, " done (0s)\n");
+	TimerEnd(time_process);
+	ColorSpewMessage(SPEW_MESSAGE, &done_color, " done (%.2fs)\n", time_process);
 #endif
 
 	StartPacifier( "Displacement Alpha -> ");
