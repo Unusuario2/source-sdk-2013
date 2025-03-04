@@ -248,9 +248,9 @@ void TryMergeFaceList( face_t **pFaceList )
 	{
 #ifdef MAPBASE
 	Msg("\nMerged");
-	ColorSpewMessage(SPEW_MESSAGE, &magenta, " [%d] ", merged);
-	Msg("detail faces... ");
-	ColorSpewMessage(SPEW_MESSAGE, &green, "done (0)\n");
+	ColorSpewMessage(SPEW_MESSAGE, &number_color, " [%d] ", merged);
+	Msg("detail faces...");
+	ColorSpewMessage(SPEW_MESSAGE, &done_color, " done (0s)\n");
 #else
 	Msg("Merged %d detail faces... done(0)\n", merged );
 #endif 
@@ -300,7 +300,7 @@ face_t *MergeDetailTree( tree_t *worldtree, int brush_start, int brush_end )
 			detailbrushes = ChopBrushes (detailbrushes);
 
 #ifdef MAPBASE
-	ColorSpewMessage(SPEW_MESSAGE, &green, " done (%d)\n", (int)(Plat_FloatTime() - start));
+	ColorSpewMessage(SPEW_MESSAGE, &done_color, " done (%ds)\n", (int)(Plat_FloatTime() - start));
 #else
 	Msg("done (%d)\n", (int)(Plat_FloatTime() - start));
 #endif
@@ -314,7 +314,7 @@ face_t *MergeDetailTree( tree_t *worldtree, int brush_start, int brush_end )
 		SubdivideFaceList( &pFaces );
 
 #ifdef MAPBASE
-		ColorSpewMessage(SPEW_MESSAGE, &green, " done (%d)\n", (int)(Plat_FloatTime() - start));
+		ColorSpewMessage(SPEW_MESSAGE, &done_color, " done (%ds)\n", (int)(Plat_FloatTime() - start));
 #else
 		Msg("done (%d)\n", (int)(Plat_FloatTime() - start));
 #endif
@@ -330,7 +330,7 @@ face_t *MergeDetailTree( tree_t *worldtree, int brush_start, int brush_end )
 		FreeBrushList(detailbrushes);
 
 #ifdef MAPBASE
-		ColorSpewMessage(SPEW_MESSAGE, &green, " done (%d)\n", (int)(Plat_FloatTime() - start));
+		ColorSpewMessage(SPEW_MESSAGE, &done_color, " done (%ds)\n", (int)(Plat_FloatTime() - start));
 #else
 		Msg("done (%d)\n", (int)(Plat_FloatTime() - start));
 #endif

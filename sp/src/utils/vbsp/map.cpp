@@ -2820,8 +2820,8 @@ bool LoadMapFile( const char *pszFileName )
 			{
 #ifdef MAPBASE
 			Msg("Loading vmf file: +- ");
-			ColorSpewMessage(SPEW_MESSAGE, &blue, "%s", pszFileName);
-			ColorSpewMessage(SPEW_MESSAGE, &green, " done (0)\n");
+			ColorSpewMessage(SPEW_MESSAGE, &path_color, "%s", pszFileName);
+			ColorSpewMessage(SPEW_MESSAGE, &done_color, " done (0s)\n");
 #else
 			Msg("Loading %s...done\n", pszFileName);
 #endif	
@@ -3572,8 +3572,8 @@ void CMapFile::TestExpandBrushes (void)
 
 #ifdef MAPBASE
 	Msg("Writing: +- ");
-	ColorSpewMessage(SPEW_MESSAGE, &blue, "%s", name);
-	ColorSpewMessage(SPEW_MESSAGE, &green, " done (0)\n");
+	ColorSpewMessage(SPEW_MESSAGE, &path_color, "%s", name);
+	ColorSpewMessage(SPEW_MESSAGE, &done_color, " done (0s)\n");
 #else
 	Msg("writing %s...\n", name);
 #endif

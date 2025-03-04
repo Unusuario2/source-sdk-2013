@@ -209,7 +209,7 @@ void ReadLightFile (char *filename)
 
 #ifdef MAPBASE
 	Msg("Reading texlights from: +- ");
-	ColorSpewMessage(SPEW_MESSAGE, &blue, "%s", filename);
+	ColorSpewMessage(SPEW_MESSAGE, &path_color, "%s", filename);
 #else
 	Msg("[Reading texlights from '%s']\n", filename);
 #endif
@@ -318,7 +318,7 @@ void ReadLightFile (char *filename)
 		}
 	}
 #ifdef MAPBASE
-	ColorSpewMessage(SPEW_MESSAGE, &green, " done (0)\n");
+	ColorSpewMessage(SPEW_MESSAGE, &done_color, " done (0s)\n");
 #endif
 	qprintf ( "[%i texlights parsed from '%s']\n\n", file_texlights, filename);
 	g_pFileSystem->Close( f );
@@ -734,7 +734,7 @@ void MakePatches (void)
 
 #ifdef MAPBASE
 	Msg("Number of faces ");
-	ColorSpewMessage(SPEW_MESSAGE, &magenta, "[%i]\n",numfaces);
+	ColorSpewMessage(SPEW_MESSAGE, &number_color, "[%i]\n",numfaces);
 #else
 	qprintf ("%i faces\n", numfaces);
 #endif
@@ -770,7 +770,7 @@ void MakePatches (void)
 
 #ifdef MAPBASE
 	Msg("Total area ");
-	ColorSpewMessage(SPEW_MESSAGE, &magenta, "[%i square feet [%.2f square inches]]\n", (int)(totalarea / 144), totalarea);
+	ColorSpewMessage(SPEW_MESSAGE, &number_color, "[%i square feet [%.2f square inches]]\n", (int)(totalarea / 144), totalarea);
 #else
 	qprintf ("%i square feet [%.2f square inches]\n", (int)(totalarea/144), totalarea );
 #endif
@@ -985,7 +985,7 @@ void SubdividePatches (void)
 	unsigned int uiPatchCount = g_Patches.Size();
 #ifdef MAPBASE
 	Msg("Patches before subdivision ");
-	ColorSpewMessage(SPEW_MESSAGE, &magenta, "[%i]\n", g_Patches.Size());
+	ColorSpewMessage(SPEW_MESSAGE, &number_color, "[%i]\n", g_Patches.Size());
 #else
 	qprintf ("%i patches before subdivision\n", g_Patches.Size());
 #endif
@@ -1099,7 +1099,7 @@ void SubdividePatches (void)
 	}
 #ifdef MAPBASE
 	Msg("Patches after subdivision ");
-	ColorSpewMessage(SPEW_MESSAGE, &magenta, "[%i]\n", uiPatchCount);
+	ColorSpewMessage(SPEW_MESSAGE, &number_color, "[%i]\n", uiPatchCount);
 #else
 	qprintf("%i patches after subdivision\n", uiPatchCount);
 #endif
@@ -1775,7 +1775,7 @@ void BounceLight (void)
 
 #ifdef MAPBASE
 		Msg("\tBounce #%i added RGB", i + 1);
-		ColorSpewMessage(SPEW_MESSAGE, &magenta, " [%.0f, %.0f, %.0f]\n", added[0], added[1], added[2]);
+		ColorSpewMessage(SPEW_MESSAGE, &number_color, " [%.0f, %.0f, %.0f]\n", added[0], added[1], added[2]);
 #else
 		qprintf ("\tBounce #%i added RGB(%.0f, %.0f, %.0f)\n", i+1, added[0], added[1], added[2] );
 #endif
@@ -1999,16 +1999,16 @@ void MakeAllScales (void)
 
 #ifdef MAPBASE
 	Msg("Transfers ");
-	ColorSpewMessage(SPEW_MESSAGE, &magenta, "[%d]", total_transfer);
+	ColorSpewMessage(SPEW_MESSAGE, &number_color, "[%d]", total_transfer);
 	Msg(", max ");
-	ColorSpewMessage(SPEW_MESSAGE, &magenta, "[%d]\n", max_transfer);
+	ColorSpewMessage(SPEW_MESSAGE, &number_color, "[%d]\n", max_transfer);
 #else
 	Msg("transfers %d, max %d\n", total_transfer, max_transfer);
 #endif
 
 #ifdef MAPBASE
 	Msg("Transfer lists");
-	ColorSpewMessage(SPEW_MESSAGE, &magenta, " [%f megs]\n"
+	ColorSpewMessage(SPEW_MESSAGE, &number_color, " [%f megs]\n"
 		, (float)total_transfer * sizeof(transfer_t) / (1024*1024));
 #else
 	qprintf ("transfer lists: %5.1f megs\n"
@@ -2168,8 +2168,8 @@ bool RadWorld_Go()
 		VMPI_DistributeLightData();
 			
 #ifdef MAPBASE
-		Msg("FinalLightFace... "); 
-		ColorSpewMessage(SPEW_MESSAGE, &green, "done (0)\n");
+		Msg("FinalLightFace..."); 
+		ColorSpewMessage(SPEW_MESSAGE, &done_color, " done (0s)\n");
 		fflush(stdout);
 #else
 		Msg("FinalLightFace Done\n"); fflush(stdout);
@@ -2274,8 +2274,8 @@ void VRAD_LoadBSP( char const *pFilename )
 
 #ifdef MAPBASE
 	Msg("Loading bsp file: +- ");
-	ColorSpewMessage(SPEW_MESSAGE, &blue, "%s", platformPath);
-	ColorSpewMessage(SPEW_MESSAGE, &green, " done (0)\n");
+	ColorSpewMessage(SPEW_MESSAGE, &path_color, "%s", platformPath);
+	ColorSpewMessage(SPEW_MESSAGE, &done_color, " done (0s)\n");
 #else
 	Msg("Loading %s...done\n", platformPath);
 #endif
@@ -2285,7 +2285,9 @@ void VRAD_LoadBSP( char const *pFilename )
 	
 	// now, set whether or not static prop lighting is present
 	if (g_bStaticPropLighting)
-		g_LevelFlags |= g_bHDR? LVLFLAGS_BAKED_STATIC_PROP_LIGHTING_HDR : LVLFLAGS_BAKED_STATIC_PROP_LIGHTING_NONHDR;
+	{
+		g_LevelFlags |= g_bHDR ? LVLFLAGS_BAKED_STATIC_PROP_LIGHTING_HDR : LVLFLAGS_BAKED_STATIC_PROP_LIGHTING_NONHDR;
+	}
 	else
 	{
 		g_LevelFlags &= ~( LVLFLAGS_BAKED_STATIC_PROP_LIGHTING_HDR | LVLFLAGS_BAKED_STATIC_PROP_LIGHTING_NONHDR );
@@ -2330,7 +2332,7 @@ void VRAD_LoadBSP( char const *pFilename )
 	//
 	// TODO: change the maxes to the amount from the bsp!!
 	//
-//	g_Patches.EnsureCapacity( MAX_PATCHES );
+	//	g_Patches.EnsureCapacity( MAX_PATCHES );
 
 	g_FacePatches.SetSize( MAX_MAP_FACES );
 	faceParents.SetSize( MAX_MAP_FACES );
@@ -2358,13 +2360,13 @@ void VRAD_LoadBSP( char const *pFilename )
 		WriteRTEnv("trace.txt");
 
 	// Build acceleration structure
-	printf ( "Setting up ray-trace acceleration structure... ");
+	printf ( "Setting up ray-trace acceleration structure...");
 	float start = Plat_FloatTime();
 	g_RtEnv.SetupAccelerationStructure();
 	float end = Plat_FloatTime();
 
 #ifdef MAPBASE
-	ColorSpewMessage(SPEW_MESSAGE, &green, "done (%.2f)\n", end - start);
+	ColorSpewMessage(SPEW_MESSAGE, &done_color, " done (%.2f)\n", end - start);
 #else
 	printf ( "Done (%.2f seconds)\n", end-start );
 #endif
@@ -2410,7 +2412,7 @@ extern void CloseDispLuxels();
 void VRAD_Finish()
 {
 #ifdef MAPBASE
-	ColorSpewMessage(SPEW_MESSAGE, &green, "--> Map build ready to finish\n");
+	ColorSpewMessage(SPEW_MESSAGE, &sucesfullprocess_color, "--> Map build ready to finish\n");
 #else
 	Msg( "Ready to Finish\n" );
 #endif
@@ -2424,7 +2426,7 @@ void VRAD_Finish()
 
 #ifdef MAPBASE
 	Msg("Writing Bsp file: +- ");
-	ColorSpewMessage(SPEW_MESSAGE, &blue, "%s ", platformPath);
+	ColorSpewMessage(SPEW_MESSAGE, &path_color, "%s ", platformPath);
 #else
 	Msg("Writing %s\n", platformPath);
 #endif
@@ -2433,7 +2435,7 @@ void VRAD_Finish()
 	WriteBSPFile(platformPath);
 
 #ifdef MAPBASE
-	ColorSpewMessage(SPEW_MESSAGE, &green, "done (0)\n");
+	ColorSpewMessage(SPEW_MESSAGE, &done_color, " done (0s)\n");
 #endif
 
 	if ( g_bDumpPatches )
@@ -2457,7 +2459,7 @@ void VRAD_Finish()
 	GetHourMinuteSecondsString( (int)( end - g_flStartTime ), str, sizeof( str ) );
 
 #ifdef MAPBASE
-	ColorSpewMessage(SPEW_MESSAGE, &green, "--> Bake lighting build finished %s seconds.\n\n", str);
+	ColorSpewMessage(SPEW_MESSAGE, &sucesfullprocess_color, "--> Bake lighting build finished %s seconds.\n\n", str);
 #else
 	Msg("%s elapsed\n", str);
 #endif
@@ -2821,6 +2823,10 @@ int ParseCommandLine( int argc, char **argv, bool *onlydetail )
 			}
 		}
 #if MAPBASE
+		else if (!Q_stricmp(argv[i], "-HighlightingSaturated"))
+		{
+			HighlightingSaturated();
+		}
 		else if (!Q_stricmp(argv[i], "-NoColorHighlighting"))
 		{
 			DisableColorHighlighting();
@@ -3007,7 +3013,8 @@ void PrintUsage( int argc, char **argv )
 		"  -noskyboxrecurse : Turn off recursion into 3d skybox (skybox shadows on world)\n"
 		"  -nossprops      : Globally disable self-shadowing on static props\n"
 #ifdef MAPBASE
-		"  -NoColorHighlighting: Disables all highlighted colors in the console, except for warnings and errors.\n"
+		"  -NoColorHighlighting: Disables all highlighted colors in the console, except for headers warnings and errors.\n"
+		"  -HighlightingSaturated: Changes the color scheme to one with saturaded colors, except for warnings and errors.\n"
 #endif
 		"\n"
 #if 1 // Disabled for the initial SDK release with VMPI so we can get feedback from selected users.
@@ -3045,7 +3052,7 @@ int RunVRAD( int argc, char **argv )
 {
 #if defined(_MSC_VER) && ( _MSC_VER >= 1310 )
 	#if defined (MAPBASE) && defined (_WIN32)
-		ColorSpewMessage(SPEW_MESSAGE, &cyan, "Valve Software - Valve Radiosity Simulator (vrad.exe) (Build: pc32 %s)", __DATE__);
+		ColorSpewMessage(SPEW_MESSAGE, &header_color, "Valve Software - Valve Radiosity Simulator (vrad.exe) (Build: pc32 %s %s)", __DATE__, __TIME__);
 	#else
 		Msg("Valve Software - vrad.exe (" __DATE__ ")\n" );
 	#endif
@@ -3067,6 +3074,19 @@ int RunVRAD( int argc, char **argv )
 	}
 
 	VRAD_LoadBSP( argv[i] );
+
+#ifdef MAPBASE
+	char bake_mode[8] = "";
+
+	if ((g_flSkySampleScale >= 16.0) && (!onlydetail) && (!g_bOnlyStaticProps) && (visdatasize) && (numbounce >= 100)) //final
+		strcpy(bake_mode, "Final");
+	else if (do_fast == 1 || g_bFastAmbient == true || do_extra == false || numbounce == 1) //fast
+		strcpy(bake_mode, "Fast");
+	else
+		strcpy(bake_mode, "Normal");
+
+	ColorSpewMessage(SPEW_MESSAGE, &white_pure, "======== Baking lightmaps, %s mode ========\n", bake_mode);
+#endif
 
 	if ( (! onlydetail) && (! g_bOnlyStaticProps ) )
 	{
@@ -3090,6 +3110,10 @@ int VRAD_Main(int argc, char **argv)
 	g_pFileSystem = NULL;	// Safeguard against using it before it's properly initialized.
 
 	VRAD_Init();
+
+#ifdef MAPBASE
+	InitColorCmd();
+#endif
 
 	// This must come first.
 	VRAD_SetupMPI( argc, argv );

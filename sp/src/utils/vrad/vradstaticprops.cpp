@@ -416,8 +416,8 @@ void DumpCollideToGlView( vcollide_t *pCollide, const char *pFilename )
 
 #ifdef MAPBASE
 	Msg("Writing: +- ");
-	ColorSpewMessage(SPEW_MESSAGE, &blue, "%s", pFilename);
-	ColorSpewMessage(SPEW_MESSAGE, &green, " done (0)\n");
+	ColorSpewMessage(SPEW_MESSAGE, &path_color, "%s", pFilename);
+	ColorSpewMessage(SPEW_MESSAGE, &done_color, " done (0s)\n");
 #else
 	Msg("Writing %s...\n", pFilename);
 #endif
@@ -509,8 +509,8 @@ public:
 			return NULL;
 #ifdef MAPBASE
 		Msg("Loaded alpha texture: +- ");
-		ColorSpewMessage(SPEW_MESSAGE, &blue, " %s", szPath);
-		ColorSpewMessage(SPEW_MESSAGE, &green, " done (0)\n");
+		ColorSpewMessage(SPEW_MESSAGE, &path_color, " %s", szPath);
+		ColorSpewMessage(SPEW_MESSAGE, &done_color, " done (0s)\n");
 #else
 		Msg("Loaded alpha texture %s\n", szPath);
 #endif

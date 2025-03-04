@@ -2918,7 +2918,7 @@ void PrintBSPFileSizes (void)
 
 #ifdef MAPBASE
 	Msg("Total triangle count ");
-	ColorSpewMessage(SPEW_MESSAGE, &magenta, "[%d]\n", triangleCount);
+	ColorSpewMessage(SPEW_MESSAGE, &number_color, "[%d]\n", triangleCount);
 #else
 	Msg("Total triangle count: %d\n", triangleCount );
 #endif

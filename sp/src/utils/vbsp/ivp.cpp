@@ -99,11 +99,12 @@ void CTextBuffer::WriteFloatKey( const char *pKeyName, float outputData )
 	if ( strlen(pKeyName) > 1000 )
 	{
 #ifdef MAPBASE
-		Warning("\tError writing collision data %s\n", pKeyName);
+		Error("\tError writing collision data %s\n", pKeyName);
 #else
 		Msg("Error writing collision data %s\n", pKeyName);
-#endif
+
 		return;
+#endif
 	}
 	sprintf( tmp, "\"%s\" \"%f\"\n", pKeyName, outputData );
 	CopyData( tmp, strlen(tmp) );
@@ -117,11 +118,12 @@ void CTextBuffer::WriteFloatArrayKey( const char *pKeyName, const float *outputD
 	if ( strlen(pKeyName) > 1000 )
 	{
 #ifdef MAPBASE
-		Warning("\tError writing collision data %s\n", pKeyName);
+		Error("\tError writing collision data %s\n", pKeyName);
 #else
 		Msg("Error writing collision data %s\n", pKeyName);
-#endif
+
 		return;
+#endif
 	}
 	sprintf( tmp, "\"%s\" \"", pKeyName );
 	for ( int i = 0; i < count; i++ )
@@ -166,8 +168,8 @@ void DumpCollideToGlView( CPhysCollide *pCollide, const char *pFilename )
 		return;
 #ifdef MAPBASE
 	Msg("Writing: +- ");
-	ColorSpewMessage(SPEW_MESSAGE, &blue, "%s", pFilename);
-	ColorSpewMessage(SPEW_MESSAGE, &green, " done (0)\n");
+	ColorSpewMessage(SPEW_MESSAGE, &path_color, "%s", pFilename);
+	ColorSpewMessage(SPEW_MESSAGE, &done_color, " done (0s)\n");
 #else
 	Msg("Writing %s...\n", pFilename);
 #endif
@@ -196,8 +198,8 @@ void DumpCollideToPHY( CPhysCollide *pCollide, CTextBuffer *text,   const char *
 {
 #ifdef MAPBASE
 	Msg("Writing: +- ");
-	ColorSpewMessage(SPEW_MESSAGE, &blue, "%s", pFilename);
-	ColorSpewMessage(SPEW_MESSAGE, &green, " done (0)\n");
+	ColorSpewMessage(SPEW_MESSAGE, &path_color, "%s", pFilename);
+	ColorSpewMessage(SPEW_MESSAGE, &done_color, " done (0s)\n");
 #else
 	Msg("Writing %s...\n", pFilename);
 #endif
@@ -1685,8 +1687,8 @@ void EmitPhysCollision()
 	Assert( (ptr-g_pPhysCollide) == g_PhysCollideSize);
 
 #ifdef MAPBASE
-	ColorSpewMessage(SPEW_MESSAGE, &magenta, " [%d bytes]", g_PhysCollideSize);
-	ColorSpewMessage(SPEW_MESSAGE, &green, " done(%d)\n", (int)(Plat_FloatTime() - start));
+	ColorSpewMessage(SPEW_MESSAGE, &number_color, " [%d bytes]", g_PhysCollideSize);
+	ColorSpewMessage(SPEW_MESSAGE, &done_color, " done(%d)\n", (int)(Plat_FloatTime() - start));
 #else
 	Msg("done (%d)\n", (int)(Plat_FloatTime() - start));
 #endif

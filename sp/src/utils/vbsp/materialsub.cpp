@@ -48,8 +48,8 @@ void LoadMaterialReplacementKeys( const char *gamedir, const char *mapname )
 
 #ifdef MAPBASE
 	Msg( "File path: +- ");
-	ColorSpewMessage(SPEW_MESSAGE, &blue, "%s", path);
-	ColorSpewMessage(SPEW_MESSAGE, &green, " done (0)\n");
+	ColorSpewMessage(SPEW_MESSAGE, &path_color, "%s", path);
+	ColorSpewMessage(SPEW_MESSAGE, &done_color, " done (0s)\n");
 #else
 	Msg( "File path: %s", path );
 #endif

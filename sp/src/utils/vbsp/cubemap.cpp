@@ -842,7 +842,7 @@ void Cubemap_FixupBrushSidesMaterials( void )
 	}
 
 #ifdef MAPBASE
-	ColorSpewMessage(SPEW_MESSAGE, &green, " done (0)\n");
+	ColorSpewMessage(SPEW_MESSAGE, &done_color, " done (0s)\n");
 #else
 	Msg("done(0)\n");
 #endif 

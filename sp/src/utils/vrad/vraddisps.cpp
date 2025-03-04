@@ -519,9 +519,9 @@ void CVRadDispMgr::MakePatches( void )
 	// Print stats.
 #ifdef MAPBASE
 	Msg("Number of displacements ");
-	ColorSpewMessage(SPEW_MESSAGE, &magenta, "[%i]\n", nTreeCount);	
+	ColorSpewMessage(SPEW_MESSAGE, &number_color, "[%i]\n", nTreeCount);	
 	Msg("Square Feet ");
-	ColorSpewMessage(SPEW_MESSAGE, &magenta, "[%i] [%.2f Square Inches]\n", (int)(flTotalArea / 144.0f), flTotalArea);
+	ColorSpewMessage(SPEW_MESSAGE, &number_color, "[%i] [%.2f Square Inches]\n", (int)(flTotalArea / 144.0f), flTotalArea);
 #else
 	qprintf("%i Displacements\n", nTreeCount);
 	qprintf("%i Square Feet [%.2f Square Inches]\n", (int)(flTotalArea / 144.0f), flTotalArea);
@@ -1565,7 +1565,7 @@ void CVRadDispMgr::EndTimer( void )
 	double seconds = duration.GetSeconds();
 
 #ifdef MAPBASE
-	ColorSpewMessage(SPEW_MESSAGE, &green, "done (%1.4lf)\n", seconds);
+	ColorSpewMessage(SPEW_MESSAGE, &done_color, "done (%1.4lf)\n", seconds);
 #else
 	Msg( "Done<%1.4lf sec>\n", seconds );
 #endif

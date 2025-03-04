@@ -365,13 +365,13 @@ void CalcVis (void)
 	//lol
 #ifdef MAPBASE
 		Msg("Optimized ");
-		ColorSpewMessage(SPEW_MESSAGE, &magenta, "[%d]", count);
+		ColorSpewMessage(SPEW_MESSAGE, &number_color, "[%d]", count);
 		Msg(" visible clusters ");
-		ColorSpewMessage(SPEW_MESSAGE, &magenta, "[%.2f%%]\n", count * 100.0 / totalvis);
+		ColorSpewMessage(SPEW_MESSAGE, &number_color, "[%.2f%%]\n", count * 100.0 / totalvis);
 		Msg("Total clusters visible ");
-		ColorSpewMessage(SPEW_MESSAGE, &magenta, "[%i]\n", totalvis);
+		ColorSpewMessage(SPEW_MESSAGE, &number_color, "[%i]\n", totalvis);
 		Msg("Average clusters visible");
-		ColorSpewMessage(SPEW_MESSAGE, &magenta, " [%i]\n", totalvis / portalclusters);
+		ColorSpewMessage(SPEW_MESSAGE, &number_color, " [%i]\n", totalvis / portalclusters);
 #else
 	Msg("Optimized: %d visible clusters (%.2f%%)\n", count, count * 100.0 / totalvis);
 	Msg("Total clusters visible: %i\n", totalvis);
@@ -496,9 +496,9 @@ void LoadPortals (char *name)
 
 #ifdef MAPBASE
 		Msg ("  Portalclusters ");
-		ColorSpewMessage(SPEW_MESSAGE, &magenta, "[%i] \n", portalclusters);
+		ColorSpewMessage(SPEW_MESSAGE, &number_color, "[%i] \n", portalclusters);
 		Msg ("  Numportals ");
-		ColorSpewMessage(SPEW_MESSAGE, &magenta, "[%i] \n", g_numportals);
+		ColorSpewMessage(SPEW_MESSAGE, &number_color, "[%i] \n", g_numportals);
 #else
 	Msg ("%4i portalclusters\n", portalclusters);
 	Msg ("%4i numportals\n", g_numportals);
@@ -667,12 +667,12 @@ void CalcPAS (void)
 	}
 
 #ifdef MAPBASE
-	ColorSpewMessage(SPEW_MESSAGE, &green, "done (0)\n");
+	ColorSpewMessage(SPEW_MESSAGE, &done_color, " done (0s)\n");
 #endif 
 
 #ifdef MAPBASE
 	Msg("Average clusters audible");
-	ColorSpewMessage(SPEW_MESSAGE, &magenta, " [%i]\n", count / portalclusters);
+	ColorSpewMessage(SPEW_MESSAGE, &number_color, " [%i]\n", count / portalclusters);
 #else
 	Msg("Average clusters audible: %i\n", count / portalclusters);
 #endif
@@ -1020,6 +1020,10 @@ int ParseCommandLine( int argc, char **argv )
 			// nothing to do here, but don't bail on this option
 		}
 #if MAPBASE
+		else if (!Q_stricmp(argv[i], "-HighlightingSaturated"))
+		{
+			HighlightingSaturated();
+		}
 		else if (!Q_stricmp(argv[i], "-NoColorHighlighting"))
 		{
 			DisableColorHighlighting();
@@ -1094,7 +1098,8 @@ void PrintUsage( int argc, char **argv )
 		"  -x360		   : Generate Xbox360 version of vsp\n"
 		"  -nox360		   : Disable generation Xbox360 version of vsp (default)\n"
 #ifdef MAPBASE
-		"  -NoColorHighlighting: Disables all highlighted colors in the console, except for warnings and errors.\n"
+		"  -NoColorHighlighting: Disables all highlighted colors in the console, except for headers warnings and errors.\n"
+		"  -HighlightingSaturated: Changes the color scheme to one with saturaded colors, except for warnings and errors.\n"
 #endif
 		"\n"
 #if 1 // Disabled for the initial SDK release with VMPI so we can get feedback from selected users.
@@ -1136,7 +1141,7 @@ int RunVVis( int argc, char **argv )
 
 
 #if defined (MAPBASE) && defined(_WIN32)
-	ColorSpewMessage(SPEW_MESSAGE, &cyan, "Valve Software - vvis.exe (Build: pc32 %s)", __DATE__);
+	ColorSpewMessage(SPEW_MESSAGE, &header_color, "Valve Software - vvis.exe (Build: pc32 %s %s)", __DATE__, __TIME__);
 #else
 	Msg("Valve Software - vvis.exe (%s)\n", __DATE__);
 #endif
@@ -1188,8 +1193,8 @@ int RunVVis( int argc, char **argv )
 
 #ifdef MAPBASE
 		Msg ("Reading: +- ");
-		ColorSpewMessage(SPEW_MESSAGE, &blue, "%s", targetPath);
-		ColorSpewMessage(SPEW_MESSAGE, &green, " done (0)\n");
+		ColorSpewMessage(SPEW_MESSAGE, &path_color, "%s", targetPath);
+		ColorSpewMessage(SPEW_MESSAGE, &done_color, " done (0s)\n");
 #else
 	Msg ("Reading %s\n", targetPath);
 #endif
@@ -1228,8 +1233,8 @@ int RunVVis( int argc, char **argv )
 
 #ifdef MAPBASE
 	Msg("Reading: +- ");
-	ColorSpewMessage(SPEW_MESSAGE, &blue, "%s", portalfile);
-	ColorSpewMessage(SPEW_MESSAGE, &green, " done (0)\n");
+	ColorSpewMessage(SPEW_MESSAGE, &path_color, "%s", portalfile);
+	ColorSpewMessage(SPEW_MESSAGE, &done_color, " done (0s)\n");
 #else
 	Msg("Reading %s\n", targetPath);
 #endif
@@ -1253,17 +1258,17 @@ int RunVVis( int argc, char **argv )
 
 #ifdef MAPBASE
 		Msg("VisDataSize");
-		ColorSpewMessage(SPEW_MESSAGE, &magenta, " [%i] ", visdatasize);
+		ColorSpewMessage(SPEW_MESSAGE, &number_color, " [%i] ", visdatasize);
 		Msg("compressed from");
-		ColorSpewMessage(SPEW_MESSAGE, &magenta, " [%i]\n", originalvismapsize * 2);
+		ColorSpewMessage(SPEW_MESSAGE, &number_color, " [%i]\n", originalvismapsize * 2);
 #else
 		Msg("visdatasize:%i  compressed from %i\n", visdatasize, originalvismapsize * 2);
 #endif 
 
 #ifdef MAPBASE
 		Msg("Writing Bsp file: +- ");
-		ColorSpewMessage(SPEW_MESSAGE, &blue, "%s ", targetPath);
-		ColorSpewMessage(SPEW_MESSAGE, &green, "done (0)\n");
+		ColorSpewMessage(SPEW_MESSAGE, &path_color, "%s", targetPath);
+		ColorSpewMessage(SPEW_MESSAGE, &done_color, " done (0s)\n");
 #else
 		Msg("Writing %s\n", targetPath);
 #endif
@@ -1289,7 +1294,7 @@ int RunVVis( int argc, char **argv )
 	GetHourMinuteSecondsString( (int)( end - start ), str, sizeof( str ) );
 
 #ifdef MAPBASE
-	ColorSpewMessage(SPEW_MESSAGE, &green, "--> Visibility complete in %s seconds.", str);
+	ColorSpewMessage(SPEW_MESSAGE, &sucesfullprocess_color, "--> Visibility complete in %s seconds.\n", str);
 #else
 	Msg("%s elapsed\n", str);
 #endif
@@ -1312,6 +1317,10 @@ int main (int argc, char **argv)
 	MathLib_Init( 2.2f, 2.2f, 0.0f, 1.0f, false, false, false, false );
 	InstallAllocationFunctions();
 	InstallSpewFunction();
+
+#ifdef MAPBASE
+	InitColorCmd();
+#endif
 
 	VVIS_SetupMPI( argc, argv );
 

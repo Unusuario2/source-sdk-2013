@@ -1508,7 +1508,7 @@ static void ParseLightEnvironment( entity_t* e, directlight_t* dl )
 
 #ifdef MAPBASE
 		printf("Sun extent from map ");
-		ColorSpewMessage(SPEW_MESSAGE, &magenta, "[%f]\n", g_SunAngularExtent);
+		ColorSpewMessage(SPEW_MESSAGE, &number_color, "[%f]\n", g_SunAngularExtent);
 #else
 		printf("sun extent from map=%f\n",g_SunAngularExtent);
 #endif
@@ -1641,7 +1641,7 @@ void CreateDirectLights (void)
 
 #ifdef MAPBASE
 	Msg("Direct lights");
-	ColorSpewMessage(SPEW_MESSAGE, &magenta, " [%i]\n", numdlights);
+	ColorSpewMessage(SPEW_MESSAGE, &number_color, " [%i]\n", numdlights);
 #else
 	qprintf ("%i direct lights\n", numdlights);
 #endif

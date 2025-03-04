@@ -353,7 +353,7 @@ void ProcessWorldModel (void)
 	MakeFaces (tree->headnode);
 
 #ifdef MAPBASE
-	ColorSpewMessage(SPEW_MESSAGE, &green, " done (%d)\n", (int)(Plat_FloatTime() - start));
+	ColorSpewMessage(SPEW_MESSAGE, &done_color, " done (%ds)\n", (int)(Plat_FloatTime() - start));
 #else
 	Msg("done (%d)\n", (int)(Plat_FloatTime() - start) );
 #endif
@@ -384,14 +384,14 @@ void ProcessWorldModel (void)
 	pLeafFaceList = FixTjuncs (tree->headnode, pLeafFaceList);
 
 #ifdef MAPBASE
-	ColorSpewMessage(SPEW_MESSAGE, &green, " done (0)\n");
+	ColorSpewMessage(SPEW_MESSAGE, &done_color, " done (0s)\n");
 #endif
 
 	// this merges all of the solid nodes that have separating planes
 	if (!noprune)
 	{
 #ifdef MAPBASE
-		Msg("PruneNodes... ");
+		Msg("PruneNodes...");
 #else
 		Msg("PruneNodes...done (0)\n");
 #endif
@@ -399,7 +399,7 @@ void ProcessWorldModel (void)
 		PruneNodes (tree->headnode);
 
 #ifdef MAPBASE
-		ColorSpewMessage(SPEW_MESSAGE, &green, "done (0)\n");
+		ColorSpewMessage(SPEW_MESSAGE, &done_color, " done (0s)\n");
 #endif
 	}
 
@@ -410,7 +410,7 @@ void ProcessWorldModel (void)
 	WriteBSP (tree->headnode, pLeafFaceList);
 
 #ifdef MAPBASE
-	ColorSpewMessage(SPEW_MESSAGE, &green, " done (%d)\n", (int)(Plat_FloatTime() - start));
+	ColorSpewMessage(SPEW_MESSAGE, &done_color, " done (%ds)\n", (int)(Plat_FloatTime() - start));
 #else
 	Msg("done (%d)\n", (int)(Plat_FloatTime() - start));
 #endif
@@ -961,7 +961,7 @@ int RunVBSP( int argc, char **argv )
 	LoadCmdLineFromFile( argc, argv, mapbase, "vbsp" );
 
 #if defined (MAPBASE) && defined (_WIN32)
-	ColorSpewMessage(SPEW_MESSAGE, &cyan, "Valve Software - vbsp.exe (Build: pc32 %s)", __DATE__ );
+	ColorSpewMessage(SPEW_MESSAGE, &header_color, "Valve Software - vbsp.exe (Build: pc32 %s %s)", __DATE__, __TIME__ );
 #else
 	Msg( "Valve Software - vbsp.exe (%s)\n", __DATE__ );
 #endif
@@ -1238,6 +1238,10 @@ int RunVBSP( int argc, char **argv )
 		{
 			g_bPropperStripEntities = true;
 		}
+		else if (!Q_stricmp(argv[i], "-HighlightingSaturated"))
+		{
+			HighlightingSaturated();
+		}
 		else if ( !Q_stricmp( argv[i], "-NoColorHighlighting" ) )
 		{
 			DisableColorHighlighting();
@@ -1394,7 +1398,8 @@ int RunVBSP( int argc, char **argv )
 				"  -FullMinidumps  : Write large minidumps on crash.\n"
 				"  -nohiddenmaps   : Exclude manifest maps if they are currently hidden.\n"
 #ifdef MAPBASE
-				"  -NoColorHighlighting: Disables all highlighted colors in the console, except for warnings and errors.\n"
+				"  -NoColorHighlighting: Disables all highlighted colors in the console, except for headers warnings and errors.\n"
+				"  -HighlightingSaturated: Changes the color scheme to one with saturaded colors, except for warnings and errors.\n"
 				"  -defaultcubemap : Makes a dummy cubemap.\n"
 				"  -skyboxcubemap  : Makes a skybox cubemaps for LDR cubemaps. (HDR skybox cubemaps are not supported)\n"
 				"  -defaultcubemapres  : Sets the dummy cubemap resolution. (Default 32)\n"
@@ -1454,8 +1459,8 @@ int RunVBSP( int argc, char **argv )
 
 #ifdef MAPBASE
 	Msg("Material path: +- ");
-	ColorSpewMessage(SPEW_MESSAGE, &blue, "%s", materialPath);
-	ColorSpewMessage(SPEW_MESSAGE, &green, " done (0)\n");
+	ColorSpewMessage(SPEW_MESSAGE, &path_color, "%s", materialPath);
+	ColorSpewMessage(SPEW_MESSAGE, &done_color, " done (0s)\n");
 #else
 	Msg("materialPath: %s\n", materialPath);
 #endif
@@ -1588,7 +1593,7 @@ int RunVBSP( int argc, char **argv )
 	GetHourMinuteSecondsString( (int)( end - start ), str, sizeof( str ) );
 
 #ifdef MAPBASE
-	ColorSpewMessage(SPEW_MESSAGE, &green, "--> Geometry complete in %s.", str);
+	ColorSpewMessage(SPEW_MESSAGE, &sucesfullprocess_color, "--> Geometry complete in %s.\n", str);
 #else
 	Msg("%s elapsed\n", str);
 #endif
@@ -1614,6 +1619,11 @@ int main(int argc, char** argv)
 {
 	// Install an exception handler.
 	SetupDefaultToolsMinidumpHandler();
+
+#ifdef MAPBASE
+	InitColorCmd();
+#endif
+
 	return RunVBSP( argc, argv );
 }
 

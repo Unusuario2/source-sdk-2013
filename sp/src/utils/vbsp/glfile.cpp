@@ -175,8 +175,8 @@ void WriteGLView (tree_t *tree, char *source)
 
 #ifdef MAPBASE
 	Msg("Writing: +- ");
-	ColorSpewMessage(SPEW_MESSAGE, &blue, "%s", name);
-	ColorSpewMessage(SPEW_MESSAGE, &green, " done (0)\n");
+	ColorSpewMessage(SPEW_MESSAGE, &path_color, "%s", name);
+	ColorSpewMessage(SPEW_MESSAGE, &done_color, " done (0s)\n");
 #else
 	Msg("Writing %s\n", name);
 #endif
@@ -205,8 +205,8 @@ void WriteGLViewFaces( tree_t *tree, const char *pName )
 	sprintf (name, "%s%s.gl", outbase, pName);
 #ifdef MAPBASE
 	Msg("Writing: +- ");
-	ColorSpewMessage(SPEW_MESSAGE, &blue, "%s", name);
-	ColorSpewMessage(SPEW_MESSAGE, &green, " done (0)\n");
+	ColorSpewMessage(SPEW_MESSAGE, &path_color, "%s", name);
+	ColorSpewMessage(SPEW_MESSAGE, &done_color, " done (0s)\n");
 #else
 	Msg("Writing %s\n", name);
 #endif
@@ -234,8 +234,8 @@ void WriteGLViewBrushList( bspbrush_t *pList, const char *pName )
 	sprintf (name, "%s%s.gl", outbase, pName );
 #ifdef MAPBASE
 	Msg("Writing: +- ");
-	ColorSpewMessage(SPEW_MESSAGE, &blue, "%s", name);
-	ColorSpewMessage(SPEW_MESSAGE, &green, " done (0)\n");
+	ColorSpewMessage(SPEW_MESSAGE, &path_color, "%s", name);
+	ColorSpewMessage(SPEW_MESSAGE, &done_color, " done (0s)\n");
 #else
 	Msg("Writing %s\n", name);
 #endif

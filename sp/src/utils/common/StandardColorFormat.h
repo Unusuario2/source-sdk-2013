@@ -7,6 +7,8 @@
 // $NoKeywords: $
 //=============================================================================
 
+// For a detailed explanation, go to StandardColorFormat.cpp
+
 #ifndef STANDARDCOLORFORMAT_H
 #define STANDARDCOLORFORMAT_H
 
@@ -16,38 +18,7 @@
 
 #include "Color.h"
 
-// We will use the next color format in the tools.
-//	- Green: process done.
-//	- Blue: indicates a path.
-//	- Purple: indicates a number of a funtion.
-//	- Red: process failed.
-//	- Cyan: Only for header strings.
-
-// +--------------------+------------------+
-// |       Color        | ANSI Code        |
-// +--------------------+------------------+
-// | Black              | \033[30m         |
-// | Red                | \033[31m         |
-// | Green              | \033[32m         |
-// | Yellow             | \033[33m         |
-// | Blue               | \033[34m         |
-// | Magenta            | \033[35m         |
-// | Cyan               | \033[36m         |
-// | White              | \033[37m         |
-// +--------------------+------------------+
-// | Bright Black       | \033[90m         |
-// | Bright Red         | \033[91m         |
-// | Bright Green       | \033[92m         |
-// | Bright Yellow      | \033[93m         |
-// | Bright Blue        | \033[94m         |
-// | Bright Magenta     | \033[95m         |
-// | Bright Cyan        | \033[96m         |
-// | Bright White       | \033[97m         |
-// +--------------------+------------------+
-// | Reset              | \033[0m          |
-// +--------------------+------------------+
-
-// Colors
+// Colors (saturated)
 extern Color black;				// Black
 extern Color red;				// Red
 extern Color green;				// Green
@@ -57,8 +28,7 @@ extern Color magenta;			// Magenta
 extern Color cyan;				// Cyan
 extern Color white;				// White
 
-#if 0 //these do not work in all the console windows. 
-// Bright Colors (High Intensity)
+#if 0 //these do not work in all the windows console. 
 extern Color bright_black;      // Bright Black (Gray)
 extern Color bright_red;        // Bright Red
 extern Color bright_green;      // Bright Green
@@ -67,11 +37,21 @@ extern Color bright_blue;       // Bright Blue
 extern Color bright_magenta;    // Bright Magenta
 extern Color bright_cyan;       // Bright Cyan
 extern Color bright_white;      // Bright White
-
-// Dark Colors (Low Intensity)
-extern Color dark_yellow;		// Custom
 #endif //0
 
+//Custom
+extern Color white_pure;
+
+//Colors used by the strings. 
+extern Color header_color;
+extern Color path_color;
+extern Color number_color;
+extern Color sucesfullprocess_color;
+extern Color done_color;
+
+
+void InitColorCmd();
 void DisableColorHighlighting();
+void HighlightingSaturated();
 
 #endif //STANDARDCOLORFORMAT_H

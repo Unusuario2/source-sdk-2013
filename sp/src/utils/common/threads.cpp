@@ -151,7 +151,7 @@ void ThreadSetDefault (void)
 	}
 
 #ifdef MAPBASE
-	ColorSpewMessage(SPEW_MESSAGE, &cyan, "(Threads: %i)\n", numthreads);
+	ColorSpewMessage(SPEW_MESSAGE, &cyan, "(Threads: %i)\n", numthreads); //Since this is part of the header of the tool, this will be in cyan.
 #else
 	Msg ("%i threads \n", numthreads);
 #endif
@@ -263,7 +263,7 @@ void RunThreadsOn( int workcnt, qboolean showpacifier, RunThreadsFn fn, void *pU
 	{
 		EndPacifier(false);
 #ifdef MAPBASE
-		printf("] (%i)\n", end - start);
+		printf("] (%is)\n", end - start);
 #else
 		printf (" (%i)\n", end-start);
 #endif

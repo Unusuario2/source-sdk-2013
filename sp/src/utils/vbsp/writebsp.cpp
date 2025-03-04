@@ -886,17 +886,17 @@ void CompactTexinfos()
 		}
 	}
 #ifdef MAPBASE
-	ColorSpewMessage(SPEW_MESSAGE, &green, " done (0)\n");
+	ColorSpewMessage(SPEW_MESSAGE, &done_color, " done (0s)\n");
 	Msg("  Reduced ");
-	ColorSpewMessage(SPEW_MESSAGE,  &magenta, "[%d]", oldCount);
+	ColorSpewMessage(SPEW_MESSAGE,  &number_color, "[%d]", oldCount);
 	Msg(" texinfos to ");
-	ColorSpewMessage(SPEW_MESSAGE,  &magenta, "[%d]\n",texinfo.Count());
+	ColorSpewMessage(SPEW_MESSAGE,  &number_color, "[%d]\n",texinfo.Count());
 
 	Msg("  Reduced ");
-	ColorSpewMessage(SPEW_MESSAGE,  &magenta, "[%d]", oldTexdataCount);
+	ColorSpewMessage(SPEW_MESSAGE,  &number_color, "[%d]", oldTexdataCount);
 	Msg(" texinfos to ");
-	ColorSpewMessage(SPEW_MESSAGE,  &magenta, "[%d] ", numtexdata);
-	ColorSpewMessage(SPEW_MESSAGE,  &magenta, "[%d bytes to %d]\n", oldTexdataString, g_TexDataStringData.Count());
+	ColorSpewMessage(SPEW_MESSAGE,  &number_color, "[%d] ", numtexdata);
+	ColorSpewMessage(SPEW_MESSAGE,  &number_color, "[%d bytes to %d]\n", oldTexdataString, g_TexDataStringData.Count());
 #else
 	Msg(" done\n");
 
@@ -1308,8 +1308,8 @@ void EndBSPFile (void)
 
 #ifdef MAPBASE
 	Msg("Writing Bsp file: +- ");
-	ColorSpewMessage(SPEW_MESSAGE, &blue, "%s ", targetPath);
-	ColorSpewMessage(SPEW_MESSAGE, &green, "done (0)\n");
+	ColorSpewMessage(SPEW_MESSAGE, &path_color, "%s ", targetPath);
+	ColorSpewMessage(SPEW_MESSAGE, &done_color, "done (0s)\n");
 #else
 	Msg ("Writing %s\n", targetPath);
 #endif

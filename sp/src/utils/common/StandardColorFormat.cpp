@@ -8,6 +8,7 @@
 //=============================================================================
 
 #include "StandardColorFormat.h"
+#include <windows.h>
 
 // We will use the next color format in the tools.
 //	- Green: process done.
@@ -44,7 +45,7 @@
 // Format:	Color <name>(R, G, B, 255);
 // Funtion: ColorSpewMessage( SPEW_MESSAGE, &<name>, "");
 
-// Basic Colors
+// Basic Colors (saturated)
 Color black(0, 0, 0, 255);				// Black
 Color red(255, 0, 0, 255);				// Red,	Error
 Color green(0, 255, 0, 255);			// Green, Done
@@ -54,7 +55,7 @@ Color magenta(255, 0, 255, 255);		// Magenta, Number
 Color cyan(0, 255, 255, 255);			// Cyan, Header
 Color white(255, 255, 255, 255);		// White, Standard
 
-#if 0 //These seems to dont work so we will use the standard colors.
+#if 0
 // Bright Colors (High Intensity)
 Color bright_black(85, 85, 85, 255);    // Bright Black (Gray)
 Color bright_red(255, 85, 85, 255);     // Bright Red
@@ -63,14 +64,43 @@ Color bright_yellow(255, 255, 85, 255); // Bright Yellow
 Color bright_blue(85, 85, 255, 255);    // Bright Blue
 Color bright_magenta(255, 85, 255, 255);// Bright Magenta
 Color bright_cyan(85, 255, 255, 255);   // Bright Cyan
-Color bright_white(255, 255, 255, 255); // Bright White}
-
-// Dark Colors (Low Intensity)
-Color dark_yellow(100, 100, 0, 255);	// Custom
+Color bright_white(255, 255, 255, 255); // Bright White
 #endif //0
 
-void DisableColorHighlighting()
+// Dark Colors (Low Intensity|non-saturated)
+Color dark_yellow(155, 132, 0, 128);
+Color dark_grey(0, 0, 0, 128);
+
+//Custom
+Color white_pure(254, 254, 254, 254);
+
+//Colors used by the strings. By default they will be on non-saturated mode. 
+Color header_color = cyan;					//Used by headers strings.
+Color path_color = dark_yellow;				//Used by paths strings.
+Color number_color = white;					//Used by numbers strings.
+Color sucesfullprocess_color = green;		//Used by "-->" strings.
+Color done_color = dark_grey;				//Used by "done()"
+
+
+//This enables more colors in the cmd, for legacy consoles. In theory now, Bright Colors should work.
+void InitColorCmd() 
 {
-	red = white;		green = white;		yellow = white;
-	blue = white;		magenta = white;	cyan = white;
+	HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+	DWORD dwMode = 0;
+	GetConsoleMode(hOut, &dwMode);
+	SetConsoleMode(hOut, dwMode | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
+}
+
+
+void HighlightingSaturated()
+{
+	path_color = blue;					number_color = magenta;
+	sucesfullprocess_color = green;		done_color = green;
+}
+
+
+void DisableColorHighlighting()
+{		
+	header_color = white;		path_color = white;		number_color = white;
+	sucesfullprocess_color = white;		done_color = white;
 }

@@ -524,8 +524,8 @@ void EmitDispLMAlphaAndNeighbors()
 {
 	int i;
 #ifdef MAPBASE
-	Msg("Finding displacement neighbors... ");
-	ColorSpewMessage(SPEW_MESSAGE, &green, "done (0)\n");
+	Msg("Finding displacement neighbors...");
+	ColorSpewMessage(SPEW_MESSAGE, &done_color, " done (0s)\n");
 #else 
 	Msg("Finding displacement neighbors...\n");
 #endif 
@@ -609,7 +609,7 @@ void EmitDispLMAlphaAndNeighbors()
 	}
 
 #ifdef MAPBASE
-	ColorSpewMessage(SPEW_MESSAGE, &green, " done (0)\n");
+	ColorSpewMessage(SPEW_MESSAGE, &done_color, " done (0s)\n");
 #endif
 
 	StartPacifier( "Displacement Alpha -> ");

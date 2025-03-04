@@ -71,11 +71,11 @@ void WritePortalFile(FILE *pFile, const CUtlVector<cluster_portals_t> &list)
 			WindingPlane (w, normal, &dist);
 			if ( DotProduct (p->plane.normal, normal) < 0.99 )
 			{	// backwards...
-				fprintf (pFile,"[%i %i %i] ",w->numpoints, p->nodes[1]->cluster, p->nodes[0]->cluster);
+				fprintf (pFile,"%i %i %i ",w->numpoints, p->nodes[1]->cluster, p->nodes[0]->cluster);
 			}
 			else
 			{
-				fprintf (pFile,"[%i %i %i] ",w->numpoints, p->nodes[0]->cluster, p->nodes[1]->cluster);
+				fprintf (pFile,"%i %i %i ",w->numpoints, p->nodes[0]->cluster, p->nodes[1]->cluster);
 			}
 			
 			for (int i=0 ; i<w->numpoints ; i++)
@@ -337,8 +337,8 @@ void WritePortalFile (tree_t *tree)
 
 #ifdef MAPBASE
 		Msg("Writing portal file: +- ");
-		ColorSpewMessage(SPEW_MESSAGE, &blue, "%s", filename);
-		ColorSpewMessage(SPEW_MESSAGE, &green, " done (0)\n");
+		ColorSpewMessage(SPEW_MESSAGE, &path_color, "%s", filename);
+		ColorSpewMessage(SPEW_MESSAGE, &done_color, " done (0s)\n");
 #else
 	Msg("writing %s...", filename);
 #endif 
@@ -352,7 +352,7 @@ void WritePortalFile (tree_t *tree)
 
 // set the cluster field in every leaf and count the total number of portals
 	num_visclusters = 0;
-	Msg("Building visibility clusters... ");
+	Msg("Building visibility clusters...");
 	CUtlVector<node_t *> leaves;
 	BuildVisLeafList_r( headnode, leaves );
 
@@ -386,7 +386,7 @@ void WritePortalFile (tree_t *tree)
 	SaveClusters_r (headnode);
 
 #ifdef MAPBASE
-	ColorSpewMessage(SPEW_MESSAGE, &green, "done (%d)\n", (int)(Plat_FloatTime() - start));
+	ColorSpewMessage(SPEW_MESSAGE, &done_color, " done (%ds)\n", (int)(Plat_FloatTime() - start));
 #else
 	Msg("done (%d)\n", (int)(Plat_FloatTime() - start));
 #endif

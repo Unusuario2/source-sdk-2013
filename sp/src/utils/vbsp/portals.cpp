@@ -1394,7 +1394,7 @@ void FloodAreas (tree_t *tree)
 	qprintf ("%5i areas\n", c_areas);
 
 #ifdef MAPBASE
-	ColorSpewMessage(SPEW_MESSAGE, &green, " done (%d)\n", (int)(Plat_FloatTime() - start));
+	ColorSpewMessage(SPEW_MESSAGE, &done_color, " done (%ds)\n", (int)(Plat_FloatTime() - start));
 #else
 	Msg("done (%d)\n", (int)(Plat_FloatTime() - start));
 #endif
