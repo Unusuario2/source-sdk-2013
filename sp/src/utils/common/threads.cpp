@@ -263,7 +263,8 @@ void RunThreadsOn( int workcnt, qboolean showpacifier, RunThreadsFn fn, void *pU
 	{
 		EndPacifier(false);
 #ifdef MAPBASE
-		printf("] (%is)\n", end - start);
+		printf("]");
+		ColorSpewMessage(SPEW_MESSAGE, &done_color, " (%is)\n", end - start);
 #else
 		printf (" (%i)\n", end-start);
 #endif

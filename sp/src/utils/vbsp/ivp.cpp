@@ -1550,7 +1550,7 @@ void EmitPhysCollision()
 	int start = Plat_FloatTime();
 
 #ifdef MAPBASE
-		Msg("Building Physics collision data...");
+	Msg("Building Physics collision data...");
 #else 
 	Msg("Building Physics collision data...\n");
 #endif 
@@ -1688,7 +1688,7 @@ void EmitPhysCollision()
 
 #ifdef MAPBASE
 	ColorSpewMessage(SPEW_MESSAGE, &number_color, " [%d bytes]", g_PhysCollideSize);
-	ColorSpewMessage(SPEW_MESSAGE, &done_color, " done(%d)\n", (int)(Plat_FloatTime() - start));
+	ColorSpewMessage(SPEW_MESSAGE, &done_color, " done(%ds)\n", (int)(Plat_FloatTime() - start));
 #else
 	Msg("done (%d)\n", (int)(Plat_FloatTime() - start));
 #endif

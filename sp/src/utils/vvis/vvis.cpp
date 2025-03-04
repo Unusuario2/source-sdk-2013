@@ -1294,7 +1294,7 @@ int RunVVis( int argc, char **argv )
 	GetHourMinuteSecondsString( (int)( end - start ), str, sizeof( str ) );
 
 #ifdef MAPBASE
-	ColorSpewMessage(SPEW_MESSAGE, &sucesfullprocess_color, "--> Visibility complete in %s seconds.\n", str);
+	ColorSpewMessage(SPEW_MESSAGE, &sucesfullprocess_color, "--> Visibility complete in %s.\n", str);
 #else
 	Msg("%s elapsed\n", str);
 #endif

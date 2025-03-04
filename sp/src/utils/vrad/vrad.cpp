@@ -2366,7 +2366,7 @@ void VRAD_LoadBSP( char const *pFilename )
 	float end = Plat_FloatTime();
 
 #ifdef MAPBASE
-	ColorSpewMessage(SPEW_MESSAGE, &done_color, " done (%.2f)\n", end - start);
+	ColorSpewMessage(SPEW_MESSAGE, &done_color, " done (%.2fs)\n", end - start);
 #else
 	printf ( "Done (%.2f seconds)\n", end-start );
 #endif
@@ -2459,7 +2459,7 @@ void VRAD_Finish()
 	GetHourMinuteSecondsString( (int)( end - g_flStartTime ), str, sizeof( str ) );
 
 #ifdef MAPBASE
-	ColorSpewMessage(SPEW_MESSAGE, &sucesfullprocess_color, "--> Bake lighting build finished %s seconds.\n\n", str);
+	ColorSpewMessage(SPEW_MESSAGE, &sucesfullprocess_color, "--> Bake lighting build finished %s.\n\n", str);
 #else
 	Msg("%s elapsed\n", str);
 #endif
@@ -3085,7 +3085,7 @@ int RunVRAD( int argc, char **argv )
 	else
 		strcpy(bake_mode, "Normal");
 
-	ColorSpewMessage(SPEW_MESSAGE, &white_pure, "======== Baking lightmaps, %s mode ========\n", bake_mode);
+	Msg("======== Baking lightmaps, %s mode ========\n", bake_mode);
 #endif
 
 	if ( (! onlydetail) && (! g_bOnlyStaticProps ) )

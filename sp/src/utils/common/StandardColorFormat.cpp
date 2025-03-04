@@ -76,7 +76,7 @@ Color white_pure(254, 254, 254, 254);
 
 //Colors used by the strings. By default they will be on non-saturated mode. 
 Color header_color = cyan;					//Used by headers strings.
-Color path_color = dark_yellow;				//Used by paths strings.
+Color path_color = white;				//Used by paths strings.
 Color number_color = white;					//Used by numbers strings.
 Color sucesfullprocess_color = green;		//Used by "-->" strings.
 Color done_color = dark_grey;				//Used by "done()"
