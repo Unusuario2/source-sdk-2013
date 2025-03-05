@@ -643,6 +643,14 @@ void ComputePerLeafAmbientLighting()
 	}
 
 #ifdef MAPBASE
+	char bake_mode[8] = "";
+
+	if (!g_bFastAmbient) //final
+		strcpy(bake_mode, "Final");
+	else
+		strcpy(bake_mode, "Fast");
+
+	Msg("======== Baking ambient cubes, %s mode ========\n", bake_mode);
 	Msg("Surface lights");
 	ColorSpewMessage(SPEW_MESSAGE, &number_color, " [%d] ", nInAmbientCube);
 	Msg("went in leaf ambient cubes");

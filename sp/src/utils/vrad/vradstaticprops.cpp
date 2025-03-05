@@ -39,6 +39,9 @@
 
 #ifdef MAPBASE
 #include "../common/StandardColorFormat.h" // Controls the color formatting of the console output.
+
+extern bool g_bNoDetailLighting;
+extern bool g_bStaticPropLighting;
 #endif 
 
 #define ALIGN_TO_POW2(x,y) (((x)+(y-1))&~(y-1))
@@ -1479,6 +1482,18 @@ void CVradStaticPropMgr::ThreadComputeStaticPropLighting( int iThread, void *pUs
 //-----------------------------------------------------------------------------
 void CVradStaticPropMgr::ComputeLighting( int iThread )
 {
+#ifdef MAPBASE
+	char bake_mode[8] = "";
+
+	if (!g_bNoDetailLighting && g_bStaticPropLighting && g_bStaticPropPolys) //final
+		strcpy(bake_mode, "Final");
+	else if (g_bDisablePropSelfShadowing || g_bNoDetailLighting) //fast
+		strcpy(bake_mode, "Fast");
+	else
+		strcpy(bake_mode, "Normal");
+
+	Msg("======== Baking prop lighting, %s mode ========\n", bake_mode);
+#endif
 	// illuminate them all
 	int count = m_StaticProps.Count();
 	if ( !count )
