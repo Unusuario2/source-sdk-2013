@@ -3052,7 +3052,7 @@ int RunVRAD( int argc, char **argv )
 {
 #if defined(_MSC_VER) && ( _MSC_VER >= 1310 )
 	#if defined (MAPBASE) && defined (_WIN32)
-		ColorSpewMessage(SPEW_MESSAGE, &header_color, "Valve Software - Valve Radiosity Simulator (vrad.exe) (Build: pc32 %s %s)", __DATE__, __TIME__);
+		ColorSpewMessage(SPEW_MESSAGE, &header_color, "Valve Software - vrad.exe (Build: pc32 %s %s)", __DATE__, __TIME__);
 	#else
 		Msg("Valve Software - vrad.exe (" __DATE__ ")\n" );
 	#endif
